@@ -240,21 +240,20 @@ function loadProperty(property_id) {
         // Toggle visibility of the bank info block based on the selected option
         if (selectedOption === "no-update") {
             $("#bank-info-block").hide();
+            $('#create-default-landlord').attr('required', false);
+            $('#edit-account-name').attr('required', false);
+            $('#edit-account-type').attr('required', false);
+            $('#edit-account-number').attr('required', false);
+            $('#edit-routing-number').attr('required', false);
         } else {
             $("#bank-info-block").show();
+            $('#create-default-landlord').attr('required', true);
+            $('#edit-account-name').attr('required', true);
+            $('#edit-account-type').attr('required', true);
+            $('#edit-account-number').attr('required', true);
+            $('#edit-routing-number').attr('required', true);
         }
-    
-        // Update the required property based on the current visibility of the bank info block
-        updateRequiredFields();
     }
-    
-      function updateRequiredFields() {
-          // Check if the bank info block is currently visible
-          var isBankInfoVisible = $("#bank-info-block").css("display") !== "none";
-      
-          // Update the required property of the input and select elements inside the bank info block
-          $("#bank-info-block input, #bank-info-block select").prop("required", isBankInfoVisible);
-      }
       
       // Event listeners for dropdown changes
       $("#bank_account-select").change(toggleBankUnitBlock);
