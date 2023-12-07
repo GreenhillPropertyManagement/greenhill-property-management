@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-
+  alert('github loaded');
   createUnit();
   editProperty();
   messageBroadcast();
