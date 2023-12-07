@@ -237,16 +237,24 @@ function loadProperty(property_id) {
       function toggleBankUnitBlock() {
         var selectedOption = $("#bank_account-select").val();
     
+        // Toggle visibility of the bank info block based on the selected option
         if (selectedOption === "no-update") {
-            // Hide the bank info block and set its fields to not required
             $("#bank-info-block").hide();
-            $("#bank-info-block input, #bank-info-block select").prop("required", false);
         } else {
-            // Show the bank info block and set its fields to required
             $("#bank-info-block").show();
-            $("#bank-info-block input, #bank-info-block select").prop("required", true);
         }
+    
+        // Update the required property based on the current visibility of the bank info block
+        updateRequiredFields();
     }
+    
+      function updateRequiredFields() {
+          // Check if the bank info block is currently visible
+          var isBankInfoVisible = $("#bank-info-block").css("display") !== "none";
+      
+          // Update the required property of the input and select elements inside the bank info block
+          $("#bank-info-block input, #bank-info-block select").prop("required", isBankInfoVisible);
+      }
       
       // Event listeners for dropdown changes
       $("#bank_account-select").change(toggleBankUnitBlock);
