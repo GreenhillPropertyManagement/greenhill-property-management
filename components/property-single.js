@@ -239,12 +239,10 @@ function loadProperty(property_id) {
 
         if (selectedOption === "no-update") {
           $("#bank-account-fields").css("display", "none");
-            //$("#bank-account-fields :input").prop("required", true);
-            alert('no change');
+            $("#bank-account-fields :input").prop("required", true);
         } else {
-            alert('changed');
             $("#bank-account-fields").css("display", "block");
-            //$("#bank-account-fields :input").prop("required", false);
+            $("#bank-account-fields :input").prop("required", false);
         }
       }
       
