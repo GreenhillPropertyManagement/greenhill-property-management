@@ -15,24 +15,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /*---- Create Unit Form UX/UI ----*/
-  $("#bank-account-fields").css("display", "none");
   function toggleBankUnitBlock() {
     var selectedOption = $("#bank_account-select").val();
     var landlordOption = $("#create-default-landlord").val();
 
     if (selectedOption === "link-new-bank" || landlordOption === "link-new-bank") {
-        $("#bank-account-fields").css("display", "flex");
-        $("#bank-account-fields :input").prop("required", true);
+        $("#bank-account-fields").css("display", "block");
+        //$("#bank-account-fields :input").prop("required", true);
     } else {
         $("#bank-account-fields").css("display", "none");
-        $("#bank-account-fields :input").prop("required", false);
+        //$("#bank-account-fields :input").prop("required", false);
     }
 }
 
 // Event listeners for dropdown changes
 $("#bank_account-select").change(toggleBankUnitBlock);
 $("#create-default-landlord").change(toggleBankUnitBlock);
-
+$("#bank-account-fields").css("display", "none");
 // Initialize the toggle function on page load
 toggleBankUnitBlock();
 
