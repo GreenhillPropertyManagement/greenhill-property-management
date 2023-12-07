@@ -240,10 +240,10 @@ function loadProperty(property_id) {
 
         if (selectedOption === "no-update") {
           $("#bank-account-fields").css("display", "none");
-          $("#bank-info-block input, #bank-info-block select").prop("required", true);
+          $("#bank-info-block input, #bank-info-block select").prop("required", false);
         } else {
           $("#bank-account-fields").css("display", "block");
-          $("#bank-info-block input, #bank-info-block select").prop("required", false);
+          $("#bank-info-block input, #bank-info-block select").prop("required", true);
         }
       }
       
