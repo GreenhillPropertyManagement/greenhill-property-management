@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function initializeApp() {
 
-  alert('testing 12345');
+  alert('new update');
   $('.modal__block').hide();
   /* --- Store Base URL ---*/
 
