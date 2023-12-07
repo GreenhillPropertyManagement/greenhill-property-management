@@ -231,26 +231,27 @@ function loadProperty(property_id) {
       }
     },
     complete: function () {
-
+      
       $(".loader").hide();
-
       /*---- Create Unit Form UX/UI ----*/
       function toggleBankUnitBlock() {
-          var selectedOption = $("#bank_account-select").val();
+        $("#bank-account-fields").hide();
+        var selectedOption = $("#bank_account-select").val();
 
-          if (selectedOption === "no-update") {
-              $("#bank-account-fields").hide();
-              $("#bank-account-fields input, #bank-account-fields select").prop("required", false);
-          } else {
-              $("#bank-account-fields").show();
-              $("#bank-account-fields input, #bank-account-fields select").prop("required", true);
-          }
+        if (selectedOption === "no-update") {
+          $("#bank-account-fields").css("display", "none");
+          $("#bank-info-block input, #bank-info-block select").prop("required", true);
+        } else {
+          $("#bank-account-fields").css("display", "block");
+          $("#bank-info-block input, #bank-info-block select").prop("required", false);
+        }
       }
-
+      
       // Event listeners for dropdown changes
       $("#bank_account-select").change(toggleBankUnitBlock);
       $("#create-default-landlord").change(toggleBankUnitBlock);
-      $("#bank-account-fields").hide();
+      $("#bank-account-fields").css("display", "none");
+    },
     error: function (error) {},
   });
 }
