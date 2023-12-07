@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (selectedOption === "no-update") {
       $("#bank-account-fields").css("display", "none");
         //$("#bank-account-fields :input").prop("required", true);
+        alert('no change');
     } else {
+        alert('changed');
         $("#bank-account-fields").css("display", "block");
         //$("#bank-account-fields :input").prop("required", false);
     }
