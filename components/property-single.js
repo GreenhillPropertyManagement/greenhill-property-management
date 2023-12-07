@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let property_id = urlParams.get("id");
       loadProperty(property_id);
-      $("#bank_account-select").val("no-update");
     }, 100);
   });
 
