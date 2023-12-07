@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
 /* Main App */
 
 function initializeApp() {
-  alert('help');
+
   $('.modal__block').hide();
   /* --- Store Base URL ---*/
 
