@@ -276,6 +276,7 @@ function editProperty() {
       complete: function () {
         $("#edit-property-form")[0].reset();
         $("#create-property-form")[0].reset();
+        alert('working');
         loadProperty(localStorage.pageRefreshParam);
 
         // Reset the Uploadcare widget
