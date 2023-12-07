@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         //$("#bank-account-fields :input").prop("required", false);
     }
 }
-
+$("#bank_account-select").val("no-update");
 // Event listeners for dropdown changes
 $("#bank_account-select").change(toggleBankUnitBlock);
 $("#create-default-landlord").change(toggleBankUnitBlock);
