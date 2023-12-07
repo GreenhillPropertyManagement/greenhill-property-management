@@ -235,22 +235,23 @@ function loadProperty(property_id) {
       $(".loader").hide();
       /*---- Create Unit Form UX/UI ----*/
       function toggleBankUnitBlock() {
-        $("#bank-account-fields").hide();
         var selectedOption = $("#bank_account-select").val();
-
+    
         if (selectedOption === "no-update") {
-          $("#bank-account-fields").css("display", "none");
-          $("#bank-info-block input, #bank-info-block select").prop("required", false);
+            // Hide the bank info block and set its fields to not required
+            $("#bank-info-block").hide();
+            $("#bank-info-block input, #bank-info-block select").prop("required", false);
         } else {
-          $("#bank-account-fields").css("display", "block");
-          $("#bank-info-block input, #bank-info-block select").prop("required", true);
+            // Show the bank info block and set its fields to required
+            $("#bank-info-block").show();
+            $("#bank-info-block input, #bank-info-block select").prop("required", true);
         }
-      }
+    }
       
       // Event listeners for dropdown changes
       $("#bank_account-select").change(toggleBankUnitBlock);
       $("#create-default-landlord").change(toggleBankUnitBlock);
-      $("#bank-account-fields").css("display", "none");
+      $("#bank-info-block").css("display", "none");
     },
     error: function (error) {},
   });
