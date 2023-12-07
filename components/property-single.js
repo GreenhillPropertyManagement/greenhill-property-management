@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  alert('doc loaded');
+
   createUnit();
   editProperty();
   messageBroadcast();
