@@ -492,7 +492,7 @@ function loadWorkOrders (type,user,unit,view) {
           $('.modal__block').show().children().hide(); // show modal
           $('#maintenance-record-view').show(); // show work order card
           $("[data-work-order='view-street']").text(workOrder.property.street); // bind the property street
-          $("[data-work-order='title']").text(workOrder.title); // bind the title
+          $("[data-work-order-view='title']").text(workOrder.title); // bind the title
           $("[data-work-order=view-unit]").text(workOrder.unit.unit_name); // bind the unit name
           $("#work-order-status-select").val(workOrder.status); // bind the status of the work order to select field 
           $("[data-work-order=view-timestamp]").text(formatDateToCustomFormat(workOrder.created_at)); // bind the timestamp
