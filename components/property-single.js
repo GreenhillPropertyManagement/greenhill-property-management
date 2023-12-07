@@ -35,8 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 $("#bank_account-select").change(toggleBankUnitBlock);
 $("#create-default-landlord").change(toggleBankUnitBlock);
 $("#bank-account-fields").css("display", "none");
-// Initialize the toggle function on page load
-toggleBankUnitBlock();
+
 
   /* ------ Nav button functionality -------------*/
 
