@@ -231,6 +231,7 @@ function loadProperty(property_id) {
       }
     },
     complete: function () {
+
       $(".loader").hide();
       /*---- Create Unit Form UX/UI ----*/
       function toggleBankUnitBlock() {
@@ -239,12 +240,11 @@ function loadProperty(property_id) {
 
         if (selectedOption === "no-update") {
           $("#bank-account-fields").css("display", "none");
-            $("#new-bank-unit-block :input").prop("required", true);
+          $("#bank-account-fields input, #bank-account-fields select").prop("required", false);
         } else {
-            $("#bank-account-fields").css("display", "block");
-            $("#new-bank-unit-block :input").prop("required", false);
+          $("#bank-account-fields").css("display", "block");
+          $("#bank-account-fields input, #bank-account-fields select").prop("required", true);
         }
-      }
       
       // Event listeners for dropdown changes
       $("#bank_account-select").change(toggleBankUnitBlock);
