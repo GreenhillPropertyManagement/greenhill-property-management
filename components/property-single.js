@@ -16,34 +16,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /*---- Create Unit Form UX/UI ----*/
   $(".new-bank-block").css("display", "none");
-    // Function to toggle the visibility of #new-bank-unit-block
-    function toggleBankUnitBlock() {
-        var selectedOption = $("#bank_account-select").val();
-        var landlordOption = $("#create-default-landlord").val();
-        console.log(selectedOption);
-        console.log(landlordOption);
+  function toggleBankUnitBlock() {
+    var selectedOption = $("#bank_account-select").val();
+    var landlordOption = $("#create-default-landlord").val();
 
-        if (selectedOption === "link-new-bank" || landlordOption === "link-new-bank") {
-            $(".new-bank-block").css("display", "flex");
-            $(".new-bank-block :input").prop("required", true);
-        } else {
-            $(".new-bank-block").css("display", "none");
-            $(".new-bank-block :input").prop("required", false);
-        }
+    if (selectedOption === "link-new-bank" || landlordOption === "link-new-bank") {
+        $(".new-bank-block").css("display", "flex");
+        $(".new-bank-block :input").prop("required", true);
+    } else {
+        $(".new-bank-block").css("display", "none");
+        $(".new-bank-block :input").prop("required", false);
     }
+}
 
-    // Add an event listener to the bank account select field
-    $("#bank_account-select").change(function() {
-        toggleBankUnitBlock();
-    });
+// Event listeners for dropdown changes
+$("#bank_account-select").change(toggleBankUnitBlock);
+$("#create-default-landlord").change(toggleBankUnitBlock);
 
-    // Add an event listener to the create-default-landlord select field
-    $("#create-default-landlord").change(function() {
-        toggleBankUnitBlock();
-    });
-
-    // Initialize the behavior on page load
-    toggleBankUnitBlock();
+// Initialize the toggle function on page load
+toggleBankUnitBlock();
 
   /* ------ Nav button functionality -------------*/
 
