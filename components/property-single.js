@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let property_id = urlParams.get("id");
       loadProperty(property_id);
+      $("#bank_account-select").val("no-update");
     }, 100);
   });
 
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
         //$("#bank-account-fields :input").prop("required", false);
     }
 }
-$("#bank_account-select").val("no-update");
+
 // Event listeners for dropdown changes
 $("#bank_account-select").change(toggleBankUnitBlock);
 $("#create-default-landlord").change(toggleBankUnitBlock);
@@ -342,6 +343,7 @@ function propertyArchivedState(archivedState) {
 }
 
 function createUnit() {
+
   // Form Submission API Call
   $("#create-unit-form").submit(function (event) {
     // Prevent the default form submission behavior
