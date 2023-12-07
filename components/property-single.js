@@ -16,14 +16,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /*---- Create Unit Form UX/UI ----*/
   function toggleBankUnitBlock() {
+    $("#bank-account-fields").hide();
     var selectedOption = $("#bank_account-select").val();
-    var landlordOption = $("#create-default-landlord").val();
 
-    if (selectedOption === "link-new-bank" || landlordOption === "link-new-bank") {
-        $("#bank-account-fields").css("display", "block");
+    if (selectedOption === "no-update") {
+      $("#bank-account-fields").css("display", "none");
         //$("#bank-account-fields :input").prop("required", true);
     } else {
-        $("#bank-account-fields").css("display", "none");
+        $("#bank-account-fields").css("display", "block");
         //$("#bank-account-fields :input").prop("required", false);
     }
 }
