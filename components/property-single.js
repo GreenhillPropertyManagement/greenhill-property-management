@@ -14,27 +14,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 100);
   });
 
-  /*---- Create Unit Form UX/UI ----*/
-  function toggleBankUnitBlock() {
-    $("#bank-account-fields").hide();
-    var selectedOption = $("#bank_account-select").val();
-
-    if (selectedOption === "no-update") {
-      $("#bank-account-fields").css("display", "none");
-        //$("#bank-account-fields :input").prop("required", true);
-        alert('no change');
-    } else {
-        alert('changed');
-        $("#bank-account-fields").css("display", "block");
-        //$("#bank-account-fields :input").prop("required", false);
-    }
-}
-
-// Event listeners for dropdown changes
-$("#bank_account-select").change(toggleBankUnitBlock);
-$("#create-default-landlord").change(toggleBankUnitBlock);
-$("#bank-account-fields").css("display", "none");
-
 
   /* ------ Nav button functionality -------------*/
 
@@ -253,6 +232,26 @@ function loadProperty(property_id) {
     },
     complete: function () {
       $(".loader").hide();
+      /*---- Create Unit Form UX/UI ----*/
+      function toggleBankUnitBlock() {
+        $("#bank-account-fields").hide();
+        var selectedOption = $("#bank_account-select").val();
+
+        if (selectedOption === "no-update") {
+          $("#bank-account-fields").css("display", "none");
+            //$("#bank-account-fields :input").prop("required", true);
+            alert('no change');
+        } else {
+            alert('changed');
+            $("#bank-account-fields").css("display", "block");
+            //$("#bank-account-fields :input").prop("required", false);
+        }
+      }
+      
+      // Event listeners for dropdown changes
+      $("#bank_account-select").change(toggleBankUnitBlock);
+      $("#create-default-landlord").change(toggleBankUnitBlock);
+      $("#bank-account-fields").css("display", "none");
     },
     error: function (error) {},
   });
