@@ -276,7 +276,9 @@ function editProperty() {
       complete: function () {
         $("#edit-property-form")[0].reset();
         $("#create-property-form")[0].reset();
-        loadProperty();
+        const urlParams = new URLSearchParams(window.location.search);
+        let property_id = urlParams.get("id");
+        loadProperty(property_id);
 
         // Reset the Uploadcare widget
         var widget = uploadcare.Widget("#edit-property-img");
