@@ -14,8 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function initializeApp() {
 
-  alert('github is loaded');
-
   $('.modal__block').hide();
   /* --- Store Base URL ---*/
 
