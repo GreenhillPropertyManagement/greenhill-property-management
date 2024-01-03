@@ -466,7 +466,7 @@ function adminUpdateUser(form) {
   formData["editor_uuid"] = localStorage.userId;
   formData["user_to_edit_uuid"] = localStorage.pageRefreshParam;
   formData["user_property_id"] = localStorage.userPropertyId;
-  formData["enable_payments"] = $('#edit_enable_payments').val();
+  formData["enable_payments"] = $('#edit_enable_payments').is(':checked');
 
   // Make an AJAX POST request
   $.ajax({
