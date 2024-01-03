@@ -298,6 +298,11 @@ function loadUserProfile(user) {
         $("[data-profile=monthly_rent]")
           .text("$" + response.tenant_info.monthly_rent)
           .val(response.tenant_info.monthly_rent);
+        $("[data-profile=enable_payments]")
+          .val(response.tenant_info.enable_payments);
+        $("[data-profile=auto_pay_date]")
+          .text(response.tenant_info.auto_pay_date)
+          .val(response.tenant_info.auto_pay_date);
 
         // bind unit address
         $("[data-profile=unit_property]").text(
