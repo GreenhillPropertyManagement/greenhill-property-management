@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   
   createUnit();
@@ -383,9 +384,11 @@ function createUnit() {
       data: JSON.stringify(formData), // Convert formData to JSON
       contentType: "application/json", // Set the content type to JSON
       success: function (response) {
-        loadProperty();
         $("#create-unit-form")[0].reset();
         $(".loader").hide();
+      },
+      complete: function(){
+        $("#property").click();
       },
       error: function (error) {
         // Handle the error here
