@@ -77,6 +77,10 @@ $("#login-form").submit(function (event) {
 
               pageId = "my-profile";
               localStorage.setItem('landlordRecId', response.user_info.tenant_info.id)
+
+              if (response.user_info.tenant_info.enable_payments === false) {
+                $('#pay-rent').remove();
+              }
               
 
           } else if (userRole === "Admin" || userRole === "Employee") {
