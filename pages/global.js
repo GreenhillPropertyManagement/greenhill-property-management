@@ -248,6 +248,11 @@ function userRoleInterface () {
       $('.top-nav__menu-drawer').remove();
       $('#calendar').remove();
       
+      if (localStorage.paymentsEnabled === "false") {
+        $('#pay-rent').remove();
+      }
+
+
     }
 
 
