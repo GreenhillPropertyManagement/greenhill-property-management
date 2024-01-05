@@ -42,6 +42,8 @@ $("#login-form").submit(function (event) {
       localStorage.setItem("firstName", response.user_info.first_name);
       localStorage.setItem("lastName", response.user_info.last_name);
       localStorage.setItem("email", response.user_info.email);
+      localStorage.setItem("paymentsEnabled", response.user_info.tenant_info.enable_payments);
+      
 
       // if user access is revoked
       if (response.user_info.user_status === 'access-revoked') {
@@ -77,12 +79,7 @@ $("#login-form").submit(function (event) {
 
               pageId = "my-profile";
               localStorage.setItem('tenantRecId', response.user_info.tenant_info.id);
-              $('#pay-rent').remove();
-
-              //if (response.user_info.tenant_info.enable_payments === false) {
-                
-              
-              
+            
 
           } else if (userRole === "Admin" || userRole === "Employee") {
 
