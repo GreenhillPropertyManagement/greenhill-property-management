@@ -76,11 +76,12 @@ $("#login-form").submit(function (event) {
           } else if (userRole === "Tenant") {
 
               pageId = "my-profile";
-              localStorage.setItem('tenantRecId', response.user_info.tenant_info.id)
+              localStorage.setItem('tenantRecId', response.user_info.tenant_info.id);
+              $('#pay-rent').remove();
 
-              if (response.user_info.tenant_info.enable_payments === false) {
-                $('#pay-rent').remove();
-              }
+              //if (response.user_info.tenant_info.enable_payments === false) {
+                
+              
               
 
           } else if (userRole === "Admin" || userRole === "Employee") {
