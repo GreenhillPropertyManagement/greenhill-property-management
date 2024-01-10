@@ -42,7 +42,10 @@ $("#login-form").submit(function (event) {
       localStorage.setItem("firstName", response.user_info.first_name);
       localStorage.setItem("lastName", response.user_info.last_name);
       localStorage.setItem("email", response.user_info.email);
-      localStorage.setItem("paymentsEnabled", response.user_info.tenant_info.enable_payments);
+      if (localStorage.userRole === 'Tenant') {
+        localStorage.setItem("paymentsEnabled", response.user_info.tenant_info.enable_payments);
+      }
+      
       
 
       // if user access is revoked
