@@ -166,6 +166,7 @@ function profileSettingsLoad() {
       $('#maintenance_alerts').prop('checked', response.maintenance_alerts);
       $('#document_alerts').prop('checked', response.document_alerts);
       $('#legal_alerts').prop('checked', response.legal_alerts);
+      $('#calendar_alerts').prop('checked', response.calendar_alerts);
 
 
 
