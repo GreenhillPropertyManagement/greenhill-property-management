@@ -1,6 +1,7 @@
 let transactionToDelete;
 let amount;
 document.addEventListener("DOMContentLoaded", function () {
+
   createPropertyTransaction(); // init property transaction creation
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
@@ -735,15 +736,16 @@ function deleteRecurringTransaction(transId, type) {
 }
 
 function tenantMakesPayment(amount) {
+
   $(".loader").css("display", "flex");
   $.ajax({
-    url: localStorage.baseUrl + "api:rpDXPv3x/tenant_makes_payment",
+    url: localStorage.baseUrl + "api:S5JmTHue/charge_created",
     type: "POST",
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
     },
     data: {
-      amount: "-" + amount,
+      amount: amount,
     },
     success: function (response) {
       $(".modal__block").hide();
@@ -759,3 +761,5 @@ function tenantMakesPayment(amount) {
     error: function (error) {},
   });
 }
+
+
