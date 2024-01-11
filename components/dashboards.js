@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let unit_id = urlParams.get("id");
       loadUnitAndTenantData(unit_id); // load unit
-      loadUnitBalances(unit_id);
+      
     }, 100);
   });
 
@@ -145,6 +145,7 @@ function loadUnitAndTenantData(unit) {
         });
     },
     complete: function () {
+      loadUnitBalances(unit_id);
       loadPropertyUsers();
       loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
       loadConvosInDashboard(localStorage.activeTenantUserUuid);
