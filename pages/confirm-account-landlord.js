@@ -56,6 +56,10 @@ function confirmLandlord() {
     $.ajax({
       url: localStorage.baseUrl + "api:sElUkr6t/get_single_landlord",
       type: "GET",
+      headers: {
+        'Content-Type': "application/json",
+        'Authorization': "Bearer " + localStorage.authToken
+      },
       data: {
         user_id: userId,
       },
