@@ -212,8 +212,11 @@ function loadProperty(property_id) {
           // click handler to direct to each unit page
           $(unitItem).click(function () {
             if (unit.active_tenant === 0){
-              $('#edit-unit-button').click();
-              console.log('working');
+              localStorage.setItem("pageId", "unit"); // update the page ID
+              localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
+              localStorage.setItem("unitRecId", unit.id); // store the unit rec id
+              history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+
             } else {
               $("#unit").click();
               localStorage.setItem("pageId", "unit"); // update the page ID
