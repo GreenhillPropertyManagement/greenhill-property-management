@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadConvosInDashboard(localStorage.userId);
     loadWorkOrders("assigned_user", localStorage.userRecId, "", "dashboard"); // load in workorders
     loadPropertiesInDashboard(localStorage.userId);
-    loadActiveTenants();
+    loadActiveTenants(localStorage.userRecId);
   });
 });
 
@@ -406,7 +406,7 @@ function loadPropertiesInDashboard(user) {
   });
 }
 
-function loadActiveTenants() {
+function loadActiveTenants(user) {
   var dynContainer = $(".dyn-container__landlord-dash-active-tenants");
 
   $.ajax({
@@ -418,7 +418,9 @@ function loadActiveTenants() {
       Authorization: "Bearer " + localStorage.authToken,
     },
     dataType: "json",
-    data: {},
+    data: {
+      user: user
+    },
     success: function (response) {
       var sampleItem = $(".landlord-dashboard-sample-wrapper").find(
         ".dyn-item__landlord-dash__active-tenant",
