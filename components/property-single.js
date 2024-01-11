@@ -212,7 +212,8 @@ function loadProperty(property_id) {
           // click handler to direct to each unit page
           $(unitItem).click(function () {
             if (unit.active_tenant === 0){
-              alert('Working');
+              $('#edit-unit-button').click();
+              console.log('working');
             } else {
               $("#unit").click();
               localStorage.setItem("pageId", "unit"); // update the page ID
