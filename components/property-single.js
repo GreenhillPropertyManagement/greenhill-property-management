@@ -218,8 +218,6 @@ function loadProperty(property_id) {
               history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
               localStorage.setItem('unitEmpty','true');
               $("#unit").click();
-              
-
             } else {
               $("#unit").click();
               localStorage.setItem("pageId", "unit"); // update the page ID
