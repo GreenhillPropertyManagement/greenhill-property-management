@@ -25,135 +25,140 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadUnitAndTenantData(unit) {
   // Make API Call
-  $.ajax({
-    url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
-    type: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    data: {
-      unit_id: unit,
-    },
-    success: function (response) {
-      /* Set Local Storage */
-      localStorage.setItem("propertyRecId", response.property_info.id);
-      localStorage.setItem("unitRecId", response.id);
-      localStorage.setItem("unitId", response.unit_id);
-      localStorage.setItem("activeTenant", response.active_tenant);
-      localStorage.setItem(
-        "activeTenantUserId",
-        response.active_tenant_info.user_info.id,
-      );
-      localStorage.setItem(
-        "activeTenantUserUuid",
-        response.active_tenant_info.user_info.user_id,
-      );
-
-      /* Populate Banner Title */
-      $("[data-unit='property_street']").text(response.property_info.street);
-      $("[data-unit='unit_name']").text(response.unit_name);
-
-      /* Populate Unit Info Card */
-      $("[data-unit='sqft']").text(response.sqft);
-      $("[data-unit='parking_spaces']").text(response.parking_spaces);
-      $("[data-unit='tenants_proportionate_precentage']").text(
-        response.tenants_proportionate_precentage + "%",
-      );
-      $("[data-unit='water_meter']").text(response.water_meter);
-      $("[data-unit='electricity_meter']").text(response.electricity_meter);
-      $("[data-unit='hvac']").text(response.hvac);
-
-      /* Populate Lease Info Card */
-      $("[data-unit='move_in_date']").text(
-        formatDateNoTime(response.active_tenant_info.move_in_date),
-      );
-      $("[data-unit='move_out_date']").text(
-        formatDateNoTime(response.active_tenant_info.move_out_date),
-      );
-      $("[data-unit='monthly_rent']").text(
-        "$" + response.active_tenant_info.monthly_rent,
-      );
-      $("[data-unit='yearly_term']").text(
-        formatDateNoTime(response.active_tenant_info.yearly_term),
-      );
-      $("[data-unit='yearly_rent_increase']").text(
-        response.active_tenant_info.yearly_rent_increase + "%",
-      );
-      $("[data-unit='renewal_notice_deadline']").text(
-        formatDateNoTime(response.active_tenant_info.renewal_notice_deadline),
-      );
-      $("[data-unit='security_deposit']").text(
-        "$" + response.active_tenant_info.security_deposit,
-      );
-
-      /* Populate Balance Card */
-      $("[data-unit='balance']").text(
-        "$" + response.active_tenant_info.security_deposit,
-      );
-      $("[data-unit='next_months_charges']").text(
-        "$" + response.active_tenant_info.next_months_charges,
-      );
-
-      /* Insurance Doc */
-      $('[data-unit="insurance_doc"]').click(function () {
-        window.open(response.active_tenant_info.insurance_doc, "_blank");
-      });
-
-      /* Populate Active Tenant Card */
-      if (response.active_tenant_info.user_info.profile_img) {
-        $("[data-unit='tenant_profile_img']").attr(
-          "src",
-          response.active_tenant_info.user_info.profile_img,
+  if (localStorage.unitEmpty === 'true'){
+    alert('empty unit');
+  } else {
+    $.ajax({
+      url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
+      type: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: {
+        unit_id: unit,
+      },
+      success: function (response) {
+        /* Set Local Storage */
+        localStorage.setItem("propertyRecId", response.property_info.id);
+        localStorage.setItem("unitRecId", response.id);
+        localStorage.setItem("unitId", response.unit_id);
+        localStorage.setItem("activeTenant", response.active_tenant);
+        localStorage.setItem(
+          "activeTenantUserId",
+          response.active_tenant_info.user_info.id,
         );
-      }
-      $("[data-unit='tenant_name']").text(
-        response.active_tenant_info.user_info.first_name +
-          " " +
-          response.active_tenant_info.user_info.last_name,
-      );
-      $("[data-unit='tenant_company']").text(
-        response.active_tenant_info.user_info.company,
-      );
-      $("[data-unit='tenant_email']").text(
-        response.active_tenant_info.user_info.email,
-      );
-      $("[data-unit='tenant_mobile_phone']").text(
-        response.active_tenant_info.user_info.mobile_phone,
-      );
-      $("[data-unit='tenant_work_phone']").text(
-        response.active_tenant_info.user_info.work_phone,
-      );
-      $(".unit-grid__user__name-wrapper")
-        .off("click")
-        .click(function () {
-          var fetchedUserId = response.active_tenant_info.user_info.user_id;
-          $("#profile").click();
-          localStorage.setItem("pageId", "profile");
-          localStorage.setItem(
-            "pageRefreshParam",
-            response.active_tenant_info.user_info.user_id,
-          );
-          localStorage.setItem(
-            "userProfileRecId",
-            response.active_tenant_info.user_info.id,
-          );
-          history.pushState(
-            "profile",
-            null,
-            "/app/profile?id=" + fetchedUserId,
-          );
+        localStorage.setItem(
+          "activeTenantUserUuid",
+          response.active_tenant_info.user_info.user_id,
+        );
+  
+        /* Populate Banner Title */
+        $("[data-unit='property_street']").text(response.property_info.street);
+        $("[data-unit='unit_name']").text(response.unit_name);
+  
+        /* Populate Unit Info Card */
+        $("[data-unit='sqft']").text(response.sqft);
+        $("[data-unit='parking_spaces']").text(response.parking_spaces);
+        $("[data-unit='tenants_proportionate_precentage']").text(
+          response.tenants_proportionate_precentage + "%",
+        );
+        $("[data-unit='water_meter']").text(response.water_meter);
+        $("[data-unit='electricity_meter']").text(response.electricity_meter);
+        $("[data-unit='hvac']").text(response.hvac);
+  
+        /* Populate Lease Info Card */
+        $("[data-unit='move_in_date']").text(
+          formatDateNoTime(response.active_tenant_info.move_in_date),
+        );
+        $("[data-unit='move_out_date']").text(
+          formatDateNoTime(response.active_tenant_info.move_out_date),
+        );
+        $("[data-unit='monthly_rent']").text(
+          "$" + response.active_tenant_info.monthly_rent,
+        );
+        $("[data-unit='yearly_term']").text(
+          formatDateNoTime(response.active_tenant_info.yearly_term),
+        );
+        $("[data-unit='yearly_rent_increase']").text(
+          response.active_tenant_info.yearly_rent_increase + "%",
+        );
+        $("[data-unit='renewal_notice_deadline']").text(
+          formatDateNoTime(response.active_tenant_info.renewal_notice_deadline),
+        );
+        $("[data-unit='security_deposit']").text(
+          "$" + response.active_tenant_info.security_deposit,
+        );
+  
+        /* Populate Balance Card */
+        $("[data-unit='balance']").text(
+          "$" + response.active_tenant_info.security_deposit,
+        );
+        $("[data-unit='next_months_charges']").text(
+          "$" + response.active_tenant_info.next_months_charges,
+        );
+  
+        /* Insurance Doc */
+        $('[data-unit="insurance_doc"]').click(function () {
+          window.open(response.active_tenant_info.insurance_doc, "_blank");
         });
-    },
-    complete: function () {
-      loadUnitBalances(unit_id);
-      loadPropertyUsers();
-      loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
-      loadConvosInDashboard(localStorage.activeTenantUserUuid);
-      dashActivityLog("unit", "", "", localStorage.unitRecId);
-      $(".loader").hide();
-    },
-    error: function (error) {},
-  });
+  
+        /* Populate Active Tenant Card */
+        if (response.active_tenant_info.user_info.profile_img) {
+          $("[data-unit='tenant_profile_img']").attr(
+            "src",
+            response.active_tenant_info.user_info.profile_img,
+          );
+        }
+        $("[data-unit='tenant_name']").text(
+          response.active_tenant_info.user_info.first_name +
+            " " +
+            response.active_tenant_info.user_info.last_name,
+        );
+        $("[data-unit='tenant_company']").text(
+          response.active_tenant_info.user_info.company,
+        );
+        $("[data-unit='tenant_email']").text(
+          response.active_tenant_info.user_info.email,
+        );
+        $("[data-unit='tenant_mobile_phone']").text(
+          response.active_tenant_info.user_info.mobile_phone,
+        );
+        $("[data-unit='tenant_work_phone']").text(
+          response.active_tenant_info.user_info.work_phone,
+        );
+        $(".unit-grid__user__name-wrapper")
+          .off("click")
+          .click(function () {
+            var fetchedUserId = response.active_tenant_info.user_info.user_id;
+            $("#profile").click();
+            localStorage.setItem("pageId", "profile");
+            localStorage.setItem(
+              "pageRefreshParam",
+              response.active_tenant_info.user_info.user_id,
+            );
+            localStorage.setItem(
+              "userProfileRecId",
+              response.active_tenant_info.user_info.id,
+            );
+            history.pushState(
+              "profile",
+              null,
+              "/app/profile?id=" + fetchedUserId,
+            );
+          });
+      },
+      complete: function () {
+        loadUnitBalances(unit_id);
+        loadPropertyUsers();
+        loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
+        loadConvosInDashboard(localStorage.activeTenantUserUuid);
+        dashActivityLog("unit", "", "", localStorage.unitRecId);
+        $(".loader").hide();
+      },
+      error: function (error) {},
+    });
+  }
+
 }
 
 function loadPropertyUsers() {

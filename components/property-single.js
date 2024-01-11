@@ -216,7 +216,9 @@ function loadProperty(property_id) {
               localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
               localStorage.setItem("unitRecId", unit.id); // store the unit rec id
               history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+              localStorage.setItem('unitEmpty','true');
               $("#unit").click();
+              
 
             } else {
               $("#unit").click();
@@ -233,6 +235,7 @@ function loadProperty(property_id) {
                 unit.active_tenant_info.user_info.user_id,
               ); // set the active tenant
               history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+              localStorage.removeItem('unitEmpty');
             }
 
           });
