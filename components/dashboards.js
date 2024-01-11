@@ -418,10 +418,7 @@ function loadActiveTenants(user) {
       Authorization: "Bearer " + localStorage.authToken,
     },
     dataType: "json",
-    data: {
-      user_id: user,
-    },
-
+    data: {},
     success: function (response) {
       var sampleItem = $(".landlord-dashboard-sample-wrapper").find(
         ".dyn-item__landlord-dash__active-tenant",
