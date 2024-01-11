@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadConvosInDashboard(localStorage.userId);
     loadWorkOrders("assigned_user", localStorage.userRecId, "", "dashboard"); // load in workorders
     loadPropertiesInDashboard(localStorage.userId);
-    loadActiveTenants(localStorage.userId);
+    loadActiveTenants();
   });
 });
 
@@ -406,7 +406,7 @@ function loadPropertiesInDashboard(user) {
   });
 }
 
-function loadActiveTenants(user) {
+function loadActiveTenants() {
   var dynContainer = $(".dyn-container__landlord-dash-active-tenants");
 
   $.ajax({
