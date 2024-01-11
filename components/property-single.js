@@ -216,6 +216,7 @@ function loadProperty(property_id) {
               localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
               localStorage.setItem("unitRecId", unit.id); // store the unit rec id
               history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+              $("#unit").click();
 
             } else {
               $("#unit").click();
