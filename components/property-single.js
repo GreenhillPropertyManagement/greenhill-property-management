@@ -178,38 +178,43 @@ function loadProperty(property_id) {
         // loop through each unit
         response.units.forEach((unit) => {
 
-          if (unit.status === 'active') {
+          // clone the sample card for the unit and append to users container
+          let unitItem = $(sampleUnit).clone().appendTo(unitsContainer);
 
-            // clone the sample card for the unit and append to users container
-            let unitItem = $(sampleUnit).clone().appendTo(unitsContainer);
+          // bind the unit's data to the cloned card
+          unitItem.attr("id", unit.unit_id);
+          unitItem.find("[data-property='unit_name']").text(unit.unit_name);
 
-            // bind the unit's data to the cloned card
-            unitItem.attr("id", unit.unit_id);
-            unitItem.find("[data-property='unit_name']").text(unit.unit_name);
+          if (unit.active_tenant_info) {
+            unitItem
+              .find("[data-property='unit_tenant']")
+              .text(
+                unit.active_tenant_info.user_info.first_name +
+                  " " +
+                  unit.active_tenant_info.user_info.last_name,
+              );
+            unitItem
+              .find("[data-property='unit_monthly_rent']")
+              .text("$" + unit.active_tenant_info.monthly_rent);
+            unitItem
+              .find("[data-property='unit_balance']")
+              .text("$" + unit.active_tenant_info.balance);
+            unitItem
+              .find("[data-property='unit_next_charges']")
+              .text("$" + unit.active_tenant_info.next_months_charges);
+            unitItem
+              .find("[data-property='unit_move_in']")
+              .text(formatDateNoTime(unit.active_tenant_info.move_in_date));
+            unitItem
+              .find("[data-property='unit_move_out']")
+              .text(formatDateNoTime(unit.active_tenant_info.move_out_date));
+          }
 
-            if (unit.active_tenant_info) {
-              unitItem
-                .find("[data-property='unit_tenant']")
-                .text(
-                  unit.active_tenant_info.user_info.first_name +
-                    " " +
-                    unit.active_tenant_info.user_info.last_name,
-                );
-              unitItem
-                .find("[data-property='unit_monthly_rent']")
-                .text("$" + unit.active_tenant_info.monthly_rent);
-              unitItem
-                .find("[data-property='unit_balance']")
-                .text("$" + unit.active_tenant_info.balance);
-              unitItem
-                .find("[data-property='unit_next_charges']")
-                .text("$" + unit.active_tenant_info.next_months_charges);
-              unitItem
-                .find("[data-property='unit_move_in']")
-                .text(formatDateNoTime(unit.active_tenant_info.move_in_date));
-              unitItem
-                .find("[data-property='unit_move_out']")
-                .text(formatDateNoTime(unit.active_tenant_info.move_out_date));
+
+            if (unit.status === 'archived'){
+              unitItem.find('.archived-unit-icon').show();
+            } else {
+              unitItem.find('.archived-unit-icon').hide();
             }
 
             // click handler to direct to each unit page
@@ -240,8 +245,7 @@ function loadProperty(property_id) {
               }
 
             });
-            
-          }
+      
         });
       } else {
         unitsContainer.empty();
