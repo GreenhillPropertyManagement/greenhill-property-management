@@ -27,7 +27,6 @@ function loadUnitAndTenantData(unit) {
   // Make API Call
   if (localStorage.unitEmpty === 'true') {
     
-
     $.ajax({
       url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
       type: "GET",
@@ -59,6 +58,10 @@ function loadUnitAndTenantData(unit) {
   
       },
       complete: function () {
+        loadPropertyUsers();
+        loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
+        loadConvosInDashboard(localStorage.activeTenantUserUuid);
+        dashActivityLog("unit", "", "", localStorage.unitRecId);
         $(".loader").hide();
       },
       error: function (error) {},
