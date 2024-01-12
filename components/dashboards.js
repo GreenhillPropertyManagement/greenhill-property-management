@@ -624,7 +624,7 @@ $("#edit-unit-form").submit(function (event) {
     },
     success: function (response) {
       alert("Success! Unit Updated.");
-      //loadUnitAndTenantData(unit);
+      loadUnitAndTenantData(unit);
       $(".loader").hide();
 
       
