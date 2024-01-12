@@ -199,6 +199,17 @@ function loadUnitAndTenantData(unit) {
               "/app/profile?id=" + fetchedUserId,
             );
           });
+
+        // populate 'edit unit form fields
+        $('#edit-unit-name').val(response.unit_name);
+        $('#edit-sqft').val(response.sqft);
+        $('#edit-parking-spaces').val(response.parking_spaces);
+        $('#edit-unit-proportionate-share').val(response.tenants_proportionate_precentage);
+        $('#edit-hvac').val(response.hvac);
+        $('#edit-water-meter-number').val(response.water_meter);
+        $('#edit-electricity-meter').val(response.electricity_meter);
+        $('#edit-commission').val(response.commission);
+        $('#edit-unit-misc').val(response.miscellaneous);
       },
       complete: function () {
         loadUnitBalances(unit_id);
