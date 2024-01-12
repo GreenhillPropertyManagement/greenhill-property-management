@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let unit_id = urlParams.get("id");
       loadUnitAndTenantData(unit_id); // load unit
+      editUnit(unit_id);
       
     }, 100);
   });
@@ -588,4 +589,50 @@ function loadUnitBalances(target) {
       console.log("Error:", error);
     },
   });
+}
+
+function editUnit(unit) {
+
+  // Form Submission API Call
+$("#edit-unit-form").submit(function (event) {
+  // Prevent the default form submission behavior
+  event.preventDefault();
+
+  // Handle 'Loading' State
+  $(".modal__block").hide();
+  $(".loader").css("display", "flex");
+
+  // Make an AJAX POST request
+  $.ajax({
+    url: localStorage.baseUrl + "api:t2-fjTTj/edit_unit",
+    type: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      unit_uuid: unit,
+      unit_name: $('#edit-unit-name').val(),
+      sqft: $('#edit-sqft').val(),
+      parking_spaces: $('#edit-parking-spaces').val(),
+      tenants_proportionate_precentage: $('#edit-unit-proportionate-share').val(),
+      water_meter: $('#edit-water-meter-number').val(),
+      electricity_meter: $('#edit-electricity-meter').val(),
+      hvac: $('#edit-hvac').val(),
+      commission: $('#edit-commission').val(),
+      miscellaneous: $('#edit-unit-misc').val()
+    },
+    contentType: "application/json", // Set the content type to JSON
+    success: function (response) {
+      alert("Success! Unit Updated.");
+      loadUnitAndTenantData(unit);
+      $(".loader").hide();
+
+      
+    },
+    error: function (error) {
+      // Handle the error here
+    },
+  });
+});
+
 }
