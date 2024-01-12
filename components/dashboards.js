@@ -27,6 +27,7 @@ function loadUnitAndTenantData(unit) {
   // Make API Call
   if (localStorage.unitEmpty === 'true'){
     alert('empty unit');
+    $(".loader").hide();
   } else {
     $.ajax({
       url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
