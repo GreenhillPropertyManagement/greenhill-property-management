@@ -670,6 +670,8 @@ function archiveUnit(unit) {
     },
     error: function (error) {
       // Handle the error here
+      $('.modal__block').hide();
+      $('.loader').hide();
     },
   });
 
