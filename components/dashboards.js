@@ -622,7 +622,6 @@ $("#edit-unit-form").submit(function (event) {
       commission: $('#edit-commission').val(),
       miscellaneous: $('#edit-unit-misc').val()
     },
-    contentType: "application/json", // Set the content type to JSON
     success: function (response) {
       alert("Success! Unit Updated.");
       //loadUnitAndTenantData(unit);
