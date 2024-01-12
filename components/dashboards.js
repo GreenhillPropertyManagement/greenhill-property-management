@@ -1,5 +1,5 @@
 
-
+let unitId
 
 document.addEventListener("DOMContentLoaded", function () {
   /* Unit Dashboard */
@@ -10,12 +10,12 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
 
       const urlParams = new URLSearchParams(window.location.search);
-      let unit_id = urlParams.get("id");
-      loadUnitAndTenantData(unit_id); // load unit
-      editUnit(unit_id);
+      unitId = urlParams.get("id");
+      loadUnitAndTenantData(unitId); // load unit
+      editUnit(unitId);
 
       $("#archive-unit").on("click", function () {
-        archiveUnit(unit_id);
+        archiveUnit(unitId);
       });
       
     }, 100);
@@ -223,7 +223,8 @@ function loadUnitAndTenantData(unit) {
         $('#edit-unit-misc').val(response.miscellaneous);
       },
       complete: function () {
-        loadUnitBalances(unit_id);
+
+        loadUnitBalances(unitId);
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
