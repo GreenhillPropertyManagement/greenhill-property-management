@@ -177,66 +177,71 @@ function loadProperty(property_id) {
       if (response.units.length > 0 && response.units !== null) {
         // loop through each unit
         response.units.forEach((unit) => {
-          // clone the sample card for the unit and append to users container
-          let unitItem = $(sampleUnit).clone().appendTo(unitsContainer);
 
-          // bind the unit's data to the cloned card
-          unitItem.attr("id", unit.unit_id);
-          unitItem.find("[data-property='unit_name']").text(unit.unit_name);
+          if (unit.status === 'active') {
 
-          if (unit.active_tenant_info) {
-            unitItem
-              .find("[data-property='unit_tenant']")
-              .text(
-                unit.active_tenant_info.user_info.first_name +
-                  " " +
-                  unit.active_tenant_info.user_info.last_name,
-              );
-            unitItem
-              .find("[data-property='unit_monthly_rent']")
-              .text("$" + unit.active_tenant_info.monthly_rent);
-            unitItem
-              .find("[data-property='unit_balance']")
-              .text("$" + unit.active_tenant_info.balance);
-            unitItem
-              .find("[data-property='unit_next_charges']")
-              .text("$" + unit.active_tenant_info.next_months_charges);
-            unitItem
-              .find("[data-property='unit_move_in']")
-              .text(formatDateNoTime(unit.active_tenant_info.move_in_date));
-            unitItem
-              .find("[data-property='unit_move_out']")
-              .text(formatDateNoTime(unit.active_tenant_info.move_out_date));
-          }
+            // clone the sample card for the unit and append to users container
+            let unitItem = $(sampleUnit).clone().appendTo(unitsContainer);
 
-          // click handler to direct to each unit page
-          $(unitItem).click(function () {
-            if (unit.active_tenant === 0){
-              localStorage.setItem("pageId", "unit"); // update the page ID
-              localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
-              localStorage.setItem("unitRecId", unit.id); // store the unit rec id
-              history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
-              localStorage.setItem('unitEmpty','true');
-              $("#unit").click();
-            } else {
-              $("#unit").click();
-              localStorage.setItem("pageId", "unit"); // update the page ID
-              localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
-              localStorage.setItem("unitRecId", unit.id); // store the unit rec id
-              localStorage.setItem("activeTenant", unit.active_tenant); // set the active tenant
-              localStorage.setItem(
-                "activeTenantUserId",
-                unit.active_tenant_info.user_id,
-              ); // set the active tenant
-              localStorage.setItem(
-                "activeTenantUserUuid",
-                unit.active_tenant_info.user_info.user_id,
-              ); // set the active tenant
-              history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
-              localStorage.removeItem('unitEmpty');
+            // bind the unit's data to the cloned card
+            unitItem.attr("id", unit.unit_id);
+            unitItem.find("[data-property='unit_name']").text(unit.unit_name);
+
+            if (unit.active_tenant_info) {
+              unitItem
+                .find("[data-property='unit_tenant']")
+                .text(
+                  unit.active_tenant_info.user_info.first_name +
+                    " " +
+                    unit.active_tenant_info.user_info.last_name,
+                );
+              unitItem
+                .find("[data-property='unit_monthly_rent']")
+                .text("$" + unit.active_tenant_info.monthly_rent);
+              unitItem
+                .find("[data-property='unit_balance']")
+                .text("$" + unit.active_tenant_info.balance);
+              unitItem
+                .find("[data-property='unit_next_charges']")
+                .text("$" + unit.active_tenant_info.next_months_charges);
+              unitItem
+                .find("[data-property='unit_move_in']")
+                .text(formatDateNoTime(unit.active_tenant_info.move_in_date));
+              unitItem
+                .find("[data-property='unit_move_out']")
+                .text(formatDateNoTime(unit.active_tenant_info.move_out_date));
             }
 
-          });
+            // click handler to direct to each unit page
+            $(unitItem).click(function () {
+              if (unit.active_tenant === 0){
+                localStorage.setItem("pageId", "unit"); // update the page ID
+                localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
+                localStorage.setItem("unitRecId", unit.id); // store the unit rec id
+                history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+                localStorage.setItem('unitEmpty','true');
+                $("#unit").click();
+              } else {
+                $("#unit").click();
+                localStorage.setItem("pageId", "unit"); // update the page ID
+                localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
+                localStorage.setItem("unitRecId", unit.id); // store the unit rec id
+                localStorage.setItem("activeTenant", unit.active_tenant); // set the active tenant
+                localStorage.setItem(
+                  "activeTenantUserId",
+                  unit.active_tenant_info.user_id,
+                ); // set the active tenant
+                localStorage.setItem(
+                  "activeTenantUserUuid",
+                  unit.active_tenant_info.user_info.user_id,
+                ); // set the active tenant
+                history.pushState("unit", null, "/app/unit?id=" + unit.unit_id); // update pushstate
+                localStorage.removeItem('unitEmpty');
+              }
+
+            });
+            
+          }
         });
       } else {
         unitsContainer.empty();
