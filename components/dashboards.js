@@ -1,3 +1,6 @@
+
+
+
 document.addEventListener("DOMContentLoaded", function () {
   /* Unit Dashboard */
   $("#unit").on("click", function () {
@@ -5,10 +8,15 @@ document.addEventListener("DOMContentLoaded", function () {
     $("#unit-overview-bttn").click(); // defualt to overview tab
 
     setTimeout(() => {
+
       const urlParams = new URLSearchParams(window.location.search);
       let unit_id = urlParams.get("id");
       loadUnitAndTenantData(unit_id); // load unit
       editUnit(unit_id);
+
+      $("#archive-unit").on("click", function () {
+        archiveUnit(unit_id);
+      });
       
     }, 100);
   });
@@ -23,6 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
     loadActiveTenants(localStorage.userRecId);
   });
 });
+
+
 
 function loadUnitAndTenantData(unit) {
 
@@ -634,5 +644,33 @@ $("#edit-unit-form").submit(function (event) {
     },
   });
 });
+
+}
+
+function archiveUnit(unit) {
+
+   // Handle 'Loading' State
+  $(".modal__block").hide();
+  $(".loader").css("display", "flex");
+
+  // Make an AJAX POST request
+  $.ajax({
+    url: localStorage.baseUrl + "api:t2-fjTTj/archive_unit",
+    type: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      unit_uuid: unit,
+    },
+    success: function (response) {
+      alert("Success! Unit Archived.");
+      loadUnitAndTenantData(unit);
+      $(".loader").hide();    
+    },
+    error: function (error) {
+      // Handle the error here
+    },
+  });
 
 }
