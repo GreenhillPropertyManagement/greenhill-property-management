@@ -227,6 +227,7 @@ function loadUnitAndTenantData(unit) {
 }
 
 function loadPropertyUsers() {
+
   var employeesContainer = $(".dyn-container__unit-grid__members");
   var landlordsContainer = $(".dyn-container__unit-grid__landlords");
 
@@ -624,7 +625,7 @@ $("#edit-unit-form").submit(function (event) {
     contentType: "application/json", // Set the content type to JSON
     success: function (response) {
       alert("Success! Unit Updated.");
-      loadUnitAndTenantData(unit);
+      //loadUnitAndTenantData(unit);
       $(".loader").hide();
 
       
