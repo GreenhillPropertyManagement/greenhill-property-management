@@ -615,10 +615,9 @@ function loadUnitsForMaintenanceSelector() {
         'Authorization': "Bearer " + localStorage.authToken
       },
       success: function (response) {
-
         // Clear previous options in the select field
         $("#maintenance_unit").empty();
-
+    
         // Add the placeholder to the select field
         $("#maintenance_unit").append(
           $("<option>", {
@@ -628,12 +627,17 @@ function loadUnitsForMaintenanceSelector() {
             disabled: true
           })
         );
-
+    
+        // Ensure response is an array
+        if (!Array.isArray(response)) {
+          response = [response];
+        }
+    
         // Loop through each unit in the response
         $.each(response, function (index, unit) {
           // Create the option text
           var optionText = unit.property_info.street + " / " + unit.unit_name;
-
+    
           // Append the new option to the select field
           $("#maintenance_unit").append(
             $("<option>", {
