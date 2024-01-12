@@ -25,9 +25,44 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadUnitAndTenantData(unit) {
   // Make API Call
-  if (localStorage.unitEmpty === 'true'){
-    alert('empty unit');
-    $(".loader").hide();
+  if (localStorage.unitEmpty === 'true') {
+    
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
+      type: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: {
+        unit_id: unit,
+      },
+      success: function (response) {
+        /* Set Local Storage */
+        localStorage.setItem("propertyRecId", response.property_info.id);
+        localStorage.setItem("unitRecId", response.id);
+        localStorage.setItem("unitId", response.unit_id);
+  
+        /* Populate Banner Title */
+        $("[data-unit='property_street']").text(response.property_info.street);
+        $("[data-unit='unit_name']").text(response.unit_name);
+  
+        /* Populate Unit Info Card */
+        $("[data-unit='sqft']").text(response.sqft);
+        $("[data-unit='parking_spaces']").text(response.parking_spaces);
+        $("[data-unit='tenants_proportionate_precentage']").text(
+          response.tenants_proportionate_precentage + "%",
+        );
+        $("[data-unit='water_meter']").text(response.water_meter);
+        $("[data-unit='electricity_meter']").text(response.electricity_meter);
+        $("[data-unit='hvac']").text(response.hvac);
+  
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function (error) {},
+    });
   } else {
     $.ajax({
       url: localStorage.baseUrl + "api:t2-fjTTj/load_unit",
