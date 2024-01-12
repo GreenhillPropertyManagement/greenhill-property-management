@@ -60,7 +60,6 @@ function loadUnitAndTenantData(unit) {
       complete: function () {
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
-        loadConvosInDashboard(localStorage.activeTenantUserUuid);
         dashActivityLog("unit", "", "", localStorage.unitRecId);
         $(".loader").hide();
       },
