@@ -611,6 +611,9 @@ function loadUnitsForMaintenanceSelector() {
       url: localStorage.baseUrl + "api:SRnaK1AT/get_units_for_maintenance",
       method: "GET",
       dataType: "json",
+      headers: {
+        'Authorization': "Bearer " + localStorage.authToken
+      },
       success: function (response) {
 
         // Clear previous options in the select field
