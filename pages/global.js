@@ -23,35 +23,53 @@ function initializeApp() {
 
 /* Global Ajax Errors Handling */
 $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
-  // Handle the error here
-  console.log("An AJAX error occurred:");
-  console.log("Event:", event);
-  console.log("XHR Object:", jqXHR);
-  console.log("Settings:", settings);
-  console.log("Error:", thrownError);
-
   // Retrieve the error code and response text
   var errorCode = jqXHR.status;
-  var errorMessage = jqXHR.responseText; // assuming your API sends the error in the responseText
+  var errorMessage = jqXHR.responseText;
 
-  // If the API response is JSON and you want to parse it
+  // Try to parse the responseText to JSON if the API response is JSON
   try {
-    var responseJson = JSON.parse(jqXHR.responseText);
-    errorMessage = responseJson.message || responseJson.error || errorMessage; // Customize depending on your API response
+      var responseJson = JSON.parse(jqXHR.responseText);
+      errorMessage = responseJson.message || responseJson.error || errorMessage;
   } catch (e) {
-    // responseText wasn't JSON, use the raw responseText
+      // responseText wasn't JSON, use the raw responseText
   }
 
   // Check if the error is a 401 Unauthorized
   if (errorCode === 401 && errorMessage.includes("The token expired")) {
-    // Redirect to the login page
-    alert('Session Expired');
-    window.location.href = '/app/login'; // Update '/login' to your login page URL
-    localStorage.clear(); // clear local storage
+      alert('Session Expired');
+      window.location.href = '/app/login'; // Update this to your login page URL
+      localStorage.clear();
   } else {
-    // For all other errors, concatenate and alert the error code with the error message
-    alert("Error " + errorCode + ": " + errorMessage);
+      alert("Error " + errorCode + ": " + errorMessage);
   }
+
+  // Prepare the data to be sent to the server
+  var errorData = {
+      event_type: event.type,
+      endpoint: settings.url,
+      error_code: errorCode,
+      error_message: errorMessage,
+      xhr_status: jqXHR.statusText,
+      xhr_responseText: jqXHR.responseText,
+      request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
+      response_data: jqXHR.responseText,
+      settings_url: settings.url
+  };
+
+  // Send the error data to your server
+  $.ajax({
+      type: "POST",
+      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/error_log", 
+      contentType: "application/json", 
+      data: JSON.stringify(errorData), 
+      success: function(response) {
+          console.log("Error logged successfully");
+      },
+      error: function(response) {
+          console.log("Failed to log error");
+      }
+  });
 });
 
 
