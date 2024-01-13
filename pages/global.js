@@ -44,8 +44,8 @@ $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
       alert("Error " + errorCode + ": " + errorMessage);
   }
 
-  // Prepare the data to be sent to the server
-  var errorData = {
+  // Prepare the error data as a single JSON object
+  var errorData = JSON.stringify({
       event_type: event.type,
       endpoint: settings.url,
       error_code: errorCode,
@@ -55,22 +55,22 @@ $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
       request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
       response_data: jqXHR.responseText,
       settings_url: settings.url
-  };
+  });
 
   // Send the error data to your server
   $.ajax({
       type: "POST",
-      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/error_log", 
-      contentType: "application/json", 
-      data: JSON.stringify(errorData), 
+      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
+      contentType: "application/json",
+      data: errorData, // Send the stringified JSON object
       success: function(response) {
-          console.log("Error logged successfully");
+      console.log("Error logged successfully");
       },
       error: function(response) {
-          console.log("Failed to log error");
+      console.log("Failed to log error");
       }
+      });
   });
-});
 
 
   /* ---  log out func ---- */
