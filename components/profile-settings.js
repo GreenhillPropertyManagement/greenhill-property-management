@@ -189,7 +189,7 @@ function profileSettingsLoad() {
       if (response.user_role === 'Landlord'){
 
         $('#user_alerts_toggle').remove(); // remove users alerts toggle
-        $('##legal_alerts').remove(); // remove users alerts toggle
+        $('#legal_alerts_toggle').remove(); // remove users alerts toggle
 
       }
 
