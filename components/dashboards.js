@@ -561,6 +561,9 @@ function loadUnitBalances(target) {
       target: target,
     },
     success: function (response) {
+      // Log the received response for debugging
+      console.log("Response Data:", response);
+
       // Update current balance with formatting
       var formattedCurrentBalance = "$" + response.balance.toLocaleString();
       $('[data-tenant="current-balance"]').text(formattedCurrentBalance);
@@ -571,18 +574,26 @@ function loadUnitBalances(target) {
       var nextMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
       var nextMonthEnd = new Date(nextMonthStart.getFullYear(), nextMonthStart.getMonth() + 1, 1);
 
+      // Log the date range for next month's charges
+      console.log("Next Month Start:", nextMonthStart);
+      console.log("Next Month End:", nextMonthEnd);
+
       response.transactions.forEach(function (transaction) {
-        // Ensure date is parsed correctly (assuming date is in 'YYYY-MM-DD' format and UTC)
+        // Convert transaction date to Date object and log it
         var transactionDate = new Date(transaction.transaction_date + 'T00:00:00Z');
+        console.log("Transaction Date:", transactionDate, " (Original:", transaction.transaction_date, ")");
+
         if (
           transactionDate >= nextMonthStart &&
           transactionDate < nextMonthEnd &&
           transaction.type === "charge"
         ) {
-          // Ensure the transaction amount is treated as a number
           nextMonthCharges += Number(transaction.amount);
         }
       });
+
+      // Log the calculated next month's charges
+      console.log("Next Month's Charges:", nextMonthCharges);
 
       // Format and update next month's charges
       var formattedNextMonthCharges = "$" + nextMonthCharges.toLocaleString();
@@ -593,6 +604,7 @@ function loadUnitBalances(target) {
     },
   });
 }
+
 
 
 function editUnit(unit) {
