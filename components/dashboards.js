@@ -79,9 +79,6 @@ function loadUnitAndTenantData(unit) {
         $('#edit-electricity-meter').val(response.electricity_meter);
         $('#edit-commission').val(response.commission);
         $('#edit-unit-misc').val(response.miscellaneous);
-
-        
-  
       },
       complete: function () {
         loadPropertyUsers();
@@ -581,6 +578,8 @@ function loadUnitBalances(target) {
         nextMonthStart.getMonth() + 1,
         1,
       );
+      console.log('Next Month Start:', nextMonthStart);
+      console.log('Next Month End:', nextMonthEnd);
 
       response.transactions.forEach(function (transaction) {
         var transactionDate = new Date(transaction.transaction_date);
