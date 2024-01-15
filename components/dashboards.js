@@ -568,25 +568,19 @@ function loadUnitBalances(target) {
       // Calculate next month's charges
       var nextMonthCharges = 0;
       var currentDate = new Date();
-      var nextMonthStart = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        1,
-      );
-      var nextMonthEnd = new Date(
-        nextMonthStart.getFullYear(),
-        nextMonthStart.getMonth() + 1,
-        1,
-      );
+      var nextMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      var nextMonthEnd = new Date(nextMonthStart.getFullYear(), nextMonthStart.getMonth() + 1, 1);
 
       response.transactions.forEach(function (transaction) {
-        var transactionDate = new Date(transaction.transaction_date);
+        // Ensure date is parsed correctly (assuming date is in 'YYYY-MM-DD' format and UTC)
+        var transactionDate = new Date(transaction.transaction_date + 'T00:00:00Z');
         if (
           transactionDate >= nextMonthStart &&
           transactionDate < nextMonthEnd &&
           transaction.type === "charge"
         ) {
-          nextMonthCharges += transaction.amount;
+          // Ensure the transaction amount is treated as a number
+          nextMonthCharges += Number(transaction.amount);
         }
       });
 
@@ -599,6 +593,7 @@ function loadUnitBalances(target) {
     },
   });
 }
+
 
 function editUnit(unit) {
 
