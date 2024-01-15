@@ -62,7 +62,7 @@ function loadUsers(type,unit) {
         }
     
        
-        // click handler to direct to each folder's page
+        // click handler to direct to each user's page
         $(userItem).find(".user-click-target").click(function () {
                      
             var fetchedUserId = user.user_id; 
