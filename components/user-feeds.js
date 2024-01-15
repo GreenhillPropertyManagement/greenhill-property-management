@@ -14,9 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-
-
-
 function loadUsers(type,unit) {
   
   $('.loader').css('display','flex');
