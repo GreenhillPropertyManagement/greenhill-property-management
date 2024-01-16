@@ -203,6 +203,10 @@ function loadUserProfile(user) {
       // hide nav buttons for users own profile
       if (response.user_id === localStorage.userId) {
         $(".profile__cta-bttn-wrapper").show();
+        // bank last 4
+        $("[data-profile=bank_last_4]").text(
+          response.bank_last_4
+        );
       } else {
         $(".profile__cta-bttn-wrapper").remove();
       }
