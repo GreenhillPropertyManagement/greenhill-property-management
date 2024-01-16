@@ -21,116 +21,124 @@ function initializeApp() {
   var firstName = localStorage.getItem('firstName');
   $('[data="first_name"]').text(firstName);
 
-/* Global Ajax Errors Handling */
-$(document).ajaxError(function(event, jqXHR, settings, thrownError) {
-  // Retrieve the error code and response text
-  var errorCode = jqXHR.status;
-  var errorMessage = jqXHR.responseText;
+  /* Global Ajax Errors Handling */
+  $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
+    // Retrieve the error code and response text
+    var errorCode = jqXHR.status;
+    var errorMessage = jqXHR.responseText;
 
-  // Try to parse the responseText to JSON if the API response is JSON
-  try {
-      var responseJson = JSON.parse(jqXHR.responseText);
-      errorMessage = responseJson.message || responseJson.error || errorMessage;
-  } catch (e) {
-      // responseText wasn't JSON, use the raw responseText
-  }
+    // Try to parse the responseText to JSON if the API response is JSON
+    try {
+        var responseJson = JSON.parse(jqXHR.responseText);
+        errorMessage = responseJson.message || responseJson.error || errorMessage;
+    } catch (e) {
+        // responseText wasn't JSON, use the raw responseText
+    }
 
-  // Check if the error is a 401 Unauthorized
-  if (errorCode === 401 && errorMessage.includes("The token expired")) {
-      alert('Session Expired');
-      window.location.href = '/app/login'; // Update this to your login page URL
+    // Check if the error is a 401 Unauthorized
+    if (errorCode === 401 && errorMessage.includes("The token expired")) {
+        alert('Session Expired');
+        window.location.href = '/app/login'; // Update this to your login page URL
+        localStorage.clear();
+    } else {
+        alert("Error " + errorCode + ": " + errorMessage);
+    }
+
+    // Prepare the error data as a single JSON object
+    var errorData = JSON.stringify({
+        event_type: event.type,
+        endpoint: settings.url,
+        error_code: errorCode,
+        error_message: errorMessage,
+        xhr_status: jqXHR.statusText,
+        xhr_responseText: jqXHR.responseText,
+        request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
+        response_data: jqXHR.responseText,
+        settings_url: settings.url
+    });
+
+    // Send the error data to your server
+    $.ajax({
+        type: "POST",
+        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
+        contentType: "application/json",
+        data: errorData, // Send the stringified JSON object
+        success: function(response) {
+        console.log("Error logged successfully");
+        },
+        error: function(response) {
+        console.log("Failed to log error");
+        }
+        });
+    });
+
+
+    /* ---  log out func ---- */
+    $(".logout_button").on("click", function () {
+      // Clear all local storage
       localStorage.clear();
-  } else {
-      alert("Error " + errorCode + ": " + errorMessage);
-  }
 
-  // Prepare the error data as a single JSON object
-  var errorData = JSON.stringify({
-      event_type: event.type,
-      endpoint: settings.url,
-      error_code: errorCode,
-      error_message: errorMessage,
-      xhr_status: jqXHR.statusText,
-      xhr_responseText: jqXHR.responseText,
-      request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
-      response_data: jqXHR.responseText,
-      settings_url: settings.url
-  });
+      // Redirect user to /app/login
+      window.location.href = "/app/login";
+    });
 
-  // Send the error data to your server
-  $.ajax({
-      type: "POST",
-      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
-      contentType: "application/json",
-      data: errorData, // Send the stringified JSON object
-      success: function(response) {
-      console.log("Error logged successfully");
-      },
-      error: function(response) {
-      console.log("Failed to log error");
-      }
-      });
-  });
-
-
-  /* ---  log out func ---- */
-  $(".logout_button").on("click", function () {
-    // Clear all local storage
-    localStorage.clear();
-
-    // Redirect user to /app/login
-    window.location.href = "/app/login";
-  });
-
-  loadCurrentPage();
-  urlRouting();
-  userRoleInterface();
-  loadUsersInFormSelectFields();
+    loadCurrentPage();
+    urlRouting();
+    userRoleInterface();
+    loadUsersInFormSelectFields();
 
 
 
-  /* ---- Modal Functionality ----- */
+    /* ---- Modal Functionality ----- */
 
-  $(document).on('click', '[element="modal"]', function() {
-    // Show the .modal_block element and hide its children
-    $('.modal__block').show().children().hide();
+    $(document).on('click', '[element="modal"]', function() {
+      // Show the .modal_block element and hide its children
+      $('.modal__block').show().children().hide();
+      
+      // Read the modal attribute value from the clicked element
+      var modalValue = $(this).attr('modal');
     
-    // Read the modal attribute value from the clicked element
-    var modalValue = $(this).attr('modal');
-  
-    // Show the modal with the corresponding ID
-    $('#' + modalValue).show();
-  });
+      // Show the modal with the corresponding ID
+      $('#' + modalValue).show();
+    });
 
 
-  // close modal functionality
-  $('.inverse-cta-bttn').on('click', function() {
+    // close modal functionality
+    $('.inverse-cta-bttn').on('click', function() {
 
-    $('.modal__block').css('display', 'none');      // Hide .modal__block
-    $('.modal__block').children().hide();           // Hide all children of .modal__block
-  });
+      $('.modal__block').css('display', 'none');      // Hide .modal__block
+      $('.modal__block').children().hide();           // Hide all children of .modal__block
+    });
 
-  
-  /* -------- Element Dynamic Visibility ------- */
+    
+    /* -------- Element Dynamic Visibility ------- */
 
-  if (localStorage.userRole === 'Admin') {
-    $('[dynamic-visibility=admin-hidden]').remove();
-  }
+    if (localStorage.userRole === 'Admin') {
+      $('[dynamic-visibility=admin-hidden]').remove();
+    }
 
-  if (localStorage.userRole === 'Employee') {
-    $('[dynamic-visibility=employee-hidden]').remove();
-  }
+    if (localStorage.userRole === 'Employee') {
+      $('[dynamic-visibility=employee-hidden]').remove();
+    }
 
-  if (localStorage.userRole === 'Landlord') {
-    $('[dynamic-visibility=landlord-hidden]').remove();
-  }
+    if (localStorage.userRole === 'Landlord') {
+      $('[dynamic-visibility=landlord-hidden]').remove();
+    }
 
-  if (localStorage.userRole === 'Tenant') {
-    $('[dynamic-visibility=tenant-hidden]').remove();
-  }
+    if (localStorage.userRole === 'Tenant') {
+      $('[dynamic-visibility=tenant-hidden]').remove();
+    }
 
-  if (localStorage.userRole === 'Employee' || localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') 
+    if (localStorage.userRole === 'Employee' || localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
       $('[dynamic-visibility=admin-only]').remove();
+    }
+
+    if (localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
+      $('[dynamic-visibility=users-only]').remove();
+      $('[dynamic-visibilit-2=true]').remove(); // remove update work order form button
+
+    }
+      
   
 }
 
