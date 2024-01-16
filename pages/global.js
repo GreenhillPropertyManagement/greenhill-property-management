@@ -135,7 +135,7 @@ function initializeApp() {
 
     if (localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
       $('[dynamic-visibility=users-only]').remove();
-      $('[dynamic-visibilit-2=true]').remove(); // remove update work order form button
+      $('[dynamic-visibility-2=true]').remove(); // remove update work order form button
 
     }
       
