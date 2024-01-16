@@ -207,6 +207,7 @@ function loadUserProfile(user) {
         $("[data-profile=bank_last_4]").text(
           response.tenant_info.bank_last_4
         );
+        alert(response.tenant_info.bank_last_4);
       } else {
         $(".profile__cta-bttn-wrapper").remove();
       }
