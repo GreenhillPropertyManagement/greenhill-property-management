@@ -202,9 +202,9 @@ function loadUserProfile(user) {
       apiResponse = response;
       // hide nav buttons for users own profile
       if (response.user_id === localStorage.userId) {
-        $(".profile__cta-bttn-wrapper").hide();
-      } else {
         $(".profile__cta-bttn-wrapper").show();
+      } else {
+        $(".profile__cta-bttn-wrapper").remove();
       }
 
       // toggle the 'resend' invite button if user is pending or not
