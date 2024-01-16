@@ -222,6 +222,11 @@ function loadUserProfile(user) {
         response.first_name + " " + response.last_name,
       );
 
+      // user role
+      $("[data-profile=user_role]").text(
+        response.user_role
+      );
+
       // profile img
       if (response.profile_img) {
         $("[data-profile=profile_img]").attr("src", response.profile_img);
