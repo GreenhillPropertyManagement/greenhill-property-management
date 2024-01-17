@@ -65,34 +65,30 @@ function fetchTransactions(type, target) {
 
 function formatDate(input) {
   if (input === null) return "";
+  // Convert the input to a Date object
   const date = new Date(input);
-  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-  const day = ("0" + utcDate.getDate()).slice(-2);
-  const month = ("0" + (utcDate.getMonth() + 1)).slice(-2);
-  const year = utcDate.getFullYear().toString().substr(2, 2);
+  // Convert the date to Eastern Time Zone
+  const estDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  // Format the date
+  const day = ("0" + estDate.getDate()).slice(-2);
+  const month = ("0" + (estDate.getMonth() + 1)).slice(-2);
+  const year = estDate.getFullYear().toString().substr(2, 2);
   return `${month}/${day}/${year}`;
 }
 
 function formatBillingPeriod(input) {
   if (input === null) return "";
+  // Convert the input to a Date object
   const date = new Date(input);
-  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  // Convert the date to Eastern Time Zone
+  const estDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  // Format the billing period
   const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
-  const month = monthNames[utcDate.getMonth()];
-  const year = utcDate.getFullYear();
+  const month = monthNames[estDate.getMonth()];
+  const year = estDate.getFullYear();
   return `${month} ${year}`;
 }
 
