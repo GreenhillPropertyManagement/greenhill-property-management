@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function fetchTransactions(type, target) {
   $(".loader").css("display", "flex");
+
   // variables for csv download
   const table = document.querySelector(".styled-table");
   const exportButton = $("[element='download-csv-button']");
@@ -95,10 +96,8 @@ function formatBillingPeriod(input) {
   return `${month} ${year}`;
 }
 
-function isNewMonth(currentMonth, itemDate) {
-  const itemMonth = itemDate.getMonth();
-  const itemDay = itemDate.getDate();
-  return currentMonth !== itemMonth || itemDay === 1;
+function isNewMonth(previousMonth, itemDate) {
+  return previousMonth !== itemDate.getMonth();
 }
 
 function updateTable(data) {
@@ -111,8 +110,8 @@ function updateTable(data) {
     const itemMonth = itemDate.getMonth();
     runningBalance += item.amount;
 
-    // Check if month has changed and it's not the first transaction
-    if (previousMonth !== null && itemMonth !== previousMonth) {
+    // Check if new month has started
+    if (previousMonth !== null && isNewMonth(previousMonth, itemDate)) {
       // Insert end-of-previous-month balance row
       addEndOfMonthRow(previousMonth, runningBalance - item.amount);
     }
