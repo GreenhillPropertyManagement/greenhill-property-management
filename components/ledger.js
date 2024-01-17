@@ -63,32 +63,33 @@ function fetchTransactions(type, target) {
   });
 }
 
+function parseDateInEasternTime(input) {
+  if (input === null) return null;
+  // Append 'T00:00:00' to ensure it's treated as midnight in Eastern Time
+  // and add the Eastern Time Zone abbreviation (EST or EDT)
+  const easternTimeDateStr = input + 'T00:00:00-05:00'; // EST is UTC-5, EDT is UTC-4
+  return new Date(easternTimeDateStr);
+}
+
 function formatDate(input) {
-  if (input === null) return "";
-  // Convert the input to a Date object
-  const date = new Date(input);
-  // Convert the date to Eastern Time Zone
-  const estDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  // Format the date
-  const day = ("0" + estDate.getDate()).slice(-2);
-  const month = ("0" + (estDate.getMonth() + 1)).slice(-2);
-  const year = estDate.getFullYear().toString().substr(2, 2);
+  const date = parseDateInEasternTime(input);
+  if (!date) return "";
+  const day = ("0" + date.getDate()).slice(-2);
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const year = date.getFullYear().toString().substr(2, 2);
   return `${month}/${day}/${year}`;
 }
 
+
 function formatBillingPeriod(input) {
-  if (input === null) return "";
-  // Convert the input to a Date object
-  const date = new Date(input);
-  // Convert the date to Eastern Time Zone
-  const estDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  // Format the billing period
+  const date = parseDateInEasternTime(input);
+  if (!date) return "";
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const month = monthNames[estDate.getMonth()];
-  const year = estDate.getFullYear();
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
   return `${month} ${year}`;
 }
 
