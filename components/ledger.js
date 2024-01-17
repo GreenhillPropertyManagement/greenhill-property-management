@@ -107,41 +107,39 @@ function updateTable(data) {
   let currentMonth = null;
   let previousMonthBalance = 0;
 
-  function isNewMonth(currentMonth, itemDate) {
-    const itemMonth = itemDate.getMonth();
-    const itemDay = itemDate.getDate();
-    return currentMonth !== itemMonth || itemDay === 1;
-  }
-
   data.forEach((item, index) => {
     runningBalance += item.amount;
 
     const itemDate = new Date(item.transaction_date);
+    const itemMonth = itemDate.getMonth();
 
     if (currentMonth === null) {
-      currentMonth = itemDate.getMonth();
+      currentMonth = itemMonth;
     }
 
-    if (isNewMonth(currentMonth, itemDate)) {
-      if (currentMonth !== itemDate.getMonth()) {
-        const previousMonthDate = new Date(itemDate);
-        previousMonthDate.setMonth(itemDate.getMonth() - 1);
-        const startOfMonthRow = `
-          <tr>
-            <td>${formatBillingPeriod(previousMonthDate)}</td>
-            <td></td>
-            <td></td>
-            <td>${formatBillingPeriod(previousMonthDate)} Balance</td>
-            <td></td>
-            <td></td>
-            <td>$${previousMonthBalance.toFixed(2)}</td>
-          </tr>
-        `;
-        $(".styled-table tbody").append(startOfMonthRow);
-      }
-      currentMonth = itemDate.getMonth();
+    // Check if the transaction month has changed
+    const isNewMonth = currentMonth !== itemMonth;
+    if (isNewMonth) {
+      // Insert the previous month's balance row
+      const previousMonthDate = new Date(itemDate.getFullYear(), itemMonth - 1, 1);
+      const previousMonthRow = `
+        <tr>
+          <td>${formatBillingPeriod(previousMonthDate)}</td>
+          <td></td>
+          <td></td>
+          <td>${formatBillingPeriod(previousMonthDate)} Balance</td>
+          <td></td>
+          <td></td>
+          <td>$${previousMonthBalance.toFixed(2)}</td>
+        </tr>
+      `;
+      $(".styled-table tbody").append(previousMonthRow);
+
+      currentMonth = itemMonth;
+      previousMonthBalance = runningBalance;
     }
 
+    // Insert the current transaction row
     const chargeClass = item.type === "charge" ? "charge-row" : "";
     const fileUrl = item.type === "charge" ? item.invoice_url : "";
     const newRow = `
@@ -157,10 +155,12 @@ function updateTable(data) {
     `;
     $(".styled-table tbody").append(newRow);
 
+    // Check if this is the last item or the next item is in a new month
     const isLastItem = index === data.length - 1;
-    const isEndOfMonth = isLastItem || isNewMonth(currentMonth, new Date(data[index + 1]?.transaction_date));
+    const isNextMonth = isLastItem || new Date(data[index + 1]?.transaction_date).getMonth() !== itemMonth;
 
-    if (isEndOfMonth) {
+    if (isNextMonth) {
+      // Insert the end-of-month balance row
       const endOfMonthRow = `
         <tr style="background-color: #92EFDD;">
           <td>${formatBillingPeriod(item.billing_period)}</td>
@@ -173,7 +173,6 @@ function updateTable(data) {
         </tr>
       `;
       $(".styled-table tbody").append(endOfMonthRow);
-      previousMonthBalance = runningBalance;
     }
   });
 
