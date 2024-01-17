@@ -104,28 +104,17 @@ function isNewMonth(currentMonth, itemDate) {
 function updateTable(data) {
   console.log(`Updating table with data:`, data);
   let runningBalance = 0;
-  let currentMonth = null;
-  let endOfMonthAdded = false;
+  let previousMonth = null;
 
   data.forEach((item, index) => {
-    runningBalance += item.amount;
     const itemDate = new Date(item.transaction_date);
     const itemMonth = itemDate.getMonth();
+    runningBalance += item.amount;
 
-    if (currentMonth === null) {
-      currentMonth = itemMonth;
-    }
-
-    // Check if the month has changed
-    if (itemMonth !== currentMonth) {
-      if (!endOfMonthAdded) {
-        // Insert end-of-previous-month balance row
-        addEndOfMonthRow(currentMonth, runningBalance - item.amount);
-        endOfMonthAdded = true;
-      }
-      currentMonth = itemMonth;
-    } else {
-      endOfMonthAdded = false;
+    // Check if month has changed and it's not the first transaction
+    if (previousMonth !== null && itemMonth !== previousMonth) {
+      // Insert end-of-previous-month balance row
+      addEndOfMonthRow(previousMonth, runningBalance - item.amount);
     }
 
     // Insert transaction row
@@ -144,8 +133,10 @@ function updateTable(data) {
     `;
     $(".styled-table tbody").append(newRow);
 
+    previousMonth = itemMonth;
+
     const isLastItem = index === data.length - 1;
-    if (isLastItem && !endOfMonthAdded) {
+    if (isLastItem) {
       // Insert end-of-last-month balance row
       addEndOfMonthRow(itemMonth, runningBalance);
     }
@@ -178,7 +169,7 @@ function updateTable(data) {
 
   // Add cursor style for charge rows
   $(".charge-row").css("cursor", "pointer");
-}
+} 
 
 /* --- Download CSV Functionality ---- */
 
