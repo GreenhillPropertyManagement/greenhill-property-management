@@ -208,7 +208,7 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    const date = new Date(transaction.transaction_date);
+    const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
     const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
     if (!statements[monthYear]) {
@@ -257,9 +257,8 @@ function formatMonthYear(monthYear) {
 
 function populateTableWithTransactions(transactions, monthYear) {
   const filteredTransactions = transactions.filter((transaction) => {
-    const transactionMonthYear = `${new Date(
-      transaction.transaction_date,
-    ).getFullYear()}-${new Date(transaction.transaction_date).getMonth() + 1}`;
+    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+    const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
     return transactionMonthYear === monthYear;
   });
 
@@ -267,26 +266,14 @@ function populateTableWithTransactions(transactions, monthYear) {
   $tableBody.empty(); // Clear existing rows
 
   filteredTransactions.forEach((transaction) => {
-    const formattedChargeAmount =
-      transaction.type === "charge" ? `$${transaction.amount.toFixed(2)}` : "";
-    const formattedCreditAmount =
-      transaction.type === "credit" || transaction.type === "payment"
-        ? `-$${transaction.amount.toFixed(2)}`
-        : "";
+    const billingPeriodDate = new Date(transaction.billing_period + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+    const formattedBillingPeriod = `${billingPeriodDate.toLocaleString("default", { month: "short" })} ${billingPeriodDate.getFullYear()}`;
 
-    const billingPeriodDate = new Date(transaction.billing_period);
-    const formattedBillingPeriod = `${billingPeriodDate.toLocaleString(
-      "default",
-      { month: "short" },
-    )} ${billingPeriodDate.getFullYear()}`;
+    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+    const formattedTransactionDate = `${transactionDate.getMonth() + 1}/${transactionDate.getDate()}/${transactionDate.getFullYear().toString().substr(-2)}`;
 
-    const transactionDate = new Date(transaction.transaction_date);
-    const formattedTransactionDate = `${
-      transactionDate.getMonth() + 1
-    }/${transactionDate.getDate()}/${transactionDate
-      .getFullYear()
-      .toString()
-      .substr(-2)}`;
+    const formattedChargeAmount = transaction.type === "charge" ? `$${transaction.amount.toFixed(2)}` : "";
+    const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? `-$${transaction.amount.toFixed(2)}` : "";
 
     const $row = $("<tr>");
     $row.append($("<td>").text(formattedBillingPeriod));
@@ -316,7 +303,6 @@ function populateTableWithTransactions(transactions, monthYear) {
     }
   });
 }
-
 function convertTableToCSV($table) {
   let csv = [];
   $table.find("tr").each(function () {
