@@ -101,52 +101,24 @@ function updateTable(data) {
   console.log(`Updating table with data:`, data);
   let runningBalance = 0;
   let previousMonth = null;
-
-  data.forEach((item, index) => {
-    const itemDate = new Date(item.transaction_date);
-    const itemMonth = itemDate.getMonth();
-    runningBalance += item.amount;
-
-    // Check if new month has started
-    if (previousMonth !== null && isNewMonth(previousMonth, itemDate)) {
-      // Insert end-of-previous-month balance row
-      addEndOfMonthRow(previousMonth, runningBalance - item.amount);
-    }
-
-    // Insert transaction row
-    const chargeClass = item.type === "charge" ? "charge-row" : "";
-    const fileUrl = item.type === "charge" ? item.invoice_url : "";
-    const newRow = `
-      <tr class="${chargeClass}" data-file-url="${fileUrl}">
-          <td>${formatBillingPeriod(item.billing_period)}</td>
-          <td>${formatDate(item.transaction_date)}</td>
-          <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
-          <td>${item.description}</td>
-          <td>${item.type === "charge" ? `$${item.amount.toFixed(2)}` : ""}</td>
-          <td>${item.type !== "charge" ? `$${(-item.amount).toFixed(2)}` : ""}</td>
-          <td>$${runningBalance.toFixed(2)}</td>
-      </tr>
-    `;
-    $(".styled-table tbody").append(newRow);
-
-    previousMonth = itemMonth;
-
-    const isLastItem = index === data.length - 1;
-    if (isLastItem) {
-      // Insert end-of-last-month balance row
-      addEndOfMonthRow(itemMonth, runningBalance);
-    }
-  });
+  let previousYear = null;
 
   // Function to add end-of-month balance row
-  function addEndOfMonthRow(month, balance) {
-    const balanceDate = new Date(new Date().getFullYear(), month, 1);
+  function addEndOfMonthRow(month, year, balance) {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const displayMonth = monthNames[month];
+    const displayYear = year;
+
     const endOfMonthRow = `
       <tr style="background-color: #92EFDD;">
-        <td>${formatBillingPeriod(balanceDate)}</td>
+        <td>${displayMonth} ${displayYear}</td>
         <td></td>
         <td></td>
-        <td>End of ${formatBillingPeriod(balanceDate)} Balance</td>
+        <td>End of ${displayMonth} ${displayYear} Balance</td>
         <td></td>
         <td></td>
         <td>$${balance.toFixed(2)}</td>
@@ -154,6 +126,40 @@ function updateTable(data) {
     `;
     $(".styled-table tbody").append(endOfMonthRow);
   }
+
+  data.forEach((item, index) => {
+    const itemDate = new Date(item.transaction_date + 'T00:00:00-05:00'); // EST timezone
+    const itemMonth = itemDate.getMonth();
+    const itemYear = itemDate.getFullYear();
+    runningBalance += item.amount;
+
+    if (previousMonth !== null && isNewMonth(previousMonth, itemDate)) {
+      addEndOfMonthRow(previousMonth, previousYear, runningBalance - item.amount);
+    }
+
+    const chargeClass = item.type === "charge" ? "charge-row" : "";
+    const fileUrl = item.type === "charge" ? item.invoice_url : "";
+    const newRow = `
+      <tr class="${chargeClass}" data-file-url="${fileUrl}">
+        <td>${formatBillingPeriod(item.billing_period)}</td>
+        <td>${formatDate(item.transaction_date)}</td>
+        <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
+        <td>${item.description}</td>
+        <td>${item.type === "charge" ? `$${item.amount.toFixed(2)}` : ""}</td>
+        <td>${item.type !== "charge" ? `$${(-item.amount).toFixed(2)}` : ""}</td>
+        <td>$${runningBalance.toFixed(2)}</td>
+      </tr>
+    `;
+    $(".styled-table tbody").append(newRow);
+
+    previousMonth = itemMonth;
+    previousYear = itemYear;
+
+    const isLastItem = index === data.length - 1;
+    if (isLastItem) {
+      addEndOfMonthRow(itemMonth, itemYear, runningBalance);
+    }
+  });
 
   // Add click event listener for charge rows
   $(".charge-row").on("click", function () {
@@ -165,7 +171,10 @@ function updateTable(data) {
 
   // Add cursor style for charge rows
   $(".charge-row").css("cursor", "pointer");
-} 
+}
+
+
+
 
 /* --- Download CSV Functionality ---- */
 
