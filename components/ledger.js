@@ -105,6 +105,7 @@ function updateTable(data) {
   console.log(`Updating table with data:`, data);
   let runningBalance = 0;
   let currentMonth = null;
+  let endOfMonthAdded = false;
 
   data.forEach((item, index) => {
     runningBalance += item.amount;
@@ -113,6 +114,18 @@ function updateTable(data) {
 
     if (currentMonth === null) {
       currentMonth = itemMonth;
+    }
+
+    // Check if the month has changed
+    if (itemMonth !== currentMonth) {
+      if (!endOfMonthAdded) {
+        // Insert end-of-previous-month balance row
+        addEndOfMonthRow(currentMonth, runningBalance - item.amount);
+        endOfMonthAdded = true;
+      }
+      currentMonth = itemMonth;
+    } else {
+      endOfMonthAdded = false;
     }
 
     // Insert transaction row
@@ -132,28 +145,28 @@ function updateTable(data) {
     $(".styled-table tbody").append(newRow);
 
     const isLastItem = index === data.length - 1;
-    const isNextMonthDifferent = isLastItem || new Date(data[index + 1]?.transaction_date).getMonth() !== itemMonth;
-
-    if (isNextMonthDifferent) {
-      // Insert end-of-month balance row
-      const endOfMonthRow = `
-        <tr style="background-color: #92EFDD;">
-          <td>${formatBillingPeriod(item.billing_period)}</td>
-          <td></td>
-          <td></td>
-          <td>End of ${formatBillingPeriod(item.billing_period)} Balance</td>
-          <td></td>
-          <td></td>
-          <td>$${runningBalance.toFixed(2)}</td>
-        </tr>
-      `;
-      $(".styled-table tbody").append(endOfMonthRow);
-
-      if (!isLastItem) {
-        currentMonth = new Date(data[index + 1]?.transaction_date).getMonth();
-      }
+    if (isLastItem && !endOfMonthAdded) {
+      // Insert end-of-last-month balance row
+      addEndOfMonthRow(itemMonth, runningBalance);
     }
   });
+
+  // Function to add end-of-month balance row
+  function addEndOfMonthRow(month, balance) {
+    const balanceDate = new Date(new Date().getFullYear(), month, 1);
+    const endOfMonthRow = `
+      <tr style="background-color: #92EFDD;">
+        <td>${formatBillingPeriod(balanceDate)}</td>
+        <td></td>
+        <td></td>
+        <td>End of ${formatBillingPeriod(balanceDate)} Balance</td>
+        <td></td>
+        <td></td>
+        <td>$${balance.toFixed(2)}</td>
+      </tr>
+    `;
+    $(".styled-table tbody").append(endOfMonthRow);
+  }
 
   // Add click event listener for charge rows
   $(".charge-row").on("click", function () {
