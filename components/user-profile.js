@@ -486,12 +486,7 @@ function adminUpdateUser(form) {
     },
     data: JSON.stringify(formData), // Convert formData to JSON
     contentType: "application/json", // Set the content type to JSON
-    success: function (response) {
-      // Log each key-value pair in formData
-      for(let pair of formData.entries()) {
-          console.log(pair[0]+ ', '+ pair[1]); 
-      }
-    
+    success: function (response) {   
       loadUserProfile(localStorage.pageRefreshParam);
     },
     error: function (error) {
