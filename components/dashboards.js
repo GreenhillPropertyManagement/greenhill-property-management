@@ -81,8 +81,8 @@ function loadUnitAndTenantData(unit) {
         $('#edit-unit-misc').val(response.miscellaneous);
 
         // populate balances card
-        $("[data-tenant='current-balance']").text(response.active_tenant_info.balance);
-        $("[data-tenant='next_month_charges']").text(response.active_tenant_info.next_month_payment);
+        $("[data-tenant='current-balance']").text('$' + response.active_tenant_info.balance.toLocaleString());
+        $("[data-tenant='next_month_charges']").text('$' + response.active_tenant_info.next_month_payment.toLocaleString());
       },
       complete: function () {
         loadPropertyUsers();
@@ -155,8 +155,8 @@ function loadUnitAndTenantData(unit) {
         );
   
         // populate balances card
-        $("[data-tenant='current-balance']").text(response.active_tenant_info.balance);
-        $("[data-tenant='next_month_charges']").text(response.active_tenant_info.next_month_payment);
+        $("[data-tenant='current-balance']").text('$' + response.active_tenant_info.balance.toLocaleString());
+        $("[data-tenant='next_month_charges']").text('$' + response.active_tenant_info.next_month_payment.toLocaleString());
   
         /* Insurance Doc */
         $('[data-unit="insurance_doc"]').click(function () {
