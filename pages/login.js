@@ -46,7 +46,11 @@ $("#login-form").submit(function (event) {
         localStorage.setItem("paymentsEnabled", response.user_info.tenant_info.enable_payments);
       }
       
-      
+      // hide edit property for landlords without edit permissions
+      if (localStorage.userRole === 'Landlord' && response.user_info.landlord_info.edit_permissions === false) {
+        $('#edit-property-button').remove();
+      }
+         
 
       // if user access is revoked
       if (response.user_info.user_status === 'access-revoked') {
