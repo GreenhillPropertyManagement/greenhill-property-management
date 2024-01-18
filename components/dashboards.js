@@ -152,10 +152,10 @@ function loadUnitAndTenantData(unit) {
   
         /* Populate Balance Card */
         $("[data-unit='balance']").text(
-          "$" + response.active_tenant_info.security_deposit,
+          "$" + response.active_tenant_info.balance,
         );
         $("[data-unit='next_months_charges']").text(
-          "$" + response.active_tenant_info.next_months_charges,
+          "$" + response.active_tenant_info.next_month_payment,
         );
   
         /* Insurance Doc */
@@ -549,62 +549,6 @@ function loadActiveTenants(user) {
     },
   });
 }
-
-function loadUnitBalances(target) {
-  $.ajax({
-    url: localStorage.baseUrl + "api:t2-fjTTj/get_unit_balances",
-    type: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    data: {
-      target: target,
-    },
-    success: function (response) {
-      // Log the received response for debugging
-      console.log("Response Data:", response);
-
-      // Update current balance with formatting
-      var formattedCurrentBalance = "$" + response.balance.toLocaleString();
-      $('[data-tenant="current-balance"]').text(formattedCurrentBalance);
-
-      // Calculate next month's charges
-      var nextMonthCharges = 0;
-      var currentDate = new Date();
-      var nextMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-      var nextMonthEnd = new Date(nextMonthStart.getFullYear(), nextMonthStart.getMonth() + 1, 1);
-
-      // Log the date range for next month's charges
-      console.log("Next Month Start:", nextMonthStart);
-      console.log("Next Month End:", nextMonthEnd);
-
-      response.transactions.forEach(function (transaction) {
-        // Convert transaction date to Date object and log it
-        var transactionDate = new Date(transaction.transaction_date + 'T00:00:00Z');
-        console.log("Transaction Date:", transactionDate, " (Original:", transaction.transaction_date, ")");
-
-        if (
-          transactionDate >= nextMonthStart &&
-          transactionDate < nextMonthEnd &&
-          transaction.type === "charge"
-        ) {
-          nextMonthCharges += Number(transaction.amount);
-        }
-      });
-
-      // Log the calculated next month's charges
-      console.log("Next Month's Charges:", nextMonthCharges);
-
-      // Format and update next month's charges
-      var formattedNextMonthCharges = "$" + nextMonthCharges.toLocaleString();
-      $('[data-tenant="next_month_charges"]').text(formattedNextMonthCharges);
-    },
-    error: function (error) {
-      console.log("Error:", error);
-    },
-  });
-}
-
 
 
 function editUnit(unit) {
