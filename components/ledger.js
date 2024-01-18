@@ -228,8 +228,8 @@ function loadBalancesPaymentPage(user){
     },
     dataType: "json",
     success: function (response) {
-      $("[data-tenant='current-balance']").text(response.balance);
-      $("[data-tenant='next-month-balance']").text(response.next_month_payment);
+      $("[data-tenant='current-balance']").text('$' + response.balance.toLocaleString());
+      $("[data-tenant='next-month-balance']").text('$' + response.next_month_payment.toLocaleString());
     },
     complete: function () {
       $(".loader").hide();
