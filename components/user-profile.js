@@ -203,10 +203,6 @@ function loadUserProfile(user) {
       // hide nav buttons for users own profile
       if (response.user_id === localStorage.userId) {
         $(".profile__cta-bttn-wrapper").hide();
-        // bank last 4
-        $("[data-profile=bank_last_4]").text(
-          response.tenant_info.bank_last_4
-        );
       } else {
         $(".profile__cta-bttn-wrapper").show();
       }
@@ -217,6 +213,15 @@ function loadUserProfile(user) {
         $("#resend-invite").show();
       } else {
         $("#resend-invite").hide();
+      }
+
+      if (response.user_status === "active" && response.user_role === "Tenant") {
+          // bank last 4
+          $("[data-profile=bank_last_4]").text(
+            response.tenant_info.bank_last_4
+          );
+      } else {
+        $("[data-profile=bank_last_4]").hide();
       }
 
       /* --------Bind Global User Data------------ */
