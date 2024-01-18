@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
     .off("click")
     .click(function () {
       fetchTransactions("tenant-user-ledger", localStorage.userId);
-      loadTenantsBalances(localStorage.userId);
     });
 });
 
