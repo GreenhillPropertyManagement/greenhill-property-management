@@ -467,7 +467,6 @@ function updateNotificationsPref () {
     // Handle 'Loading' State
     $('.loader').css('display','flex');
    
-    
   
     const formData = {};
   
