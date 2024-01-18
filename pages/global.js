@@ -138,6 +138,13 @@ function initializeApp() {
       $('[dynamic-visibility-2=true]').remove(); // remove update work order form button
 
     }
+
+    if (localStorage.editPermissions === 'false') {
+      $('#edit-property-button').remove();
+    } else {
+      $('#edit-property-button').show();
+    }
+
       
   
 }
