@@ -48,7 +48,8 @@ $("#login-form").submit(function (event) {
       
       // hide edit property for landlords without edit permissions
       if (localStorage.userRole === 'Landlord' && response.user_info.landlord_info.edit_permissions === false) {
-        $('#edit-property-button').remove();
+        $('[modal=edit-property]').remove();
+        alert('no edit');
       }
          
 
