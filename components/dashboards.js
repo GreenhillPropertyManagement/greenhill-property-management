@@ -79,6 +79,10 @@ function loadUnitAndTenantData(unit) {
         $('#edit-electricity-meter').val(response.electricity_meter);
         $('#edit-commission').val(response.commission);
         $('#edit-unit-misc').val(response.miscellaneous);
+
+        // populate balances card
+        $("[data-tenant='current-balance']").text(response.active_tenant_info.balance);
+        $("[data-tenant='next_month_charges']").text(response.active_tenant_info.next_month_payment);
       },
       complete: function () {
         loadPropertyUsers();
