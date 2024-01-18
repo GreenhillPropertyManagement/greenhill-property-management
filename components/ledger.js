@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .off("click")
     .click(function () {
       fetchTransactions("tenant-user-ledger", localStorage.userId);
+      loadBalancesPaymentPage(localStorage.userRecId);
     });
 });
 
@@ -211,6 +212,33 @@ function exportTableToCSV(table, filename) {
 
   csv = csv.join("\n");
   downloadCSV(csv, filename);
+}
+
+function loadBalancesPaymentPage(user){
+
+  // Ajax to retrieve transactions
+  $.ajax({
+    url: localStorage.baseUrl + "api:sElUkr6t/get_balances_payment_page",
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      user_id: user,
+    },
+    dataType: "json",
+    success: function (response) {
+      $("[data-tenant='current-balance']").text(response.balance);
+      $("[data-tenant='next-month-balance']").text(response.next_month_payment);
+    },
+    complete: function () {
+      $(".loader").hide();
+    },
+    error: function () {
+
+    },
+  });
+
 }
 
 
