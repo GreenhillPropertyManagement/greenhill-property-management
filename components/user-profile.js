@@ -231,6 +231,7 @@ function loadUserProfile(user) {
     },
     data: { user_id: user },
     success: function (response) {
+
       apiResponse = response;
       // hide nav buttons for users own profile
       if (response.user_id === localStorage.userId) {
@@ -254,6 +255,10 @@ function loadUserProfile(user) {
           );
       } else {
         $("[data-profile=bank_last_4]").hide();
+      }
+
+      if (response.user_role === "Landlord") {
+        $('#edit_permissions').prop('checked', response.landlord_info.edit_permissions);
       }
 
       /* --------Bind Global User Data------------ */
