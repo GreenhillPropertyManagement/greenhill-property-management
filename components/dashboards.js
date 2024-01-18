@@ -221,7 +221,6 @@ function loadUnitAndTenantData(unit) {
       },
       complete: function () {
 
-        loadUnitBalances(unitId);
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
