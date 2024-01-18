@@ -214,47 +214,4 @@ function exportTableToCSV(table, filename) {
   downloadCSV(csv, filename);
 }
 
-function loadTenantsBalances(target) {
-  $.ajax({
-    url: localStorage.baseUrl + "api:rpDXPv3x/get_users_balance",
-    type: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    data: {
-      target: target,
-    },
-    success: function (response) {
-      // Update current balance with formatting
-      var formattedCurrentBalance = "$" + response.balance.toLocaleString();
-      $('[data-tenant="current-balance"]').text(formattedCurrentBalance);
 
-      // Calculate next month's balance
-      var nextMonthBalance = 0;
-      var currentDate = new Date();
-      var nextMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        1,
-      );
-
-      response.transactions.forEach(function (transaction) {
-        var transactionDate = new Date(transaction.transaction_date);
-        if (
-          transactionDate >= nextMonth &&
-          transactionDate <
-            new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1)
-        ) {
-          nextMonthBalance += transaction.amount;
-        }
-      });
-
-      // Format and update next month's balance
-      var formattedNextMonthBalance = "$" + nextMonthBalance.toLocaleString();
-      $('[data-tenant="next-month-balance"]').text(formattedNextMonthBalance);
-    },
-    error: function (error) {
-      console.log("Error:", error);
-    },
-  });
-}
