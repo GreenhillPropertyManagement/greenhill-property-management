@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let user_id = urlParams.get("id");
       loadUserProfile(user_id);
-      
-      $('#edit_permission').change(function() {
+
+      $('#edit_permissions').change(function() {
 
         $('.loader').css('display', 'flex');
         // Get the checked state of the checkbox
