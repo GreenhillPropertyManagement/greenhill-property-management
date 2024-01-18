@@ -154,13 +154,9 @@ function loadUnitAndTenantData(unit) {
           "$" + response.active_tenant_info.security_deposit,
         );
   
-        /* Populate Balance Card */
-        $("[data-unit='balance']").text(
-          "$" + response.active_tenant_info.balance,
-        );
-        $("[data-unit='next_months_charges']").text(
-          "$" + response.active_tenant_info.next_month_payment,
-        );
+        // populate balances card
+        $("[data-tenant='current-balance']").text(response.active_tenant_info.balance);
+        $("[data-tenant='next_month_charges']").text(response.active_tenant_info.next_month_payment);
   
         /* Insurance Doc */
         $('[data-unit="insurance_doc"]').click(function () {
