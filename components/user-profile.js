@@ -39,6 +39,38 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let user_id = urlParams.get("id");
       loadUserProfile(user_id);
+      
+      $('#edit_permission').change(function() {
+
+        $('.loader').css('display', 'flex');
+        // Get the checked state of the checkbox
+        var isChecked = $(this).is(':checked');
+      
+        // Prepare the data to be sent
+        var dataToSend = {
+            edit_permissions: isChecked,
+            user_uuid: user_id
+        };
+      
+        // AJAX call to update the database
+        $.ajax({
+            url: localStorage.baseUrl + 'api:sElUkr6t/allow_landlord_edit', 
+            type: 'POST', // or 'PUT', depending on your API
+            headers: {
+              Authorization: "Bearer " + localStorage.authToken,
+            },
+            data: dataToSend,
+            success: function(response) {
+      
+              alert('Success! Landlord Settings Updated.');
+              $('.loader').hide();
+      
+            },
+            error: function(xhr, status, error) {
+      
+            }
+        });
+      });
     }, 100);
   });
 
@@ -600,3 +632,5 @@ function activityLog(type, user, property, unit, view) {
     error: function (error) {},
   });
 }
+
+
