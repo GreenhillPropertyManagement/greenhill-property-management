@@ -201,7 +201,7 @@ function loadProperty(property_id) {
               .text("$" + unit.active_tenant_info.balance);
             unitItem
               .find("[data-property='unit_next_charges']")
-              .text("$" + unit.active_tenant_info.next_months_charges);
+              .text("$" + unit.active_tenant_info.next_month_payment);
             unitItem
               .find("[data-property='unit_move_in']")
               .text(formatDateNoTime(unit.active_tenant_info.move_in_date));
