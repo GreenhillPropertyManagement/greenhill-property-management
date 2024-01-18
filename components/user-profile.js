@@ -202,13 +202,13 @@ function loadUserProfile(user) {
       apiResponse = response;
       // hide nav buttons for users own profile
       if (response.user_id === localStorage.userId) {
-        $(".profile__cta-bttn-wrapper").show();
+        $(".profile__cta-bttn-wrapper").hide();
         // bank last 4
         $("[data-profile=bank_last_4]").text(
           response.tenant_info.bank_last_4
         );
       } else {
-        $(".profile__cta-bttn-wrapper").hide();
+        $(".profile__cta-bttn-wrapper").show();
       }
 
       // toggle the 'resend' invite button if user is pending or not
