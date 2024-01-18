@@ -208,7 +208,7 @@ function loadUserProfile(user) {
           response.tenant_info.bank_last_4
         );
       } else {
-        $(".profile__cta-bttn-wrapper").remove();
+        $(".profile__cta-bttn-wrapper").hide();
       }
 
       // toggle the 'resend' invite button if user is pending or not
