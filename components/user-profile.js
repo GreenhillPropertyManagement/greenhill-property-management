@@ -330,6 +330,9 @@ function loadUserProfile(user) {
         if (response.tenant_info.enable_payments === false) {
           $("[api-button=user-transactions]").hide();
           $("[api-button=user-ledger]").hide();
+        } else {
+          $("[api-button=user-transactions]").show();
+          $("[api-button=user-ledger]").show();
         }
 
         // popuplate lease info card
