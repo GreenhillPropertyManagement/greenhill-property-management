@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
       saveQuillContent(
         "additional_reits",
         quill_content,
-        localStorage.activeTenant,
+        localStorage.activeTenantUserId,
       );
     }
   });
