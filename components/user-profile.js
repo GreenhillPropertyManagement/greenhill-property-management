@@ -324,13 +324,13 @@ function loadUserProfile(user) {
           response.tenant_info.property_info.property_id,
         );
 
+        $("#tenant-user-tabs").css("display", "flex"); // show tenant tab component
+       
         // hide transaction related tabs if tenant does not have payments enabled
         if (response.tenant_info.enable_payments === 'false') {
           $("[api-button=user-transactions]").hide();
           $("[api-button=user-ledger]").hide();
         }
-
-        $("#tenant-user-tabs").css("display", "flex"); // show tenant tab component
 
         // popuplate lease info card
         localStorage.setItem("unitId", response.tenant_info.unit_id);
