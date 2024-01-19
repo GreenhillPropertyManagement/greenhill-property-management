@@ -146,6 +146,10 @@ function initializeApp() {
       $('#edit-property-button').show();
     }
 
+    // hide modal on back button 
+    $(window).on('popstate', function() {
+    $('.modal__block').hide();
+});
       
   
 }
