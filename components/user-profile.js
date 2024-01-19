@@ -327,7 +327,7 @@ function loadUserProfile(user) {
         $("#tenant-user-tabs").css("display", "flex"); // show tenant tab component
        
         // hide transaction related tabs if tenant does not have payments enabled
-        if (response.tenant_info.enable_payments === 'false') {
+        if (response.tenant_info.enable_payments === false) {
           $("[api-button=user-transactions]").hide();
           $("[api-button=user-ledger]").hide();
         }
