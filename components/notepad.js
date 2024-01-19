@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ---- Loading Additional Reits
   $("[data-unit=additional-reits]").click(function () {
-
+    quill.setContents([]);
     $("#modal-notepad").attr("mode", "additional_reits");
     $(".loader").css("display", "flex"); // show loader
     loadQuillContent("additional_reits", localStorage.activeTenantUserUuid); // load quill content
