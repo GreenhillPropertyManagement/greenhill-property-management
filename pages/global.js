@@ -21,6 +21,11 @@ function initializeApp() {
   var firstName = localStorage.getItem('firstName');
   $('[data="first_name"]').text(firstName);
 
+  // update profile image if applicable
+  if (localStorage.profileImage) {
+    $('[data="profile_img"]').attr('src', localStorage.profileImage);
+  }
+
   /* Global Ajax Errors Handling */
   $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
     // Retrieve the error code and response text
