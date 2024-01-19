@@ -80,9 +80,6 @@ function loadUnitAndTenantData(unit) {
         $('#edit-commission').val(response.commission);
         $('#edit-unit-misc').val(response.miscellaneous);
 
-        // populate balances card
-        $("[data-tenant='current-balance']").text('$' + response.active_tenant_info.balance.toLocaleString());
-        $("[data-tenant='next_month_charges']").text('$' + response.active_tenant_info.next_month_payment.toLocaleString());
       },
       complete: function () {
         loadPropertyUsers();
