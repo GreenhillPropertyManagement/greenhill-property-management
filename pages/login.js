@@ -64,17 +64,17 @@ $("#login-form").submit(function (event) {
 
           window.location.href = "/tenant/verify-bank-account";
 
-        // if tenant has not updated their info  
-        } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
+      // if tenant has not updated their info  
+      } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
 
           window.location.href = "/tenant/confirm-account?user=" + response.user_info.user_id;
 
         // if landlord has not updated their info   
-        } else if (response.user_info.user_role === 'Landlord' && response.user_info.user_status === 'pending') {
+      } else if (response.user_info.user_role === 'Landlord' && response.user_info.user_status === 'pending') {
 
           window.location.href = "/landlord/confirm-account?user=" + response.user_info.user_id;
 
-        } else {
+      } else {
 
           /* update the default page ID depending on user role */
           let pageId; 
@@ -101,7 +101,7 @@ $("#login-form").submit(function (event) {
           //re-direct user to dashboard
           window.location.href = "/app/home";
           
-        }
+      }
 
         
         
