@@ -54,8 +54,7 @@ function initializeApp() {
         xhr_responseText: jqXHR.responseText,
         request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
         response_data: jqXHR.responseText,
-        settings_url: settings.url,
-        user: localStorage.lastName
+        settings_url: settings.url
     });
 
     // Send the error data to your server
