@@ -365,7 +365,7 @@ function loadUserProfile(user) {
         $('[data-lease_document]').on('click', function() {
           window.open(response.tenant_info.lease_document, '_blank');
         });
-        $('[data-lease_document]').on('click', function() {
+        $('[data=lease_document]').on('click', function() {
           window.open(response.tenant_info.lease_document, '_blank');
         });
 
