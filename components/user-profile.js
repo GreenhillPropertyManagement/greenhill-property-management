@@ -365,6 +365,9 @@ function loadUserProfile(user) {
         $('[data=lease_document]').on('click', function() {
           window.open(response.tenant_info.lease_document, '_blank');
         });
+        $('[data=insurance_doc]').on('click', function() {
+          window.open(response.tenant_info.insurance_doc, '_blank');
+        });
 
         // bind unit address
         $("[data-profile=unit_property]").text(
