@@ -533,6 +533,7 @@ function adminUpdateUser(form) {
   formData["user_property_id"] = localStorage.userPropertyId;
   formData["enable_payments"] = $('#edit_enable_payments').is(':checked');
   formData["monthly_rent"] = $("[data-api-unit='monthly_rent']").val();
+  formData["insurance_doc"] = $("[data-api-input='insurance_doc']").val();
 
 
   
