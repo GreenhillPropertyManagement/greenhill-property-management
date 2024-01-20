@@ -116,6 +116,27 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /* ----- Tenant Makes Payment ----*/
+
+  // Validate payment form so that tenant cannot make payment greater than $6000
+  document.addEventListener('DOMContentLoaded', function () {
+    var inputField = document.getElementById('rent-trans-amount');
+    var submitButton = document.getElementById('payment-init-button');
+    var validatorMessage = document.querySelector('.payment-validator-message');
+
+    function updateFormState() {
+        var inputValue = parseFloat(inputField.value);
+        if (inputValue > 6000) {
+            validatorMessage.style.display = 'block'; // Show the validator message
+            submitButton.classList.add('button-inactive');
+        } else {
+            validatorMessage.style.display = 'none'; // Hide the validator message
+            submitButton.classList.remove('button-inactive');
+        }
+    }
+
+    inputField.addEventListener('input', updateFormState);
+  });
+
   $("#pay-rent-form")
     .off("submit")
     .submit(function (event) {
