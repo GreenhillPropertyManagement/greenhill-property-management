@@ -362,10 +362,10 @@ function loadUserProfile(user) {
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
           .val(response.tenant_info.auto_pay_date);
-        $('[data=lease_document]').on('click', function() {
+        $('[data=lease_document]').off('click').on('click', function() {
           window.open(response.tenant_info.lease_document, '_blank');
         });
-        $('[data=insurance_doc]').on('click', function() {
+        $('[data=insurance_doc]').off('click').on('click', function() {
           window.open(response.tenant_info.insurance_doc, '_blank');
         });
 
