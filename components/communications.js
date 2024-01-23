@@ -457,7 +457,7 @@ function loadRecipients(recipient) {
         $.each(response, function (index, user) {
           // Create the option text
           var optionText =
-            user.first_name + " " + user.last_name + " (" + user.email + ")";
+            user.display_name + " " + " (" + user.email + ")";
 
           // Append the new option to the select field
           $("[data-api-input=recipient]").append(
