@@ -265,7 +265,7 @@ function loadUserProfile(user) {
 
       // username
       $("[data-profile=user_name]").text(
-        response.first_name + " " + response.last_name,
+        response.display_name
       );
 
       // user role
