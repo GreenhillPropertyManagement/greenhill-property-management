@@ -256,6 +256,10 @@ function formatMonthYear(monthYear) {
 }
 
 function populateTableWithTransactions(transactions, monthYear) {
+
+  function formatCurrency(amount) {
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
   const filteredTransactions = transactions.filter((transaction) => {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
@@ -272,8 +276,8 @@ function populateTableWithTransactions(transactions, monthYear) {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const formattedTransactionDate = `${transactionDate.getMonth() + 1}/${transactionDate.getDate()}/${transactionDate.getFullYear().toString().substr(-2)}`;
 
-    const formattedChargeAmount = transaction.type === "charge" ? `$${transaction.amount.toFixed(2)}` : "";
-    const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? `-$${transaction.amount.toFixed(2)}` : "";
+    const formattedChargeAmount = transaction.type === "charge" ? formatCurrency(transaction.amount) : "";
+    const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? formatCurrency(-transaction.amount) : "";
 
     const $row = $("<tr>");
     $row.append($("<td>").text(formattedBillingPeriod));
