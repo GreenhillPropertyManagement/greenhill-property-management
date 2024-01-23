@@ -429,9 +429,8 @@ function loadRecipients(recipient) {
       if (!$.isArray(response)) {
         // Response is a single object, set the select field to this object
         var optionText =
-          response.first_name +
+          response.display_name +
           " " +
-          response.last_name +
           " (" +
           response.email +
           ")";
