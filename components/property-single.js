@@ -186,9 +186,7 @@ function loadProperty(property_id) {
             unitItem
               .find("[data-property='unit_tenant']")
               .text(
-                unit.active_tenant_info.user_info.first_name +
-                  " " +
-                  unit.active_tenant_info.user_info.last_name,
+                unit.active_tenant_info.user_info.display_name
               );
             unitItem
               .find("[data-property='unit_monthly_rent']")
