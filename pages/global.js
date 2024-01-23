@@ -18,8 +18,8 @@ function initializeApp() {
   /* --- Store Base URL ---*/
 
   /* Populate User Global Info */
-  var firstName = localStorage.getItem('firstName');
-  $('[data="first_name"]').text(firstName);
+  var displayName = localStorage.getItem('displayName');
+  $('[data="first_name"]').text(displayName);
 
   // update profile image if applicable
   if (localStorage.profileImage) {
