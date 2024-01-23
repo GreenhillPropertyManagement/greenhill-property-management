@@ -49,7 +49,7 @@ function loadUsers(type,unit) {
         if (user.profile_img) {
           userItem.find(".users__dyn-item__img").attr("src", user.profile_img); 
         }    
-        userItem.find(".user-name").text(user.last_name + " " + user.first_name);
+        userItem.find(".user-name").text(user.display_name);
         userItem.find("[data='user-role']").text(user.user_role);
         userItem.find("[data='status']").text(user.user_status);
         userItem.find(".user-phone").attr("href", "tel:" + user.mobile_phone).text(user.mobile_phone);
