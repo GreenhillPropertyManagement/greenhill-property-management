@@ -76,7 +76,7 @@ function calendarInit() {
           const eventTemplate = document.querySelector('.calendar-event-sample-wrapper [data-dyn-item="calendar-event"]').cloneNode(true);
 
           eventTemplate.querySelector('[data-calendar="type"]').textContent = event.type;
-          eventTemplate.querySelector('[data-calendar="tenant_name"]').textContent = event.first_name + " " + event.last_name;
+          eventTemplate.querySelector('[data-calendar="tenant_name"]').textContent = event.display_name;
           eventTemplate.querySelector('[data-calendar="property_name"]').textContent = event.street;
           eventTemplate.querySelector('[data-calendar="unit_name"]').textContent = event.unit_name;
           eventTemplate.querySelector('[data-calendar="date"]').textContent= formatDateNoTime(event.calendar_date);
@@ -106,7 +106,7 @@ function calendarInit() {
                   const eventTemplate = document.querySelector('.calendar-event-sample-wrapper [data-dyn-item="calendar-event"]').cloneNode(true);
 
                   eventTemplate.querySelector('[data-calendar="type"]').textContent = event.type;
-                  eventTemplate.querySelector('[data-calendar="tenant_name"]').textContent = event.first_name + " " + event.last_name;
+                  eventTemplate.querySelector('[data-calendar="tenant_name"]').textContent = event.display_name;
                   eventTemplate.querySelector('[data-calendar="property_name"]').textContent = event.street;
                   eventTemplate.querySelector('[data-calendar="unit_name"]').textContent = event.unit_name;
 
