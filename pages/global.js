@@ -328,7 +328,7 @@ success: function (response) {
     // Loop through each landlord in the response
     $.each(response.landlords, function (index, landlord) {
         // Create the option text
-        var optionText = landlord.first_name + " " + landlord.last_name;
+        var optionText = landlord.display_name;
 
         // Append the new option to the select field
         $('[select-field=landlords]').append(
@@ -357,7 +357,7 @@ success: function (response) {
     // Loop through each landlord in the response
     $.each(response.employees, function (index, employee) {
         // Create the option text
-        var optionText = employee.first_name + " " + employee.last_name;
+        var optionText = employee.display_name;
 
         // Append the new option to the select field
         $('[select-field=employees]').append(
