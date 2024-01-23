@@ -122,7 +122,7 @@ function updateTable(data) {
         <td>${displayMonth} ${displayYear}</td>
         <td></td>
         <td></td>
-        <td>${displayMonth} ${displayYear} Balance</td>
+        <td>${displayMonth} Balance</td>
         <td></td>
         <td></td>
         <td>${formatCurrency(balance)}</td>
@@ -149,9 +149,9 @@ function updateTable(data) {
         <td>${formatDate(item.transaction_date)}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description}</td>
-        <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
-        <td>${item.type !== "charge" ? formatCurrency(-item.amount) : ""}</td>
-        <td>${formatCurrency(runningBalance)}</td>
+        <td>${item.type === "charge" ? `$${item.amount.toFixed(2)}` : ""}</td>
+        <td>${item.type !== "charge" ? `$${(-item.amount).toFixed(2)}` : ""}</td>
+        <td>$${runningBalance.toFixed(2)}</td>
       </tr>
     `;
     $(".styled-table tbody").append(newRow);
