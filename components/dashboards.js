@@ -168,9 +168,7 @@ function loadUnitAndTenantData(unit) {
           );
         }
         $("[data-unit='tenant_name']").text(
-          response.active_tenant_info.user_info.first_name +
-            " " +
-            response.active_tenant_info.user_info.last_name,
+          response.active_tenant_info.user_info.display_name
         );
         $("[data-unit='tenant_company']").text(
           response.active_tenant_info.user_info.company,
@@ -259,7 +257,7 @@ function loadPropertyUsers() {
 
         dynItem
           .find("[data-unit-user='name']")
-          .text(user.first_name + " " + user.last_name); // bind name
+          .text(user.display_name); // bind name
 
         // bind company name
         if (user.company_name) {
