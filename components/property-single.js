@@ -110,9 +110,7 @@ function loadProperty(property_id) {
       $("[data-property=street]").text(response.street);
       $("[data-api-input=commission]").val(response.default_commission);
       $("[data-property=default_landlord]").text(
-        response.default_landlord_info.first_name +
-          " " +
-          response.default_landlord_info.last_name,
+        response.default_landlord_info.display_name
       );
       $("[data-property=bank_last_4]").text(
         response.default_landlord_info.stripe_bank_last_4,
@@ -126,9 +124,8 @@ function loadProperty(property_id) {
       const newOption = $("<option>", {
         value: "no-update", // Set the value for the new option
         text:
-          response.default_landlord_info.first_name +
+          response.default_landlord_info.display_name +
           " " +
-          response.default_landlord_info.last_name +
           " : " +
           response.default_landlord_info.stripe_bank_last_4 +
           "  (Dafult Bank Account For Property)", // Set the text for the new option
@@ -463,7 +460,7 @@ function managePropertyUsers(injectContainer, userType) {
           }
           userItem
             .find("[data-property-user='name']")
-            .text(user.first_name + " " + user.last_name);
+            .text(user.display_name);
           userItem
             .find("[data-property-user='user_role']")
             .text(user.user_role);
