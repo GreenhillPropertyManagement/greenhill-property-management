@@ -104,8 +104,8 @@ function updateTable(data) {
   let previousYear = null;
 
   function formatCurrency(amount) {
-    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  }
+  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
 
   // Function to add end-of-month balance row
   function addEndOfMonthRow(month, year, balance) {
@@ -122,10 +122,10 @@ function updateTable(data) {
         <td>${displayMonth} ${displayYear}</td>
         <td></td>
         <td></td>
-        <td>${displayMonth} Balance</td>
+        <td>${displayMonth} ${displayYear} Balance</td>
         <td></td>
         <td></td>
-        <td>${formatCurrency(balance)}</td>
+        <td>$${balance.toFixed(2)}</td>
       </tr>
     `;
     $(".styled-table tbody").append(endOfMonthRow);
