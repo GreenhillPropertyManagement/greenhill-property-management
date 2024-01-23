@@ -103,6 +103,10 @@ function updateTable(data) {
   let previousMonth = null;
   let previousYear = null;
 
+  function formatCurrency(amount) {
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
   // Function to add end-of-month balance row
   function addEndOfMonthRow(month, year, balance) {
     const monthNames = [
@@ -121,7 +125,7 @@ function updateTable(data) {
         <td>${displayMonth} ${displayYear} Balance</td>
         <td></td>
         <td></td>
-        <td>$${balance.toFixed(2)}</td>
+        <td>${formatCurrency(balance)}</td>
       </tr>
     `;
     $(".styled-table tbody").append(endOfMonthRow);
@@ -145,9 +149,9 @@ function updateTable(data) {
         <td>${formatDate(item.transaction_date)}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description}</td>
-        <td>${item.type === "charge" ? `$${item.amount.toFixed(2)}` : ""}</td>
-        <td>${item.type !== "charge" ? `$${(-item.amount).toFixed(2)}` : ""}</td>
-        <td>$${runningBalance.toFixed(2)}</td>
+        <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
+        <td>${item.type !== "charge" ? formatCurrency(-item.amount) : ""}</td>
+        <td>${formatCurrency(runningBalance)}</td>
       </tr>
     `;
     $(".styled-table tbody").append(newRow);
