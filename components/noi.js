@@ -97,7 +97,8 @@ function processTransactions(transactions) {
       monthlyData[month] = { payments: 0, expenses: 0 };
     }
 
-    let amount = Number(transaction.amount); // Ensure amount is a number
+    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+
 
     if (
       transaction.recipient_type === "tenant" &&
