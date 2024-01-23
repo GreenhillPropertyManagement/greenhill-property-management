@@ -118,7 +118,7 @@ function updateTable(data) {
         <td>${displayMonth} ${displayYear}</td>
         <td></td>
         <td></td>
-        <td>End of ${displayMonth} ${displayYear} Balance</td>
+        <td>${displayMonth} ${displayYear} Balance</td>
         <td></td>
         <td></td>
         <td>$${balance.toFixed(2)}</td>
