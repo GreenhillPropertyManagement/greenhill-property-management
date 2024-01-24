@@ -196,9 +196,14 @@ function loadProperty(property_id) {
             unitItem
               .find("[data-property='unit_monthly_rent']")
               .text("$" + formattedRent);
+
+            let formattedBalance = Number(unit.active_tenant_info.balance).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
             unitItem
               .find("[data-property='unit_balance']")
-              .text("$" + unit.active_tenant_info.balance);
+              .text("$" + formattedBalance);
             unitItem
               .find("[data-property='unit_next_charges']")
               .text("$" + unit.active_tenant_info.next_month_payment);
