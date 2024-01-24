@@ -76,121 +76,120 @@ function initializeApp() {
         console.log("Failed to log error");
         }
         });
-    });
+  });
 
 
-    /* ---  log out func ---- */
-    $(".logout_button").on("click", function () {
-      // Clear all local storage
-      localStorage.clear();
+  /* ---  log out func ---- */
+  $(".logout_button").on("click", function () {
+    // Clear all local storage
+    localStorage.clear();
 
-      // Redirect user to /app/login
-      window.location.href = "/app/login";
-    });
+    // Redirect user to /app/login
+    window.location.href = "/app/login";
+  });
 
-    loadCurrentPage();
-    urlRouting();
-    userRoleInterface();
-    loadUsersInFormSelectFields();
+  loadCurrentPage();
+  urlRouting();
+  userRoleInterface();
+  loadUsersInFormSelectFields();
 
 
 
-    /* ---- Modal Functionality ----- */
+  /* ---- Modal Functionality ----- */
 
-    $(document).on('click', '[element="modal"]', function() {
-      // Show the .modal_block element and hide its children
-      $('.modal__block').show().children().hide();
-      
-      // Read the modal attribute value from the clicked element
-      var modalValue = $(this).attr('modal');
+  $(document).on('click', '[element="modal"]', function() {
+    // Show the .modal_block element and hide its children
+    $('.modal__block').show().children().hide();
     
-      // Show the modal with the corresponding ID
-      $('#' + modalValue).show();
-    });
+    // Read the modal attribute value from the clicked element
+    var modalValue = $(this).attr('modal');
+  
+    // Show the modal with the corresponding ID
+    $('#' + modalValue).show();
+  });
 
 
-    // close modal functionality
-    $('.inverse-cta-bttn').on('click', function() {
+  // close modal functionality
+  $('.inverse-cta-bttn').on('click', function() {
 
-      $('.modal__block').css('display', 'none');      // Hide .modal__block
-      $('.modal__block').children().hide();           // Hide all children of .modal__block
-    });
+    $('.modal__block').css('display', 'none');      // Hide .modal__block
+    $('.modal__block').children().hide();           // Hide all children of .modal__block
+  });
 
 
-    /* ----------- Mobile Nav Buttons Menu Drawer ------ */
+  /* ----------- Mobile Nav Buttons Menu Drawer ------ */
 
-    $('#nav-create-user').click(function(){
-      $('#nav-menu-button').click();
-      setTimeout(function() {
-        $('#create-user').click();
-    }, 500); 
+  $('#nav-create-user').click(function(){
+    $('#nav-menu-button').click();
+    setTimeout(function() {
+      $('#create-user').click();
+  }, 500); 
 
-    });
+  });
 
-    $('#nav-profile-settings').click(function(){
-      $('#nav-menu-button').click();
-      setTimeout(function() {
-        $('#profile-settings').click();
-    }, 500); 
+  $('#nav-profile-settings').click(function(){
+    $('#nav-menu-button').click();
+    setTimeout(function() {
+      $('#profile-settings').click();
+  }, 500); 
 
-    });
+  });
 
-    $('#nav-documents').click(function(){
-      $('#nav-menu-button').click();
-      setTimeout(function() {
-        $('#documents').click();
-    }, 500); 
+  $('#nav-documents').click(function(){
+    $('#nav-menu-button').click();
+    setTimeout(function() {
+      $('#documents').click();
+  }, 500); 
 
-    });
+  });
 
-    $('#nav-calendar').click(function(){
-      $('#nav-menu-button').click();
-      setTimeout(function() {
-        $('#calendar').click();
-    }, 500); 
+  $('#nav-calendar').click(function(){
+    $('#nav-menu-button').click();
+    setTimeout(function() {
+      $('#calendar').click();
+  }, 500); 
+  }); 
+  
+  /* -------- Element Dynamic Visibility ------- */
 
-    
-    /* -------- Element Dynamic Visibility ------- */
+  if (localStorage.userRole === 'Admin') {
+    $('[dynamic-visibility=admin-hidden]').remove();
+  }
 
-    if (localStorage.userRole === 'Admin') {
-      $('[dynamic-visibility=admin-hidden]').remove();
-    }
+  if (localStorage.userRole === 'Employee') {
+    $('[dynamic-visibility=employee-hidden]').remove();
+  }
 
-    if (localStorage.userRole === 'Employee') {
-      $('[dynamic-visibility=employee-hidden]').remove();
-    }
+  if (localStorage.userRole === 'Landlord') {
+    $('[dynamic-visibility=landlord-hidden]').remove();
+  }
 
-    if (localStorage.userRole === 'Landlord') {
-      $('[dynamic-visibility=landlord-hidden]').remove();
-    }
+  if (localStorage.userRole === 'Tenant') {
+    $('[dynamic-visibility=tenant-hidden]').remove();
+  }
 
-    if (localStorage.userRole === 'Tenant') {
-      $('[dynamic-visibility=tenant-hidden]').remove();
-    }
+  if (localStorage.userRole === 'Employee' || localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
+    $('[dynamic-visibility=admin-only]').remove();
+  }
 
-    if (localStorage.userRole === 'Employee' || localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
-      $('[dynamic-visibility=admin-only]').remove();
-    }
+  if (localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
+    $('[dynamic-visibility=users-only]').remove();
+    $('[dynamic-visibility-2=true]').remove(); // remove update work order form button
 
-    if (localStorage.userRole === 'Landlord'|| localStorage.userRole === 'Tenant') {
-      $('[dynamic-visibility=users-only]').remove();
-      $('[dynamic-visibility-2=true]').remove(); // remove update work order form button
+  }
 
-    }
+  if (localStorage.editPermissions === 'false') {
+    $('#edit-property-button').remove();
+  } else {
+    $('#edit-property-button').show();
+  }
 
-    if (localStorage.editPermissions === 'false') {
-      $('#edit-property-button').remove();
-    } else {
-      $('#edit-property-button').show();
-    }
-
-    // hide modal on back button 
-    $(window).on('popstate', function() {
-    $('.modal__block').hide();
-    });
+  // hide modal on back button 
+  $(window).on('popstate', function() {
+  $('.modal__block').hide();
+  });
       
-
-
+}
 /* Utlity Functions */
 
 function authUser() {
