@@ -135,9 +135,10 @@ function loadUnitAndTenantData(unit) {
         $("[data-unit='move_out_date']").text(
           formatDateNoTime(response.active_tenant_info.move_out_date),
         );
-        $("[data-unit='monthly_rent']").text(
-          "$" + response.active_tenant_info.monthly_rent,
-        );
+        $("[data-unit='monthly_rent']").text('$' + Number(response.active_tenant_info.monthly_rent).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
         $("[data-unit='yearly_term']").text(
           formatDateNoTime(response.active_tenant_info.yearly_term),
         );
@@ -147,9 +148,10 @@ function loadUnitAndTenantData(unit) {
         $("[data-unit='renewal_notice_deadline']").text(
           formatDateNoTime(response.active_tenant_info.renewal_notice_deadline),
         );
-        $("[data-unit='security_deposit']").text(
-          "$" + response.active_tenant_info.security_deposit,
-        );
+        $("[data-unit='security_deposit']").text('$' + Number(response.active_tenant_info.security_deposit).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
   
         // populate balances card
         $("[data-tenant='current-balance']").text('$' + Number(response.active_tenant_info.balance).toLocaleString("en-US", {
