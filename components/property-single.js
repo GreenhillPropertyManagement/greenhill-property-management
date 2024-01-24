@@ -188,9 +188,14 @@ function loadProperty(property_id) {
               .text(
                 unit.active_tenant_info.user_info.display_name
               );
+            let formattedRent = Number(unit.active_tenant_info.monthly_rent).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
+            
             unitItem
               .find("[data-property='unit_monthly_rent']")
-              .text("$" + unit.active_tenant_info.monthly_rent);
+              .text("$" + formattedRent);
             unitItem
               .find("[data-property='unit_balance']")
               .text("$" + unit.active_tenant_info.balance);
