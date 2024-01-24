@@ -187,10 +187,9 @@ function initializeApp() {
     // hide modal on back button 
     $(window).on('popstate', function() {
     $('.modal__block').hide();
-});
+    });
       
-  
-}
+
 
 /* Utlity Functions */
 
