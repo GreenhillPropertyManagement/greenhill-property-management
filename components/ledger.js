@@ -232,8 +232,14 @@ function loadBalancesPaymentPage(user){
     },
     dataType: "json",
     success: function (response) {
-      $("[data-tenant='current-balance']").text('$' + response.balance.toLocaleString());
-      $("[data-tenant='next-month-balance']").text('$' + response.next_month_payment.toLocaleString());
+      $("[data-tenant='current-balance']").text('$' + Number(response.balance).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }));
+      $("[data-tenant='next-month-balance']").text('$' + Number(response.next_month_payment).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }));
     },
     complete: function () {
       $(".loader").hide();
