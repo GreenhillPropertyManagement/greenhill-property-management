@@ -304,8 +304,8 @@ function userRoleInterface () {
       $('#create-user').remove();
       $('#my-profile').remove();
       $('#pay-rent').remove();
-      $('.top-nav__menu').remove();
-      $('.top-nav__menu-drawer').remove();
+
+  
 
     } else if (userRole === 'Tenant') {
 
@@ -318,8 +318,8 @@ function userRoleInterface () {
       $('#unit').remove();
       $('#profile').remove();
       $('#legal').remove();
-      $('.top-nav__menu').remove();
-      $('.top-nav__menu-drawer').remove();
+
+  
       $('#calendar').remove();
       
       if (localStorage.paymentsEnabled === "false") {
