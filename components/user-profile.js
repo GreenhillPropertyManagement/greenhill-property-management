@@ -353,11 +353,17 @@ function loadUserProfile(user) {
           .text(response.tenant_info.yearly_rent_increase + "%")
           .val(response.tenant_info.yearly_rent_increase);
         $("[data-profile=security_deposit]")
-          .text("$" + response.tenant_info.security_deposit)
           .val(response.tenant_info.security_deposit);
+        $("[data-profile=security_deposit]").text('$' + Number(response.tenant_info.security_deposit).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
         $("[data-profile=monthly_rent]")
-          .text("$" + response.tenant_info.monthly_rent)
           .val(response.tenant_info.monthly_rent);
+        $("[data-profile=monthly_rent]").text('$' + Number(response.tenant_info.monthly_rent).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
         $("[data-profile=enable_payments]").prop("checked", response.tenant_info.enable_payments);
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
