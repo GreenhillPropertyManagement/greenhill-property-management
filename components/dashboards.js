@@ -152,8 +152,15 @@ function loadUnitAndTenantData(unit) {
         );
   
         // populate balances card
-        $("[data-tenant='current-balance']").text('$' + response.active_tenant_info.balance.toLocaleString());
-        $("[data-tenant='next_month_charges']").text('$' + response.active_tenant_info.next_month_payment.toLocaleString());
+        $("[data-tenant='current-balance']").text('$' + Number(response.active_tenant_info.balance).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
+      
+        $("[data-tenant='next_month_charges']").text('$' + Number(response.active_tenant_info.next_month_payment).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
   
         /* Insurance Doc */
         $('[data-unit="insurance_doc"]').click(function () {
