@@ -120,20 +120,34 @@ function initializeApp() {
     /* ----------- Mobile Nav Buttons Menu Drawer ------ */
 
     $('#nav-create-user').click(function(){
-      $('#create-user').click();
+      $('#nav-menu-button').click();
+      setTimeout(function() {
+        $('#create-user').click();
+    }, 500); 
+
     });
 
     $('#nav-profile-settings').click(function(){
-      $('#profile-settings').click();
+      $('#nav-menu-button').click();
+      setTimeout(function() {
+        $('#profile-settings').click();
+    }, 500); 
+
     });
 
     $('#nav-documents').click(function(){
-      $('#documents').click();
+      $('#nav-menu-button').click();
+      setTimeout(function() {
+        $('#documents').click();
+    }, 500); 
+
     });
 
     $('#nav-calendar').click(function(){
-      $('#calendar').click();
-    });
+      $('#nav-menu-button').click();
+      setTimeout(function() {
+        $('#calendar').click();
+    }, 500); 
 
     
     /* -------- Element Dynamic Visibility ------- */
