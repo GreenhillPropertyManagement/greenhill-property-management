@@ -116,6 +116,25 @@ function initializeApp() {
       $('.modal__block').children().hide();           // Hide all children of .modal__block
     });
 
+
+    /* ----------- Mobile Nav Buttons Menu Drawer ------ */
+
+    $('#nav-create-user').click(function(){
+      $('#create-user').click();
+    });
+
+    $('#nav-profile-settings').click(function(){
+      $('#profile-settings').click();
+    });
+
+    $('#nav-documents').click(function(){
+      $('#documents').click();
+    });
+
+    $('#nav-calendar').click(function(){
+      $('#calendar').click();
+    });
+
     
     /* -------- Element Dynamic Visibility ------- */
 
