@@ -7,6 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
     $('.chat__messages-wrapper').hide();
   });
 
+  // ---- (mobile only) open convo func
+  $('.dyn-item__chat-convo-item').click(function(){
+    $('.chat__messages-wrapper').show();
+  });
+
   // ---- Communication Tab button clicked
   $("#communications")
     .off("click")
