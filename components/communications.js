@@ -153,6 +153,9 @@ function loadConvos(targetUser, type) {
 
           /* click handler for Peer to Peer convos to load convo messages */
           convoItem.click(function () {
+            
+            $('.chat__messages-wrapper').show();
+
             let convoSid = $(this).attr("id"); // get the convo SID from the element's ID
             localStorage.setItem("activeConvo", convoSid); // set the clicked convo as the active convo in local storage
 
@@ -222,6 +225,8 @@ function loadConvos(targetUser, type) {
 
           /* Click Handler for Broadcast Convo Types */
           convoItem.click(function () {
+
+            $('.chat__messages-wrapper').show();
             let convoSid = $(this).attr("id"); // get the convo SID from the element's ID
             localStorage.setItem("activeConvo", convoSid); // set the clicked convo as the active convo in local storage
 
@@ -254,14 +259,9 @@ function loadConvos(targetUser, type) {
     },
     complete: function () {
       $(".loader").hide();
-      // ---- (mobile only) back button for convos
+        // ---- (mobile only) back button for convos
       $('.back-convo-button').click(function(){
         $('.chat__messages-wrapper').hide();
-      });
-
-      // ---- (mobile only) open convo func
-      $('.dyn-item__chat-convo-item').click(function(){
-        $('.chat__messages-wrapper').show();
       });
     },
     error: function (error) {},
