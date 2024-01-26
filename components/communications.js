@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", function () {
   createNewConvo(); // functinon to create new convo on form submit
   sendMessage();
 
+  // ---- (mobile only) back button for convos
+  $('.back-convo-button').click(function(){
+    $('.chat__messages-wrapper').hide();
+  });
+
   // ---- Communication Tab button clicked
   $("#communications")
     .off("click")
