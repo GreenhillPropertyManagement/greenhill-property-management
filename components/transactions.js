@@ -765,7 +765,7 @@ function tenantMakesPayment(amount) {
     success: function (response) {
       $(".modal__block").hide();
       alert(
-        "Success! Payment Initiated. (Payments can take up to 3 business days to clear)",
+        "Success! Payment Initiated. (Payments can take up to 3-6 business days to clear)",
       );
     },
     complete: function () {
