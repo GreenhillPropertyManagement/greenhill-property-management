@@ -557,7 +557,7 @@ function loadActiveTenants(user) {
 function editUnit(unit) {
 
   // Form Submission API Call
-$("#edit-unit-form").submit(function (event) {
+  $("#edit-unit-form").off("submit").on("submit", function (event) {
   // Prevent the default form submission behavior
   event.preventDefault();
 
