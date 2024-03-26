@@ -413,7 +413,7 @@ function updateProfilePic() {
 
   /* ------------ Upload Profile Pic Functionality ------------ */
 
-  const widget = uploadcare.Widget("my-profile-pic", {
+  const widget = uploadcare.Widget("#my-profile-pic", {
     crop: "1:1",
     imagesOnly: true,
     imageShrink: "1000x1000",
