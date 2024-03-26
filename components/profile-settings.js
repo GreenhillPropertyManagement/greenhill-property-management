@@ -409,23 +409,23 @@ function updateBankInfo() {
 
 }
 
-function updateProfilePic () {
+function updateProfilePic() {
 
   /* ------------ Upload Profile Pic Functionality ------------ */
 
-
-  const widget = uploadcare.Widget('[role=uploadcare-uploader]');
+  const widget = uploadcare.Widget('[role=uploadcare-uploader]', {
+    effects: 'crop', // Enable the crop effect
+    crop: '1:1',     // Set the aspect ratio to 1:1 for a square crop
+  });
 
   $('.user-img').click(function() {
-    widget.openDialog(null, {
-        crop: '1:1', // Set the aspect ratio to 1:1 for a square crop
-    });
-      $('.loader').css('display','flex');
+      widget.openDialog();
+      $('.loader').css('display', 'flex');
   });
 
   widget.onUploadComplete(function(info) {
 
-      $('.loader').css('display','flex');
+      $('.loader').css('display', 'flex');
       // Get the URL of the uploaded image
       const imageUrl = info.cdnUrl;
 
@@ -434,7 +434,7 @@ function updateProfilePic () {
           url: localStorage.baseUrl + "api:sElUkr6t/edit_user",
           type: "POST",
           headers: {
-            'Authorization': "Bearer " + localStorage.authToken
+              'Authorization': "Bearer " + localStorage.authToken
           },
           data: {
               user_id: localStorage.userRecId,
@@ -442,16 +442,14 @@ function updateProfilePic () {
           },
           success: function(response) {
 
+              profileSettingsLoad();
 
-            profileSettingsLoad();
-            
-              
           },
           error: function(error) {
-              
+
           }
-        });
-    });
+      });
+  });
 
 }
 
