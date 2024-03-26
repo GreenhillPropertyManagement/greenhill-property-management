@@ -413,9 +413,10 @@ function updateProfilePic() {
 
   /* ------------ Upload Profile Pic Functionality ------------ */
 
-  const widget = uploadcare.Widget('[role=uploadcare-uploader]', {
-    effects: 'crop', // Enable the crop effect
-    crop: '1:1',     // Set the aspect ratio to 1:1 for a square crop
+  const widget = uploadcare.Widget("my-profile-pic", {
+    crop: "1:1",
+    imagesOnly: true,
+    imageShrink: "1000x1000",
   });
 
   widget.onDialogOpen(() => {
