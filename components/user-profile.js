@@ -477,7 +477,7 @@ function loadUserProfile(user) {
       if (apiResponse.user_role === "Tenant") {
         dashActivityLog("user", apiResponse.user_id);
 
-        if (response.tenant_info.unit_info.active_tenant === 0){
+        if (apiResponse.tenant_info.unit_info.active_tenant === 0){
           localStorage.setItem('unitEmpty','true');
         } else {
           localStorage.setItem('unitEmpty','false');
