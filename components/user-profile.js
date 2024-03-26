@@ -364,7 +364,11 @@ function loadUserProfile(user) {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         }));
-        $("[data-profile=auto_pay]").text(response.tenant_info.enable_autopay);
+        if (response.tenant_info.enable_autopay === true) {
+          $("[data-profile=auto_pay]").text("Yes");
+        } else {
+          $("[data-profile=auto_pay]").text("No");
+        }
         $("[data-profile=enable_payments]").prop("checked", response.tenant_info.enable_payments);
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
