@@ -410,48 +410,50 @@ function updateBankInfo() {
 }
 
 function updateProfilePic() {
+
+  /* ------------ Upload Profile Pic Functionality ------------ */
+
   const widget = uploadcare.Widget('[role=uploadcare-uploader]', {
-      crop: '1:1',
+    effects: 'crop', // Enable the crop effect
+    crop: '1:1',     // Set the aspect ratio to 1:1 for a square crop
   });
 
-  $('[data-profile-img-swap]').click(function() {
-      const wrapperElement = $(this);
-      const imageElement = wrapperElement.find('.user-img');
-      widget.value(null); // Clear any previous value
-      widget.onChange(function(file) {
-          if (file) {
-              // When a file is selected, update the preview with the crop applied
-              widget.value(file).cdnUrlTransform('crop', '1:1').done(function(croppedFile) {
-                  imageElement.attr('src', croppedFile.cdnUrl);
-              });
-          }
-      });
-      widget.openDialog();
-      $('.loader').css('display', 'flex');
+  widget.onDialogOpen(() => {
+    // Set the preview step to crop
+    widget.config.previewStep = 'crop';
+  });
+
+  $('.user-img').click(function() {
+    widget.openDialog();
+    $('.loader').css('display', 'flex');
   });
 
   widget.onUploadComplete(function(info) {
-      $('.loader').css('display', 'flex');
-      const imageUrl = info.cdnUrl;
 
-      $.ajax({
-          url: localStorage.baseUrl + "api:sElUkr6t/edit_user",
-          type: "POST",
-          headers: {
-              'Authorization': "Bearer " + localStorage.authToken
-          },
-          data: {
-              user_id: localStorage.userRecId,
-              profile_img: imageUrl
-          },
-          success: function(response) {
-              profileSettingsLoad();
-          },
-          error: function(error) {
+    $('.loader').css('display', 'flex');
+    // Get the URL of the uploaded image
+    const imageUrl = info.cdnUrl;
 
-          }
-      });
+    // Make the API call to save the image URL
+    $.ajax({
+      url: localStorage.baseUrl + "api:sElUkr6t/edit_user",
+      type: "POST",
+      headers: {
+        'Authorization': "Bearer " + localStorage.authToken
+      },
+      data: {
+        user_id: localStorage.userRecId,
+        profile_img: imageUrl
+      },
+      success: function(response) {
+        profileSettingsLoad();
+      },
+      error: function(error) {
+
+      }
+    });
   });
+
 }
 
 
