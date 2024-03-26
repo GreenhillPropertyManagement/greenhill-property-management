@@ -418,40 +418,44 @@ function updateProfilePic() {
     crop: '1:1',     // Set the aspect ratio to 1:1 for a square crop
   });
 
+  widget.onDialogOpen(() => {
+    // Set the preview step to crop
+    widget.config.previewStep = 'crop';
+  });
+
   $('.user-img').click(function() {
-      widget.openDialog();
-      $('.loader').css('display', 'flex');
+    widget.openDialog();
+    $('.loader').css('display', 'flex');
   });
 
   widget.onUploadComplete(function(info) {
 
-      $('.loader').css('display', 'flex');
-      // Get the URL of the uploaded image
-      const imageUrl = info.cdnUrl;
+    $('.loader').css('display', 'flex');
+    // Get the URL of the uploaded image
+    const imageUrl = info.cdnUrl;
 
-      // Make the API call to save the image URL
-      $.ajax({
-          url: localStorage.baseUrl + "api:sElUkr6t/edit_user",
-          type: "POST",
-          headers: {
-              'Authorization': "Bearer " + localStorage.authToken
-          },
-          data: {
-              user_id: localStorage.userRecId,
-              profile_img: imageUrl
-          },
-          success: function(response) {
+    // Make the API call to save the image URL
+    $.ajax({
+      url: localStorage.baseUrl + "api:sElUkr6t/edit_user",
+      type: "POST",
+      headers: {
+        'Authorization': "Bearer " + localStorage.authToken
+      },
+      data: {
+        user_id: localStorage.userRecId,
+        profile_img: imageUrl
+      },
+      success: function(response) {
+        profileSettingsLoad();
+      },
+      error: function(error) {
 
-              profileSettingsLoad();
-
-          },
-          error: function(error) {
-
-          }
-      });
+      }
+    });
   });
 
 }
+
 
 function updateNotificationsPref () {
 
