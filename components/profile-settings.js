@@ -417,7 +417,9 @@ function updateProfilePic () {
   const widget = uploadcare.Widget('[role=uploadcare-uploader]');
 
   $('.user-img').click(function() {
-      widget.openDialog();
+    widget.openDialog(null, {
+        crop: '1:1', // Set the aspect ratio to 1:1 for a square crop
+    });
       $('.loader').css('display','flex');
   });
 
