@@ -364,6 +364,7 @@ function loadUserProfile(user) {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         }));
+        $("[data-profile=auto_pay]").text(response.tenant_info.enable_autopay);
         $("[data-profile=enable_payments]").prop("checked", response.tenant_info.enable_payments);
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
@@ -476,7 +477,7 @@ function loadUserProfile(user) {
 
       if (apiResponse.user_role === "Tenant") {
         dashActivityLog("user", apiResponse.user_id);
-        
+
         // unit occupancy check for clicking on the unit card on user profile page
         if (apiResponse.tenant_info.unit_info.active_tenant === 0){
           localStorage.setItem('unitEmpty','true');
