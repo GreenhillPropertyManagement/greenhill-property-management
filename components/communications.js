@@ -11,19 +11,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   // ---- Communication Button Clicked on Users Profile Page
-  $("[api-button=user-convos]").on("click", function () {
+  $("[api-button=user-convos]").off("click").on("click", function () {
     loadConvos(localStorage.pageRefreshParam, "user");
     localStorage.removeItem("activeConvo");
   });
 
   // ---- Communication Button Clicked on Unit Page (Get Tenant Convos)
-  $("[api-button=tenant-convos]").on("click", function () {
+  $("[api-button=tenant-convos]").off("click").on("click", function () {
     loadConvos(localStorage.activeTenantUserUuid, "user");
     localStorage.removeItem("activeConvo");
   });
 
   // New convo button clicked
-  $("[modal=new-convo]").on("click", function () {
+  $("[modal=new-convo]").off("click").on("click", function () {
     // if on profile page...
     if (localStorage.pageId === "profile") {
       loadRecipients(localStorage.pageRefreshParam); // load the contact info of the user's profile
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete Convo Button Clicked
-  $("[element=delete-convo-button]").on("click", function () {
+  $("[element=delete-convo-button]").off("click").on("click", function () {
     deleteConvo();
   });
 
@@ -565,8 +565,9 @@ function createNewConvo() {
             /* Reset the Uploadcare widget */
             var widget = uploadcare.Widget("#convo-media");
             widget.value(null);
-
+            $("[api-button=user-convos]").click();
             $(".loader").hide();
+
           },
           error: function (error) {
             // Handle the error here
