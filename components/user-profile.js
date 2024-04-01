@@ -369,6 +369,12 @@ function loadUserProfile(user) {
         } else {
           $("[data-profile=auto_pay]").text("No");
         }
+        // bank verified check
+        if (response.tenant_info.bank_last_4 == null) {
+          $("[data-profile=bank_verified]").text('NO');
+        } else{
+          $("[data-profile=bank_verified]").text('YES');
+        }
         $("[data-profile=enable_payments]").prop("checked", response.tenant_info.enable_payments);
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
