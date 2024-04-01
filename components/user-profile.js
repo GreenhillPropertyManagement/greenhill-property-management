@@ -375,6 +375,11 @@ function loadUserProfile(user) {
         } else{
           $("[data-profile=bank_verified]").text('YES');
         }
+        if (response.user_role == 'Tenant'){
+          $('#bank-verified').show();
+        }else {
+          $('#bank-verified').hide();
+        }
         $("[data-profile=enable_payments]").prop("checked", response.tenant_info.enable_payments);
         $("[data-profile=auto_pay_date]")
           .text(response.tenant_info.auto_pay_date)
