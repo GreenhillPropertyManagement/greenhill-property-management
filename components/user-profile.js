@@ -371,9 +371,9 @@ function loadUserProfile(user) {
         }
         // bank verified check
         if (response.tenant_info.bank_last_4 == null) {
-          $("[data-profile=bank_verified]").text('NO');
+          $("[data-profile=bank_verified]").text('No');
         } else{
-          $("[data-profile=bank_verified]").text('YES');
+          $("[data-profile=bank_verified]").text('Yes');
         }
         if (response.user_role == 'Tenant'){
           $('#bank-verified').show();
