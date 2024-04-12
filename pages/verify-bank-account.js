@@ -73,6 +73,7 @@ function verifyBank() {
       success: function (response) {
         localStorage.setItem("pageId", "my-profile");
         window.location.href = "/app/home";
+        localStorage.setItem('bankStatus','verified');
       },
       error: function (error) {
         $(".form__error-block").show(); // show error
