@@ -57,6 +57,13 @@ $("#login-form").submit(function (event) {
       } else {
         localStorage.setItem("editPermissions", 'true');
       }
+
+      // show verification banner if tenant updated bank account
+      if (response.user_info.tenant_info.bank_account_status === "pending") {
+        $('.verify-bank-banner').css('display','flex');
+      } else {
+        $('.verify-bank-banner').css('display','none');
+      }
          
 
       // if user access is revoked
