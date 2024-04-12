@@ -78,6 +78,15 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#my-profile").on("click", function () {
     $(".loader").css("display", "flex");
     loadUserProfile(localStorage.userId);
+
+    // show bank verification banner if they changed bank accts and not yet verified 
+    var bankStatus = localStorage.getItem('bankStatus');
+    if (bankStatus === 'update-pending'){
+      $('.verify-bank-banner').css('display','flex');
+    } else {
+      $('.verify-bank-banner').css('display','none');
+    }
+    
   });
 
   // Update Contact Info Form
