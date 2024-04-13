@@ -83,10 +83,10 @@ function confirmTenant(){
         // check if they have payments enabled and update the onboarding form accordingly....
 
         if (response.tenant_info.enable_payments == false) {
-          $('#banking-form-block').remove();
-          $('#auto-pay').remove();
-          $('#form-payment-disclaimer').remove();
-          $('.sign-up__form-submit-btn-wrapper').removeClass('inactive');
+          $('#banking-form-block').remove(); // remove the banking block
+          $('#auto-pay').remove(); // remove the auto pay switch
+          $('#form-payment-disclaimer').remove(); // remove the payment discalaimer
+          $('.sign-up__form-submit-btn-wrapper').removeClass('inactive'); // enable form button
         }
 
         // If payments ARE enabled, run the form validation...
