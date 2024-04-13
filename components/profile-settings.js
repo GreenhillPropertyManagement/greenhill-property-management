@@ -201,6 +201,16 @@ function profileSettingsLoad() {
 
       }
 
+      // Update UI For Tenants with Payments NOT Enabled...
+      if (response.user_role === 'Tenant' && response.tenant_info.enable_payments == false){
+
+        $('#alerts-block').remove(); // remove alerts configure block 
+        $('#profile-bank-block').remove(); // remove bank block
+
+      }
+
+
+
      
     },
     error: function (error) {
