@@ -87,6 +87,86 @@ function confirmTenant(){
           $('#auto-pay').remove();
           $('#form-payment-disclaimer').remove()
         }
+
+        // If payments ARE enabled, run the form validation...
+        if (response.tenant_info.enable_payments !== false) {
+          var form = document.getElementById("confirm-account-form-tenant");
+          var submitButton = form.querySelector(".sign-up__form-submit-btn");
+
+          form.addEventListener("submit", function(e) {
+
+              submitButton.value = "Please wait...";
+              submitButton.style.pointerEvents = "none";
+
+          });
+          const bankingFormBlock = document.querySelector('#banking-form-block');
+          const formButtonWrapper = document.querySelector('.sign-up__form-submit-btn-wrapper');
+          const companyNameDynamic = document.querySelector('#company_dynamic');
+          const accountHolderTypeDropdown = document.querySelector('#account_holder_type');
+
+          // Hide the companyNameDynamic by default
+          companyNameDynamic.style.display = 'none';
+
+          function checkInputs() {
+              let allFilled = true;
+              const inputs = bankingFormBlock.querySelectorAll('input, select');
+
+              inputs.forEach(input => {
+                  if ((input.tagName.toLowerCase() === 'select' && input.value === '') ||
+                      (input.tagName.toLowerCase() === 'input' && input.value.trim() === '' && input !== companyNameDynamic.querySelector('input'))) {
+                      allFilled = false;
+                  }
+              });
+
+              if (accountHolderTypeDropdown.value === 'company' && companyNameDynamic.querySelector('input').value.trim() === '') {
+                  allFilled = false;
+              }
+
+              if (allFilled) {
+                  formButtonWrapper.classList.remove('inactive');
+              } else {
+                  formButtonWrapper.classList.add('inactive');
+              }
+          }
+
+          function handleDropdownChange() {
+              if (accountHolderTypeDropdown.value === 'company') {
+                  companyNameDynamic.style.display = 'block'; // Show the company_name field
+              } else {
+                  companyNameDynamic.style.display = 'none'; // Hide the company_name field
+              }
+              checkInputs();
+          }
+
+          // Add event listeners to all input fields
+          bankingFormBlock.querySelectorAll('input, select').forEach(input => {
+              input.addEventListener('input', checkInputs);
+          });
+
+          // Add the event listener to the account holder type dropdown
+          accountHolderTypeDropdown.addEventListener('change', handleDropdownChange);
+
+          // Toggle visibility for enable_autopay checkbox
+          document.querySelector('#enable_autopay').addEventListener('change', function() {
+              let autoPayWrapper = document.querySelector('.auto-pay-disc__wrapper');
+              if (this.checked) {
+                  autoPayWrapper.style.display = 'block';
+              } else {
+                  autoPayWrapper.style.display = 'none';
+              }
+          });
+
+          // Hide auto-pay-disc__wrapper when #accept-autopay or #autopay-cancel is clicked
+          let hideButtons = ['#accept-autopay', '#autopay-cancel'];
+          hideButtons.forEach(selector => {
+              let button = document.querySelector(selector);
+              if (button) {
+                  button.addEventListener('click', function() {
+                      document.querySelector('.auto-pay-disc__wrapper').style.display = 'none';
+                  });
+              }
+          });
+      }
         
 
         // check if they have previously entered a bank account already, if so send them to verification page. 
