@@ -85,7 +85,7 @@ function confirmTenant(){
         if (response.tenant_info.enable_payments == false) {
           $('#banking-form-block').remove();
           $('#auto-pay').remove();
-          $('.system-text__small disclaimer').remove()
+          $('#form-payment-disclaimer').remove()
         }
         
 
