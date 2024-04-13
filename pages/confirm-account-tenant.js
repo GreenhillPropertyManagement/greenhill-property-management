@@ -80,6 +80,13 @@ function confirmTenant(){
         localStorage.setItem("userRecId", response.id); // add user record ID
         localStorage.setItem("tenantRecId", response.tenant_info.id); // add user record ID
 
+        // check if they have previously entered a bank account already, if so send them to verification page. 
+        // this check is for if they go back to this page for a second time after already entering their initial bank account
+        // we do this to avoid double entry bank accounts before a verification
+        if (response.tenant_info.stripe_bank_id !== null) {
+          window.location.href = "/tenant/verify-bank-account";
+        }
+
         // Hide Loader
         $(".loader").css("display", "none"); // hide loader
       },
