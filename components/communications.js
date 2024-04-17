@@ -734,6 +734,10 @@ function deleteConvo() {
     },
     success: function (response) {
       alert("Success! Conversation Deleted");
+      var page = localStorage.getItem('pageId');
+      if (page == "unit"){
+        $("[api-button=tenant-convos]").click();
+      }
       $(".loader").hide();
     },
     complete: function () {
