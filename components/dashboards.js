@@ -14,11 +14,16 @@ document.addEventListener("DOMContentLoaded", function () {
       loadUnitAndTenantData(unitId); // load unit
       editUnit(unitId);
 
-      $("#archive-unit").on("click", function () {
+      $("#archive-unit").on("click", function() {
         archiveUnit(unitId);
       });
       
     }, 100);
+
+    $("#unit-overview-bttn").on("click",function() {
+      loadUnitAndTenantData(unitId); // load unit
+    })
+
   });
 
   /* Landlord Dashboard */
