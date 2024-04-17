@@ -565,7 +565,7 @@ function createNewConvo() {
             /* Reset the Uploadcare widget */
             var widget = uploadcare.Widget("#convo-media");
             widget.value(null);
-            $("[api-button=user-convos]").click();
+            // REMOVE FOR TEST $("[api-button=user-convos]").click();
             $(".loader").hide();
 
           },
