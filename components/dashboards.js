@@ -16,10 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const urlParams = new URLSearchParams(window.location.search);
       unitId = urlParams.get("id");
-      loadUnitAndTenantData(unitId);
+      loadUnitAndTenantData(unitId)
       editUnit(unitId);
-        
-      });
+      
 
       $("#archive-unit").on("click", function() {
         archiveUnit(unitId);
