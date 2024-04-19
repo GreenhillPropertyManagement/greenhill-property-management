@@ -5,14 +5,15 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Unit Dashboard */
   $("#unit").on("click", function () {
     $(".loader").css("display", "flex"); // show loader
-    $("#unit-overview-bttn").click(); // defualt to overview tab
+    $("#unit-overview-bttn").click(); // default to overview tab
 
     setTimeout(() => {
 
       const urlParams = new URLSearchParams(window.location.search);
       unitId = urlParams.get("id");
-      loadUnitAndTenantData(unitId); // load unit
-      editUnit(unitId);
+      $.when(loadUnitAndTenantData(unitId)).then(function() {
+        editUnit(unitId);
+      });
 
       $("#archive-unit").on("click", function() {
         archiveUnit(unitId);
@@ -28,12 +29,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* Landlord Dashboard */
   $("#dashboard").on("click", function () {
-    $(".loader").css("display", "flex"); // show loaded
-    dashActivityLog("landlord-dashboard", localStorage.userId);
-    loadConvosInDashboard(localStorage.userId);
-    loadWorkOrders("assigned_user", localStorage.userRecId, "", "dashboard"); // load in workorders
-    loadPropertiesInDashboard(localStorage.userId);
-    loadActiveTenants(localStorage.userRecId);
+    $(".loader").css("display", "flex"); // show loader
+    $.when(
+      dashActivityLog("landlord-dashboard", localStorage.userId),
+      loadConvosInDashboard(localStorage.userId),
+      loadWorkOrders("assigned_user", localStorage.userRecId, "", "dashboard"),
+      loadPropertiesInDashboard(localStorage.userId),
+      loadActiveTenants(localStorage.userRecId)
+    ).then(function() {
+      $(".loader").hide(); // hide loader when all AJAX requests are complete
+    });
   });
 });
 
