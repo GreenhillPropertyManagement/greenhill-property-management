@@ -365,7 +365,7 @@ function dashActivityLog(type, user, property, unit) {
     },
     complete: function () {
    
-      $('.act-mon-loader').css("display","flex");
+      $('.act-mon-loader').css("display","none");
     },
     error: function (error) {},
   });
