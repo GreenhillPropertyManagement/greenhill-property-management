@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
       unitId = urlParams.get("id");
       $.when(loadUnitAndTenantData(unitId)).then(function() {
         editUnit(unitId);
-        $('#unit-overview-bttn').click();
+      
       });
 
       $("#archive-unit").on("click", function() {
