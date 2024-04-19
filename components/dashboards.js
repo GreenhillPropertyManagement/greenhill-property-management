@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
       unitId = urlParams.get("id");
       $.when(loadUnitAndTenantData(unitId)).then(function() {
         editUnit(unitId);
-        $(".loader").hide();
+        
       });
 
       $("#archive-unit").on("click", function() {
@@ -361,7 +361,9 @@ function dashActivityLog(type, user, property, unit) {
           .text(logItem.user_role);
       });
     },
-    complete: function () {},
+    complete: function () {
+      $(".loader").hide();
+    },
     error: function (error) {},
   });
 }
