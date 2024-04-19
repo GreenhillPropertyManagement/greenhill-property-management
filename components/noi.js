@@ -154,6 +154,7 @@ function initializeChart(
           data: expensesData,
           backgroundColor: "#EE2E31",
           order: 2,
+          minBarLength: 1, // Minimum bar length in pixels
         },
         {
           label: "Profit",
