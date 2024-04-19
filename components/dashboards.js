@@ -98,8 +98,7 @@ function loadUnitAndTenantData(unit) {
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         dashActivityLog("unit", "", "", localStorage.unitRecId);
-        $('.act-mon-loader').hide();
-        
+            
       },
       error: function (error) {},
     });
@@ -244,7 +243,7 @@ function loadUnitAndTenantData(unit) {
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
         dashActivityLog("unit", "", "", localStorage.unitRecId);
         $(".loader").hide();
-        $('.act-mon-loader').hide();
+       
       },
       error: function (error) {},
     });
@@ -368,7 +367,7 @@ function dashActivityLog(type, user, property, unit) {
     },
     complete: function () {
    
-      
+      $('.act-mon-loader').hide();
     
     },
     error: function (error) {},
