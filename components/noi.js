@@ -148,21 +148,21 @@ function initializeChart(
           data: paymentsData,
           backgroundColor: "#1F154A",
           order: 1,
-          minBarLength: 1, // Minimum bar length in pixels
+          minBarLength: 3, // Minimum bar length in pixels
         },
         {
           label: "Expenses",
           data: expensesData,
           backgroundColor: "#EE2E31",
           order: 2,
-          minBarLength: 1, // Minimum bar length in pixels
+          minBarLength: 3, // Minimum bar length in pixels
         },
         {
           label: "Profit",
           data: profitsData,
           backgroundColor: "#80ed99",
           order: 3,
-          minBarLength: 1, // Minimum bar length in pixels
+          minBarLength: 3, // Minimum bar length in pixels
         },
       ],
     },
