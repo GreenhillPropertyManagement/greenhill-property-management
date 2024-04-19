@@ -245,6 +245,7 @@ function loadUnitAndTenantData(unit) {
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
         dashActivityLog("unit", "", "", localStorage.unitRecId);
         $(".loader").hide();
+        $('.act-mon-loader').hide();
       },
       error: function (error) {},
     });
