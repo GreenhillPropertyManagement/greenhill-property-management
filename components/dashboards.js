@@ -363,10 +363,11 @@ function dashActivityLog(type, user, property, unit) {
           .find("[data-dash-activity-log='role']")
           .text(logItem.user_role);
       });
+      $('.act-mon-loader').hide();
     },
     complete: function () {
    
-      $('.act-mon-loader').hide();
+      
     
     },
     error: function (error) {},
@@ -572,7 +573,6 @@ function loadActiveTenants(user) {
     },
   });
 }
-
 
 function editUnit(unit) {
 
