@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Unit Dashboard */
   $("#unit").on("click", function () {
     $(".loader").css("display", "flex"); // show loader
-    $(".dyn-container__activity-monitor__is--dashboard").empty();
     $('.act-mon-loader').css("display","flex");
 
     setTimeout(() => {
