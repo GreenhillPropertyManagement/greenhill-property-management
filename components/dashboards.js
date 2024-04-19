@@ -322,6 +322,8 @@ function dashActivityLog(type, user, property, unit) {
     ".dyn-container__activity-monitor__is--dashboard",
   );
 
+  dashActivityLogContainer.empty();
+
   $.ajax({
     url: localStorage.baseUrl + "api:ZQGsxCfJ/get_activity_log",
     method: "GET",
@@ -336,8 +338,6 @@ function dashActivityLog(type, user, property, unit) {
       var sampleLogItem = $(".dash-activity-log-sample-wrapper").find(
         ".dyn-item__activity-item__is--dashboard",
       );
-
-      dashActivityLogContainer.empty();
 
       // loop through each logItem
       response.forEach((logItem) => {
