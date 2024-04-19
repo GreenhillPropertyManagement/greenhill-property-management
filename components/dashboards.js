@@ -243,7 +243,6 @@ function loadUnitAndTenantData(unit) {
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
         dashActivityLog("unit", "", "", localStorage.unitRecId);
-        $('.act-mon-loader').hide();
         $(".loader").hide();
       },
       error: function (error) {},
