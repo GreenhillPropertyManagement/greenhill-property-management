@@ -362,7 +362,7 @@ function dashActivityLog(type, user, property, unit) {
       });
     },
     complete: function () {
-      $(".loader").hide();
+  
     },
     error: function (error) {},
   });
@@ -434,7 +434,7 @@ function loadConvosInDashboard(target) {
       });
     },
     complete: function () {
-      $(".loader").hide();
+    
     },
     error: function (error) {},
   });
@@ -496,7 +496,7 @@ function loadPropertiesInDashboard(user) {
       });
     },
     complete: function () {
-      $(".loader").hide();
+     
     },
     error: function (error) {
       // Handle errors here
@@ -560,7 +560,7 @@ function loadActiveTenants(user) {
       });
     },
     complete: function () {
-      $(".loader").hide();
+   
     },
     error: function (error) {
       // Handle errors here
