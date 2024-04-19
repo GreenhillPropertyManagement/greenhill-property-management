@@ -342,7 +342,7 @@ function dashActivityLog(type, user, property, unit) {
         ".dyn-item__activity-item__is--dashboard",
       );
 
-      // loop through each logItem
+      /* loop through each logItem
       response.forEach((logItem) => {
         // clone the sample card for the logItem and append to users container
         let actLogItem = $(sampleLogItem)
@@ -362,8 +362,8 @@ function dashActivityLog(type, user, property, unit) {
         actLogItem
           .find("[data-dash-activity-log='role']")
           .text(logItem.user_role);
-      });
-      $('.act-mon-loader').hide();
+      });*/
+      
     },
     complete: function () {
    
