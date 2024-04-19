@@ -319,6 +319,7 @@ function loadPropertyUsers() {
 }
 
 function dashActivityLog(type, user, property, unit) {
+
   var dashActivityLogContainer = $(
     ".dyn-container__activity-monitor__is--dashboard",
   );
@@ -365,6 +366,7 @@ function dashActivityLog(type, user, property, unit) {
     complete: function () {
    
       $('.act-mon-loader').hide();
+      alert('loaded');
     },
     error: function (error) {},
   });
