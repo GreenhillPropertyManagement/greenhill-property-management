@@ -99,7 +99,6 @@ function processTransactions(transactions) {
 
     let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-
     if (
       transaction.recipient_type === "tenant" &&
       transaction.type === "payment"
@@ -256,48 +255,37 @@ function formatMonthYear(monthYear) {
   })} ${year}`;
 }
 
-function populateTableWithTransactions(transactions, monthYear) {
-
-  function formatCurrency(amount) {
-    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  }
-  const filteredTransactions = transactions.filter((transaction) => {
-    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
-    const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
-    return transactionMonthYear === monthYear;
-  });
-
+function populateTableWithTransactions(transactions, monthYear, componentId) {
   const $tableBody = $('[element="noi-table"] tbody');
   $tableBody.empty(); // Clear existing rows
 
-  filteredTransactions.forEach((transaction) => {
-    const billingPeriodDate = new Date(transaction.billing_period + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
-    const formattedBillingPeriod = `${billingPeriodDate.toLocaleString("default", { month: "short" })} ${billingPeriodDate.getFullYear()}`;
-
+  transactions.forEach((transaction) => {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
-    const formattedTransactionDate = `${transactionDate.getMonth() + 1}/${transactionDate.getDate()}/${transactionDate.getFullYear().toString().substr(-2)}`;
+    const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
-    const formattedChargeAmount = transaction.type === "charge" ? formatCurrency(transaction.amount) : "";
-    const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? formatCurrency(-transaction.amount) : "";
+    if (transactionMonthYear === monthYear) {
+      const formattedChargeAmount = transaction.type === "charge" ? formatCurrency(transaction.amount) : "";
+      const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? formatCurrency(transaction.amount) : "";
 
-    const $row = $("<tr>");
-    $row.append($("<td>").text(formattedBillingPeriod));
-    $row.append($("<td>").text(formattedTransactionDate));
-    $row.append($("<td>").text(transaction.type));
-    $row.append($("<td>").text(transaction.description));
-    $row.append($("<td>").text(formattedChargeAmount));
-    $row.append($("<td>").text(formattedCreditAmount));
-    $row.append($("<td>").text(transaction.street));
-    $row.append($("<td>").text(transaction.unit_name));
+      const $row = $("<tr>");
+      $row.append($("<td>").text(transactionMonthYear));
+      $row.append($("<td>").text(transaction.transaction_date));
+      $row.append($("<td>").text(transaction.type));
+      $row.append($("<td>").text(transaction.description));
+      $row.append($("<td>").text(formattedChargeAmount));
+      $row.append($("<td>").text(formattedCreditAmount));
+      $row.append($("<td>").text(transaction.street));
+      $row.append($("<td>").text(transaction.unit_name));
 
-    // Check if the row is a charge type and add class and data attribute
-    if (transaction.type === "charge") {
-      $row.addClass("charge-row");
-      $row.data("invoice-url", transaction.invoice_url);
-      $row.css("cursor", "pointer"); // Change cursor to pointer for charge rows
+      // Check if the row is a charge type and add class and data attribute
+      if (transaction.type === "charge") {
+        $row.addClass("charge-row");
+        $row.data("invoice-url", transaction.invoice_url);
+        $row.css("cursor", "pointer"); // Change cursor to pointer for charge rows
+      }
+
+      $tableBody.append($row);
     }
-
-    $tableBody.append($row);
   });
 
   // Add click event listener for charge rows
@@ -308,6 +296,11 @@ function populateTableWithTransactions(transactions, monthYear) {
     }
   });
 }
+
+function formatCurrency(amount) {
+  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+
 function convertTableToCSV($table) {
   let csv = [];
   $table.find("tr").each(function () {
