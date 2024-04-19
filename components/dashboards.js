@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#unit").on("click", function () {
     $(".loader").css("display", "flex"); // show loader
     $(".dyn-container__activity-monitor__is--dashboard").empty();
+    $('.act-mon-loader').css("display","flex");
 
     setTimeout(() => {
 
@@ -363,7 +364,8 @@ function dashActivityLog(type, user, property, unit) {
       });
     },
     complete: function () {
-      $('.loader').hide();
+   
+      $('.act-mon-loader').css("display","flex");
     },
     error: function (error) {},
   });
