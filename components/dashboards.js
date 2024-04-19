@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const urlParams = new URLSearchParams(window.location.search);
       unitId = urlParams.get("id");
-      $.when(loadUnitAndTenantData(unitId)).then(function() {
-        editUnit(unitId);
+      loadUnitAndTenantData(unitId);
+      editUnit(unitId);
         
       });
 
