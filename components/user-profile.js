@@ -638,7 +638,9 @@ function dashActivityLog(type, user, property, unit) {
           .text(logItem.user_role);
       });
     },
-    complete: function () {},
+    complete: function () {
+      $('.act-mon-loader').hide();
+    },
     error: function (error) {},
   });
 }
@@ -687,7 +689,8 @@ function activityLog(type, user, property, unit, view) {
       activityLogContainer
         .find(".dyn-item__user:last")
         .css("border-bottom", "none");
-      $(".loader").hide();
+        $('.act-mon-loader').hide();
+        $('.loader').hide();
     },
     error: function (error) {},
   });
