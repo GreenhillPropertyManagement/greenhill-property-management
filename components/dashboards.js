@@ -362,7 +362,7 @@ function dashActivityLog(type, user, property, unit) {
       });
     },
     complete: function () {
-  
+      $('.loader').hide();
     },
     error: function (error) {},
   });
