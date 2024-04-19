@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Unit Dashboard */
   $("#unit").on("click", function () {
     $(".loader").css("display", "flex"); // show loader
-    $('.act-mon-loader').css("display","flex");
+    //$('.act-mon-loader').css("display","flex");
 
     setTimeout(() => {
 
@@ -98,7 +98,7 @@ function loadUnitAndTenantData(unit) {
       complete: function () {
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
-        dashActivityLog("unit", "", "", localStorage.unitRecId);
+        //dashActivityLog("unit", "", "", localStorage.unitRecId);
         
       },
       error: function (error) {},
@@ -242,7 +242,7 @@ function loadUnitAndTenantData(unit) {
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         loadConvosInDashboard(localStorage.activeTenantUserUuid);
-        dashActivityLog("unit", "", "", localStorage.unitRecId);
+        //dashActivityLog("unit", "", "", localStorage.unitRecId);
         $(".loader").hide();
       },
       error: function (error) {},
