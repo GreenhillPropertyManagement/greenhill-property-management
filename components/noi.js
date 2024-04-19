@@ -148,6 +148,7 @@ function initializeChart(
           data: paymentsData,
           backgroundColor: "#1F154A",
           order: 1,
+          minBarLength: 1, // Minimum bar length in pixels
         },
         {
           label: "Expenses",
@@ -161,6 +162,7 @@ function initializeChart(
           data: profitsData,
           backgroundColor: "#80ed99",
           order: 3,
+          minBarLength: 1, // Minimum bar length in pixels
         },
       ],
     },
@@ -180,6 +182,7 @@ function initializeChart(
     },
   });
 }
+
 
 /* Functions For Statements */
 
