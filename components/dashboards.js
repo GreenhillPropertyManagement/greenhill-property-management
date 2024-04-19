@@ -2,10 +2,14 @@
 let unitId
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  $("#unit-overview-bttn").on("click",function() {
+    loadUnitAndTenantData(unitId); // load unit
+  });
+
   /* Unit Dashboard */
   $("#unit").on("click", function () {
     $(".loader").css("display", "flex"); // show loader
-    $("#unit-overview-bttn").click(); // default to overview tab
 
     setTimeout(() => {
 
@@ -19,12 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
       $("#archive-unit").on("click", function() {
         archiveUnit(unitId);
       });
-      
-    }, 100);
 
-    $("#unit-overview-bttn").on("click",function() {
-      loadUnitAndTenantData(unitId); // load unit
-    })
+      $("#unit-overview-bttn").click(); // default to overview tab
+      
+    }, 150);
 
   });
 
