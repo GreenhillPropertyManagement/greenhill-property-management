@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
       unitId = urlParams.get("id");
       $.when(loadUnitAndTenantData(unitId)).then(function() {
         editUnit(unitId);
-      
+        $(".loader").hide();
       });
 
       $("#archive-unit").on("click", function() {
@@ -98,7 +98,7 @@ function loadUnitAndTenantData(unit) {
         loadPropertyUsers();
         loadWorkOrders("unit", "", localStorage.unitRecId, "dashboard"); // load in workorders
         dashActivityLog("unit", "", "", localStorage.unitRecId);
-        $(".loader").hide();
+        
       },
       error: function (error) {},
     });
