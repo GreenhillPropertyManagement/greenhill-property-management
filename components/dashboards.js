@@ -320,6 +320,7 @@ function loadPropertyUsers() {
 
 function dashActivityLog(type, user, property, unit) {
 
+  alert('loaded');
   var dashActivityLogContainer = $(
     ".dyn-container__activity-monitor__is--dashboard",
   );
