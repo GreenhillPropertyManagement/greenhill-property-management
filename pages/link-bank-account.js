@@ -58,7 +58,7 @@ function createLinkToken() {
                 console.log('Public Token: ' + public_token);
 
                 // Send public_token to your backend
-                /*$.ajax({
+                $.ajax({
                     url: localStorage.baseUrl + "api:WROWQVjv/Exchange_Public_Token",
                     type: "POST",
                     headers: {
@@ -75,7 +75,7 @@ function createLinkToken() {
                       alert("Exchange Error");
                       
                     }
-                  });*/
+                  });
 
               },
               onExit: async function(err, metadata) {
