@@ -1,3 +1,5 @@
+var enablePayments
+
 $(document).ready(function () {
 
   if (localStorage.authToken == null) {
@@ -80,13 +82,11 @@ function confirmTenant(){
         localStorage.setItem("userRecId", response.id); // add user record ID
         localStorage.setItem("tenantRecId", response.tenant_info.id); // add user record ID
 
-        // check if they have payments enabled and update the onboarding form accordingly....
 
-        if (response.tenant_info.enable_payments == false) {
-          $('#banking-form-block').remove(); // remove the banking block
-          $('#auto-pay').remove(); // remove the auto pay switch
-          $('#form-payment-disclaimer').remove(); // remove the payment discalaimer
-          $('.sign-up__form-submit-btn-wrapper').removeClass('inactive'); // enable form button
+        // check if they have payments enabled and update the onboarding form accordingly....
+        if (response.tenant_info.enable_payments == true) {
+          enablePayments = true;
+
         }    
 
         // Hide Loader
@@ -131,7 +131,13 @@ function confirmTenant(){
       },
       data: formData,
       success: function (response) {
-        window.location.href = "/tenant/link-bank-account";
+
+        if (enablePayments == true){ // take them to bank linking page
+          window.location.href = "/tenant/link-bank-account";
+        } else { // send them to their dashboard
+          window.location.href = "/app/home";
+        }
+      
       },
       error: function (error) {
         // Handle error here
