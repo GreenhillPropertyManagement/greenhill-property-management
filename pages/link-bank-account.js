@@ -65,7 +65,7 @@ function createLinkToken() {
                       'Content-Type': "application/json",
                     },
                     data: {
-                        public_token: public_token
+                        public_token: 'test'
                     },
                     success: function (data) {       
                       
@@ -98,5 +98,3 @@ function createLinkToken() {
   });
 
 }
-
-
