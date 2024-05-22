@@ -41,7 +41,6 @@ function createLinkToken() {
     type: 'POST',
     url: 'api:WROWQVjv/Create_Link_Token',
     contentType: 'application/json',
-    data: JSON.stringify(requestData),
     success: function(response) {
       // Handle successful response
       // update linkToken with response
