@@ -39,7 +39,7 @@ function createLinkToken() {
   // AJAX request to fetch Link token
   $.ajax({
     type: 'POST',
-    url: 'https://xs9h-ivtd-slvk.n7c.xano.io/api:WROWQVjv/Create_Link_Token',
+    url: 'api:WROWQVjv/Create_Link_Token',
     contentType: 'application/json',
     data: JSON.stringify(requestData),
     success: function(response) {
@@ -48,16 +48,36 @@ function createLinkToken() {
       linkToken = response;
     },
     complete: function(response) {
-        
+
         (async function() {
             const configs = {
-              token: 'YOUR_LINK_TOKEN',
+              token: linkToken,
               onLoad: function() {
                 // The Link module finished loading.
               },
               onSuccess: function(public_token, metadata) {
                 console.log('Public Token: ' + public_token);
+
                 // Send public_token to your backend
+                $.ajax({
+                    url: localStorage.baseUrl + "api:WROWQVjv/Exchange_Public_Token",
+                    type: "POST",
+                    headers: {
+                      'Content-Type': "application/json",
+                    },
+                    data: {
+                        public_token: public_token
+                    },
+                    success: function (data) {       
+                      
+                    },
+                    error: function (error) {
+                    
+                      alert("Something Went Wrong");
+                      
+                    }
+                  });
+
               },
               onExit: async function(err, metadata) {
                 if (err != null) {
