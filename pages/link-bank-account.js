@@ -39,7 +39,7 @@ function createLinkToken() {
 
   // AJAX request to fetch Link token
   $.ajax({
-    type: 'GET',
+    type: 'POST',
     url: localStorage.baseUrl + 'api:WROWQVjv/create_plaid_link_token',
     contentType: 'application/json',
     success: function(response) {
