@@ -73,7 +73,7 @@ function createLinkToken() {
                     },
                     error: function (error) {
                     
-                      alert("Something Went Wrong");
+                      alert("Exchange Error");
                       
                     }
                   });
