@@ -62,20 +62,18 @@ function createLinkToken() {
                     url: localStorage.baseUrl + "api:WROWQVjv/Exchange_Public_Token",
                     type: "POST",
                     headers: {
-                      'Content-Type': "application/json",
+                        'Content-Type': "application/json",
                     },
-                    data: {
-                        public_token: 'test'
-                    },
+                    data: JSON.stringify({
+                        public_token: public_token
+                    }),
                     success: function (data) {       
-                      
+                        // Handle success
                     },
                     error: function (error) {
-                    
-                      alert("Exchange Error");
-                      
+                        alert("Exchange Error");
                     }
-                  });
+                });
 
               },
               onExit: async function(err, metadata) {
