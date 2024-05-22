@@ -13,7 +13,6 @@ $(document).ready(function () {
 
 function authUser() {
 
-
   $.ajax({
     url: localStorage.baseUrl + "api:2yadJ61L/auth/me",
     type: "GET",
@@ -32,6 +31,7 @@ function authUser() {
       //window.location.href = "/app/login";
     }
   });
+
 }
 
 function confirmTenant(){
@@ -87,95 +87,7 @@ function confirmTenant(){
           $('#auto-pay').remove(); // remove the auto pay switch
           $('#form-payment-disclaimer').remove(); // remove the payment discalaimer
           $('.sign-up__form-submit-btn-wrapper').removeClass('inactive'); // enable form button
-        }
-
-        // If payments ARE enabled, run the form validation...
-        if (response.tenant_info.enable_payments !== false) {
-          var form = document.getElementById("confirm-account-form-tenant");
-          var submitButton = form.querySelector(".sign-up__form-submit-btn");
-
-          form.addEventListener("submit", function(e) {
-
-              submitButton.value = "Please wait...";
-              submitButton.style.pointerEvents = "none";
-
-          });
-          const bankingFormBlock = document.querySelector('#banking-form-block');
-          const formButtonWrapper = document.querySelector('.sign-up__form-submit-btn-wrapper');
-          const companyNameDynamic = document.querySelector('#company_dynamic');
-          const accountHolderTypeDropdown = document.querySelector('#account_holder_type');
-
-          // Hide the companyNameDynamic by default
-          companyNameDynamic.style.display = 'none';
-
-          function checkInputs() {
-              let allFilled = true;
-              const inputs = bankingFormBlock.querySelectorAll('input, select');
-
-              inputs.forEach(input => {
-                  if ((input.tagName.toLowerCase() === 'select' && input.value === '') ||
-                      (input.tagName.toLowerCase() === 'input' && input.value.trim() === '' && input !== companyNameDynamic.querySelector('input'))) {
-                      allFilled = false;
-                  }
-              });
-
-              if (accountHolderTypeDropdown.value === 'company' && companyNameDynamic.querySelector('input').value.trim() === '') {
-                  allFilled = false;
-              }
-
-              if (allFilled) {
-                  formButtonWrapper.classList.remove('inactive');
-              } else {
-                  formButtonWrapper.classList.add('inactive');
-              }
-          }
-
-          function handleDropdownChange() {
-              if (accountHolderTypeDropdown.value === 'company') {
-                  companyNameDynamic.style.display = 'block'; // Show the company_name field
-              } else {
-                  companyNameDynamic.style.display = 'none'; // Hide the company_name field
-              }
-              checkInputs();
-          }
-
-          // Add event listeners to all input fields
-          bankingFormBlock.querySelectorAll('input, select').forEach(input => {
-              input.addEventListener('input', checkInputs);
-          });
-
-          // Add the event listener to the account holder type dropdown
-          accountHolderTypeDropdown.addEventListener('change', handleDropdownChange);
-
-          // Toggle visibility for enable_autopay checkbox
-          document.querySelector('#enable_autopay').addEventListener('change', function() {
-              let autoPayWrapper = document.querySelector('.auto-pay-disc__wrapper');
-              if (this.checked) {
-                  autoPayWrapper.style.display = 'block';
-              } else {
-                  autoPayWrapper.style.display = 'none';
-              }
-          });
-
-          // Hide auto-pay-disc__wrapper when #accept-autopay or #autopay-cancel is clicked
-          let hideButtons = ['#accept-autopay', '#autopay-cancel'];
-          hideButtons.forEach(selector => {
-              let button = document.querySelector(selector);
-              if (button) {
-                  button.addEventListener('click', function() {
-                      document.querySelector('.auto-pay-disc__wrapper').style.display = 'none';
-                  });
-              }
-          });
-      }
-        
-
-        // check if they have previously entered a bank account already, if so send them to verification page. 
-        // this check is for if they go back to this page for a second time after already entering their initial bank account
-        // we do this to avoid double entry bank accounts before a verification
-        if (response.tenant_info.stripe_bank_id !== null) {
-          window.location.href = "/tenant/verify-bank-account";
-        }
+        }    
 
         // Hide Loader
         $(".loader").css("display", "none"); // hide loader
@@ -219,7 +131,7 @@ function confirmTenant(){
       },
       data: formData,
       success: function (response) {
-        window.location.href = "/tenant/verify-bank-account";
+        window.location.href = "/tenant/link-bank-account";
       },
       error: function (error) {
         // Handle error here
