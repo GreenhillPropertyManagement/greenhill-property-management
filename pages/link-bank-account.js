@@ -1,5 +1,6 @@
 
 var linkToken
+const baseUrl = "https://xs9h-ivtd-slvk.n7c.xano.io/";
 
 $(document).ready(function () {
 
