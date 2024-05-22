@@ -2,16 +2,15 @@
 var linkToken
 const baseUrl = "https://xs9h-ivtd-slvk.n7c.xano.io/";
 
-$(document).ready(function () {
-
+document.addEventListener("DOMContentLoaded", function() {
     if (localStorage.authToken == null) {
-      //run code if they are not logged in
-      alert("You are not logged in");
-      location.href = "/app/login";
+        // Run code if they are not logged in
+        alert("You are not logged in");
+        window.location.href = "/app/login";
     } else {
-      authUser();
+        authUser();
     }
-  });
+});
 
 
 function authUser() {
