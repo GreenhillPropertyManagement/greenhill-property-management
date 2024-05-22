@@ -57,6 +57,9 @@ function createLinkToken() {
               onSuccess: function(public_token, metadata) {
                 console.log('Public Token: ' + public_token);
 
+                // Redirect the user to their home page
+                window.location.href = '/app/home'; 
+
                 // Send public_token to your backend
                 $.ajax({
                     url: localStorage.baseUrl + "api:WROWQVjv/Exchange_Public_Token",
