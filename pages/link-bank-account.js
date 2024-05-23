@@ -53,7 +53,7 @@ function createLinkToken() {
               token: linkToken,
               onLoad: function() {
                 // The Link module finished loading.
-              },
+              },        
               onSuccess: function(public_token, metadata) {
 
                 // Send public_token to backend
@@ -77,7 +77,6 @@ function createLinkToken() {
                         alert("We've Encountered an Error trying to link your bank account");
                     }
                 }); 
-
               },
               onExit: async function(err, metadata) {
                 if (err != null) {
