@@ -66,6 +66,7 @@ function createLinkToken() {
                     type: "POST",
                     headers: {
                         'Content-Type': "application/json",
+                        'Authorization': "Bearer " + localStorage.authToken
                     },
                     data: JSON.stringify({
                         public_token: public_token
