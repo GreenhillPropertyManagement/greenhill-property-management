@@ -56,7 +56,7 @@ function createLinkToken() {
               },
               onSuccess: function(public_token, metadata) {
 
-                // Send public_token to your backend
+                // Send public_token to backend
                 $.ajax({
                     url: localStorage.baseUrl + "api:WROWQVjv/Exchange_Public_Token",
                     type: "POST",
@@ -68,15 +68,15 @@ function createLinkToken() {
                         public_token: public_token
                     }),
                     success: function (data) {       
-                        // Handle success
+
+                        // Redirect the user to the auto-pay page
+                        window.location.href = '/tenant/auto-pay-confirmation';
+
                     },
                     error: function (error) {
                         alert("We've Encountered an Error trying to link your bank account");
                     }
-                });
-
-                // Redirect the user to their home page
-                window.location.href = '/app/home'; 
+                }); 
 
               },
               onExit: async function(err, metadata) {
