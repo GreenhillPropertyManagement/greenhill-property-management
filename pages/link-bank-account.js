@@ -75,7 +75,7 @@ function createLinkToken() {
                         // Handle success
                     },
                     error: function (error) {
-                        alert("Exchange Error");
+                        alert("We've Encountered an Error trying to link your bank account");
                     }
                 });
 
