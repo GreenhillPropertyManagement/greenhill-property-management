@@ -55,10 +55,6 @@ function createLinkToken() {
                 // The Link module finished loading.
               },
               onSuccess: function(public_token, metadata) {
-                console.log('Public Token: ' + public_token);
-
-                // Redirect the user to their home page
-                window.location.href = '/app/home'; 
 
                 // Send public_token to your backend
                 $.ajax({
@@ -78,6 +74,9 @@ function createLinkToken() {
                         alert("We've Encountered an Error trying to link your bank account");
                     }
                 });
+
+                // Redirect the user to their home page
+                window.location.href = '/app/home'; 
 
               },
               onExit: async function(err, metadata) {
