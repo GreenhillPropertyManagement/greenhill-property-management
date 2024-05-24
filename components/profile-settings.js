@@ -142,12 +142,12 @@ function profileSettingsLoad() {
       });
 
 
-      // bank account last 4 degits
+      // bank account last 4 digits
       if (response.landlord_info){ 
         $('[data="bank_last_4"]').text(response.landlord_info.stripe_bank_last_4);
       }
 
-      // bank account last 4 degits
+      // bank account last 4 digits
       if (response.tenant_info){ 
         $('[data="bank_last_4"]').text(response.tenant_info.bank_last_4);
       }
@@ -204,7 +204,6 @@ function profileSettingsLoad() {
       // Update UI For Tenants with Payments NOT Enabled...
       if (response.user_role === 'Tenant' && response.tenant_info.enable_payments == false){
 
-        $('#alerts-block').remove(); // remove alerts configure block 
         $('#profile-bank-block').remove(); // remove bank block
 
       }
