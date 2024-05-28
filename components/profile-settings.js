@@ -529,7 +529,11 @@ function toggleAutoPay () {
             },
             data: { enable_autopay: isChecked },
             success: function(response) {
-                //console.log('Success:', response);
+                if (response == true) {
+                  window.location.href = "tenant/auto-pay-confirmation";
+                } else{
+                  alert ('Success! You have been unsubscribed from Auto Pay.');
+                }
             },
             error: function(xhr, status, error) {
                 //console.error('Error:', error);
