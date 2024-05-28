@@ -18,6 +18,7 @@ function profileSettingsInit () {
   updateBankInfo();
   updateProfilePic();
   updateNotificationsPref();
+  toggleAutoPay();
 
 }
 
@@ -514,4 +515,26 @@ function updateNotificationsPref () {
    });
   
   
+}
+
+function toggleAutoPay () {
+
+    $('#enable_autopay').change(function() {
+        var isChecked = $(this).prop('checked');
+        $.ajax({
+            url: localStorage.baseUrl + 'api:sElUkr6t/enable_autopay',
+            method: 'POST', 
+            headers: {
+              'Authorization': "Bearer " + localStorage.authToken
+            },
+            data: { enable_autopay: isChecked },
+            success: function(response) {
+                //console.log('Success:', response);
+            },
+            error: function(xhr, status, error) {
+                //console.error('Error:', error);
+            }
+        });
+    });
+
 }
