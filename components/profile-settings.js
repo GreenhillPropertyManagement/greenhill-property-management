@@ -528,7 +528,7 @@ function toggleAutoPay () {
     $('#enable_autopay').change(function() {
         var isChecked = $(this).prop('checked');
         $.ajax({
-            url: localStorage.baseUrl + 'api:sElUkr6t/enable_autopay',
+            url: localStorage.baseUrl + 'api:sElUkr6t/toggle_auto_pay',
             method: 'POST', 
             headers: {
               'Authorization': "Bearer " + localStorage.authToken
