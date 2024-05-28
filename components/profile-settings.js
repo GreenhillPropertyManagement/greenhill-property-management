@@ -158,6 +158,12 @@ function profileSettingsLoad() {
         $('[data="profile_img"]').attr('src', response.profile_img);
       }
 
+      // Auto Pay Settings
+      $('#enable_autopay')
+      if (response.tenant_info){ 
+        $('#enable_autopay').val(response.tenant_info.enable_autopay);
+      }
+
 
       //notification preferences
       
