@@ -536,7 +536,7 @@ function toggleAutoPay () {
             data: { enable_autopay: isChecked },
             success: function(response) {
                 if (response == true) {
-                  window.location.href = "tenant/auto-pay-confirmation";
+                  window.location.href = "https://www.greenhillpropertymgmt.com/app/tenant/auto-pay-confirmation";
                 } else{
                   alert ('Success! You have been unsubscribed from Auto Pay.');
                 }
