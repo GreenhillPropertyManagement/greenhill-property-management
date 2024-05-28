@@ -159,10 +159,10 @@ function profileSettingsLoad() {
       }
 
       // Auto Pay Settings
-      $('#enable_autopay')
-      if (response.tenant_info){ 
-        $('#enable_autopay').val(response.tenant_info.enable_autopay);
-      }
+      if (response.tenant_info) {
+        // Set the checked/unchecked state based on the response
+        $('#enable_autopay').prop('checked', response.tenant_info.enable_autopay);
+    }
 
 
       //notification preferences
