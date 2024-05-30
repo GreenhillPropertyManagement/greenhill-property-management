@@ -229,7 +229,7 @@ function loadProperty(property_id) {
 
             // click handler to direct to each unit page
             $(unitItem).click(function () {
-              if (unit.active_tenant === 0){
+              if (unit.active_tenant === null){
                 localStorage.setItem("pageId", "unit"); // update the page ID
                 localStorage.setItem("pageRefreshParam", unit.unit_id); // set the refresh parameter
                 localStorage.setItem("unitRecId", unit.id); // store the unit rec id
