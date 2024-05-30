@@ -378,7 +378,7 @@ function loadUserProfile(user) {
           $("[data-profile=auto_pay]").text("No");
         }
         // bank verified check
-        if (response.tenant_info.bank_last_4 !== 'verified') {
+        if (response.tenant_info.bank_last_4 === '') {
           $("[data-profile=bank_verified]").text('No');
         } else{
           $("[data-profile=bank_verified]").text('Yes');
