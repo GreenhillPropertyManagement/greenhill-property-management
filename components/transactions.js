@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
   $(document).ready(function() {
     $('#rent-trans-amount').on('input', function() {
       var inputValue = parseFloat($(this).val());
-      if (inputValue > 6000) {
+      if (inputValue > 10000) {
         $('.payment-validator-message').show();
         $('#payment-init-button').addClass('button-inactive');
       } else {
