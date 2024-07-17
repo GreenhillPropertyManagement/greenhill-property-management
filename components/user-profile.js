@@ -324,7 +324,9 @@ function loadUserProfile(user) {
       }
 
       // hide mandate button for non-tenant profiles
-      if (response.user_role !== "Tenant") {
+      if (response.user_role === "Tenant") {
+        $('#bank-mandate').show();
+      } else{
         $('#bank-mandate').hide();
       }
 
