@@ -30,6 +30,11 @@ document.addEventListener("DOMContentLoaded", function () {
     updateUserStatus(userStatus);
   });
 
+  // mandate bank account
+  $("#bank-mandate").on("click", function () {
+    mandateBankAccount(localStorage.pageRefreshParam);
+  });
+
   /* --------------View Loades--------------- */
 
   // When user views a profile
@@ -694,6 +699,28 @@ function activityLog(type, user, property, unit, view) {
     },
     error: function (error) {},
   });
+}
+
+function mandateBankAccount(user){
+
+  $.ajax({
+    url: localStorage.baseUrl + "api:S5JmTHue/bank_mandate",
+    type: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      user_uuid: user,
+    },
+    success: function (response) {
+      alert("Success! Mandate Successful.");
+    },
+    complete: function () {
+      $(".loader").hide();
+    },
+    error: function (error) {},
+  });
+
 }
 
 
