@@ -323,6 +323,11 @@ function loadUserProfile(user) {
         $(".noi-chart-tab").click(); // default to chart view in finance tab
       }
 
+      // hide mandate button for non-tenant profiles
+      if (response.user_role !== "Tenant") {
+        $('#bank-mandate').hide();
+      }
+
       // UI for Tenant Profiles
       if (response.user_role === "Tenant") {
         localStorage.setItem(
