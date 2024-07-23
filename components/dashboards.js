@@ -208,7 +208,7 @@ function loadUnitAndTenantData(unit) {
           .off("click")
           .click(function () {
             var fetchedUserId = response.active_tenant_info.user_info.user_id;
-            $('.modal').css('display', 'none');
+            $('.modal__block').css('display', 'none');
             $("#profile").click();
             localStorage.setItem("pageId", "profile");
             localStorage.setItem(
