@@ -63,6 +63,11 @@ function loadUnitAndTenantData(unit) {
         unit_id: unit,
       },
       success: function (response) {
+
+        /* hide active tenant header */
+        $('#active-tenant-header').css('display','none');
+
+
         /* Set Local Storage */
         localStorage.setItem("propertyRecId", response.property_info.id);
         localStorage.setItem("unitRecId", response.id);
@@ -113,6 +118,9 @@ function loadUnitAndTenantData(unit) {
         unit_id: unit,
       },
       success: function (response) {
+        
+        /* Show active tenant header*/
+        $('#active-tenant-header').css('display','none');
         /* Set Local Storage */
         localStorage.setItem("propertyRecId", response.property_info.id);
         localStorage.setItem("unitRecId", response.id);
