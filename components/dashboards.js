@@ -204,10 +204,11 @@ function loadUnitAndTenantData(unit) {
         $("[data-unit='tenant_work_phone']").text(
           response.active_tenant_info.user_info.work_phone,
         );
-        $(".unit-grid__user__name-wrapper")
+        $("#active-tenant-click")
           .off("click")
           .click(function () {
             var fetchedUserId = response.active_tenant_info.user_info.user_id;
+            $('.modal').css('display', 'none');
             $("#profile").click();
             localStorage.setItem("pageId", "profile");
             localStorage.setItem(
