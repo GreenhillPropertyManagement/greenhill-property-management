@@ -173,7 +173,7 @@ function loadUnitAndTenantData(unit) {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         }));
-        $('[data=lease_document]').off('click').on('click', function() {
+        $('[data-unit=lease_document]').off('click').on('click', function() {
           window.open(response.active_tenant_info.lease_document, '_blank');
         });
 
