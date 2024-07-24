@@ -244,6 +244,12 @@ function showTransactionDetailModal() {
 }
 
 function populateTransactionDetails(transactionId) {
+  // Clear existing values
+  $('[data=gross-payment]').text('');
+  $('[data=mg-fee]').text('');
+  $('[data=funds-transferred]').text('');
+  $('[data=transfer-date]').text('');
+
   const clickedTransaction = originalTransactions.find(
     (transaction) => transaction.transaction_id === transactionId && transaction.description === "Payment Successful"
   );
@@ -269,7 +275,7 @@ function populateTransactionDetails(transactionId) {
   }
 
   if (fundsTransferredTransaction) {
-    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
 
     // Format the date as MM/DD/YYYY
     const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
