@@ -3,7 +3,7 @@ var originalTransactions = [];
 
 document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
-  $("#dashboard").click(function () {
+  $("#finance").click(function () {
     $(".loader").css("display", "flex");
     $(".noi__component").show();
     let target = localStorage.userId;
