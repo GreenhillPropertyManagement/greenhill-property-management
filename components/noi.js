@@ -1,3 +1,4 @@
+
 var myChart = null;
 document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Property Page - NOI
   $("[component-link='noi']").click(function () {
-    $(".noi-chart-tab").click(); // default to chart view of component
+    $(".noi-chart-tab").click(); // default to chart view of compoenent
     $(".loader").css("display", "flex");
     $(".noi__component").show();
     const urlParams = new URLSearchParams(window.location.search);
@@ -60,8 +61,6 @@ function loadNoiTransactions(view, target, canvas) {
       // Process the transactions and initialize the chart
       const processedData = processTransactions(transactions);
       initializeChart(processedData, canvas);
-      // Populate the table with transactions
-      populateTable(transactions);
     },
     complete: function () {
       $(".loader").hide();
@@ -94,44 +93,43 @@ function processTransactions(transactions) {
   let monthlyData = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
-      let month = transaction.transaction_date.substr(0, 7);
-      if (!monthlyData[month]) {
-        monthlyData[month] = { payments: 0, expenses: 0 };
-      }
+    let month = transaction.transaction_date.substr(0, 7);
+    if (!monthlyData[month]) {
+      monthlyData[month] = { payments: 0, expenses: 0 };
+    }
 
-      let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-      if (
-        transaction.recipient_type === "tenant" &&
-        transaction.type === "payment"
-      ) {
-        monthlyData[month].payments += amount;
-      } else if (
-        transaction.recipient_type === "landlord" &&
-        (transaction.type === "charge" || transaction.type === "credit")
-      ) {
-        monthlyData[month].expenses += amount;
-      }
+    if (
+      transaction.recipient_type === "tenant" &&
+      transaction.type === "payment"
+    ) {
+      monthlyData[month].payments += amount;
+    } else if (
+      transaction.recipient_type === "landlord" &&
+      (transaction.type === "charge" || transaction.type === "credit")
+    ) {
+      monthlyData[month].expenses += amount;
     }
   });
 
   let labels = Object.keys(monthlyData).map(
-    (key) => `${monthName(parseInt(key.split("-")[1]))} ${key.split("-")[0]}`
+    (key) => `${monthName(parseInt(key.split("-")[1]))} ${key.split("-")[0]}`,
   );
   let paymentsData = Object.values(monthlyData).map((data) => data.payments);
   let expensesData = Object.values(monthlyData).map((data) => data.expenses);
   let profitsData = paymentsData.map(
-    (payment, index) => payment - expensesData[index]
+    (payment, index) => payment - expensesData[index],
   );
 
   let processed = { labels, paymentsData, expensesData, profitsData };
+  //console.log("Processed data:", processed);
   return processed;
 }
 
 function initializeChart(
   { labels, paymentsData, expensesData, profitsData },
-  chartId
+  chartId,
 ) {
   const ctx = document.getElementById(chartId).getContext("2d");
 
@@ -186,43 +184,6 @@ function initializeChart(
   });
 }
 
-// New function to populate the table
-function populateTable(transactions) {
-  const tableBody = document.querySelector('table[element="noi-table"] tbody');
-  tableBody.innerHTML = ''; // Clear existing table rows
-
-  transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
-      const row = document.createElement("tr");
-
-      const dateCell = document.createElement("td");
-      dateCell.textContent = transaction.transaction_date;
-      row.appendChild(dateCell);
-
-      const propertyCell = document.createElement("td");
-      propertyCell.textContent = transaction.street;
-      row.appendChild(propertyCell);
-
-      const unitCell = document.createElement("td");
-      unitCell.textContent = transaction.unit_name;
-      row.appendChild(unitCell);
-
-      const tenantCell = document.createElement("td");
-      tenantCell.textContent = transaction.tenant_info.display_name;
-      row.appendChild(tenantCell);
-
-      const paymentCell = document.createElement("td");
-      paymentCell.textContent = formatCurrency(transaction.amount);
-      row.appendChild(paymentCell);
-
-      tableBody.appendChild(row);
-    }
-  });
-}
-
-function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toFixed(2);
-}
 
 /* Functions For Statements */
 
@@ -252,16 +213,14 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
-      const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
-      const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
+    const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-      if (!statements[monthYear]) {
-        statements[monthYear] = [];
-      }
-
-      statements[monthYear].push(transaction);
+    if (!statements[monthYear]) {
+      statements[monthYear] = [];
     }
+
+    statements[monthYear].push(transaction);
   });
 
   return statements;
@@ -269,7 +228,7 @@ function processStatements(transactions) {
 
 function renderStatements(statements, allTransactions, componentId) {
   const sortedMonths = Object.keys(statements).sort(
-    (a, b) => new Date(b) - new Date(a)
+    (a, b) => new Date(b) - new Date(a),
   );
   const $container = $(`${componentId} .dyn-container__noi-statements`);
   const $sampleStatement = $(".noi-sample-wrapper .dyn-item__noi-statement"); // Globally select the sample statement
@@ -302,29 +261,49 @@ function formatMonthYear(monthYear) {
 }
 
 function populateTableWithTransactions(transactions, monthYear, componentId) {
-  const $tableBody = $(`${componentId} [element="noi-table"] tbody`);
+  const $tableBody = $('[element="noi-table"] tbody');
   $tableBody.empty(); // Clear existing rows
 
   transactions.forEach((transaction) => {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
-    if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
-      const $row = $("<tr>");
+    if (transactionMonthYear === monthYear) {
+      const formattedChargeAmount = transaction.type === "charge" ? formatCurrency(transaction.amount) : "";
+      const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? formatCurrency(transaction.amount) : "";
 
+      const $row = $("<tr>");
+      $row.append($("<td>").text(transactionMonthYear));
       $row.append($("<td>").text(transaction.transaction_date));
+      $row.append($("<td>").text(transaction.type));
+      $row.append($("<td>").text(transaction.description));
+      $row.append($("<td>").text(formattedChargeAmount));
+      $row.append($("<td>").text(formattedCreditAmount));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
-      $row.append($("<td>").text(transaction.tenant_info.display_name));
-      $row.append($("<td>").text(formatCurrency(transaction.amount)));
+
+      // Check if the row is a charge type and add class and data attribute
+      if (transaction.type === "charge") {
+        $row.addClass("charge-row");
+        $row.data("invoice-url", transaction.invoice_url);
+        $row.css("cursor", "pointer"); // Change cursor to pointer for charge rows
+      }
 
       $tableBody.append($row);
+    }
+  });
+
+  // Add click event listener for charge rows
+  $(".charge-row").on("click", function () {
+    const invoiceUrl = $(this).data("invoice-url");
+    if (invoiceUrl) {
+      window.open(invoiceUrl, "_blank");
     }
   });
 }
 
 function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
 function convertTableToCSV($table) {
