@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $(".noi__component").show();
     let target = localStorage.userId;
     loadNoiTransactions("user", target, "dashboard-chart");
-    loadStatements("user",target, "landlord-dash-comp");
+    loadStatements("user", target, "#landlord-dash-comp");
   });
 
   // landlord profile page - NOI
