@@ -43,17 +43,11 @@ document.addEventListener("DOMContentLoaded", function () {
     downloadCSV(csvData, "noi-data.csv");
   });
 
-  // Event listener for table row clicks to populate transaction details
+  // Event listener for table row clicks to populate transaction details and show modal
   $(document).on('click', 'table[element="noi-table"] tbody tr', function () {
     const transactionId = $(this).attr('data-transaction-id');
+    showTransactionDetailModal();
     populateTransactionDetails(transactionId);
-  });
-
-  // Ensure that the modal opens when elements with element="modal" are clicked
-  $(document).on('click', '[element="modal"]', function () {
-    const modalId = $(this).attr('modal');
-    // Assuming a function openModal(modalId) exists to handle the modal opening
-    openModal(modalId);
   });
 });
 
@@ -212,8 +206,6 @@ function populateTable(transactions) {
       const row = document.createElement("tr");
 
       // Add data attributes to the row
-      row.setAttribute('element', 'modal');
-      row.setAttribute('modal', 'transaction-detail-modal');
       row.setAttribute('data-transaction-id', transaction.transaction_id);
 
       const dateCell = document.createElement("td");
@@ -245,6 +237,12 @@ function formatCurrency(amount) {
   return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function showTransactionDetailModal() {
+  $('.modal__block').css('display', 'flex');
+  $('.modal__block > *').css('display', 'none');
+  $('#transaction-detail-modal').css('display', 'block');
+}
+
 function populateTransactionDetails(transactionId) {
   const relatedTransactions = originalTransactions.filter(
     (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
@@ -259,12 +257,12 @@ function populateTransactionDetails(transactionId) {
   );
 
   if (mgFeeTransaction) {
-    document.querySelector('[data=mg-fee]').textContent = formatCurrency(mgFeeTransaction.amount);
+    $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
   }
 
   if (fundsTransferredTransaction) {
-    document.querySelector('[data=funds-transferred]').textContent = formatCurrency(fundsTransferredTransaction.amount);
-    document.querySelector('[data=transfer-date]').textContent = fundsTransferredTransaction.transaction_date;
+    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=transfer-date]').text(fundsTransferredTransaction.transaction_date);
   }
 }
 
@@ -358,8 +356,6 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       const $row = $("<tr>");
 
       // Add data attributes to the row
-      $row.attr('element', 'modal');
-      $row.attr('modal', 'transaction-detail-modal');
       $row.attr('data-transaction-id', transaction.transaction_id);
 
       $row.append($("<td>").text(transaction.transaction_date));
@@ -375,29 +371,6 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 
 function formatCurrency(amount) {
   return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function populateTransactionDetails(transactionId) {
-  const relatedTransactions = originalTransactions.filter(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
-  );
-
-  const mgFeeTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Greenhill Property Management Fee")
-  );
-
-  const fundsTransferredTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Funds Transferred")
-  );
-
-  if (mgFeeTransaction) {
-    $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
-  }
-
-  if (fundsTransferredTransaction) {
-    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
-    $('[data=transfer-date]').text(fundsTransferredTransaction.transaction_date);
-  }
 }
 
 function convertTableToCSV($table) {
