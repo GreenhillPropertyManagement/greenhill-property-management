@@ -221,7 +221,7 @@ function populateTable(transactions) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Number(amount).toFixed(2);
+  return '$' + Math.abs(Number(amount)).toFixed(2);
 }
 
 /* Functions For Statements */
@@ -324,7 +324,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Number(amount).toFixed(2);
+  return '$' + Math.abs(Number(amount)).toFixed(2);
 }
 
 function convertTableToCSV($table) {
