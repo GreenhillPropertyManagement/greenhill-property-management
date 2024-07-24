@@ -1,4 +1,6 @@
 var myChart = null;
+var originalTransactions = [];
+
 document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
   $("#dashboard").click(function () {
@@ -40,6 +42,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const csvData = convertTableToCSV($('[element="noi-table"]'));
     downloadCSV(csvData, "noi-data.csv");
   });
+
+  // Event listener for table row clicks
+  $(document).on('click', 'table[element="noi-table"] tbody tr', function () {
+    const transactionId = $(this).attr('data-transaction-id');
+    populateTransactionDetails(transactionId);
+  });
 });
 
 /* Functions For NOI Chart */
@@ -57,6 +65,7 @@ function loadNoiTransactions(view, target, canvas) {
       view: view,
     },
     success: function (transactions) {
+      originalTransactions = transactions; // Store the original transactions
       // Process the transactions and initialize the chart
       const processedData = processTransactions(transactions);
       initializeChart(processedData, canvas);
@@ -198,6 +207,7 @@ function populateTable(transactions) {
       // Add data attributes to the row
       row.setAttribute('element', 'modal');
       row.setAttribute('modal', 'transaction-detail-modal');
+      row.setAttribute('data-transaction-id', transaction.transaction_id);
 
       const dateCell = document.createElement("td");
       dateCell.textContent = transaction.transaction_date;
@@ -228,6 +238,29 @@ function formatCurrency(amount) {
   return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function populateTransactionDetails(transactionId) {
+  const relatedTransactions = originalTransactions.filter(
+    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
+  );
+
+  const mgFeeTransaction = relatedTransactions.find(transaction =>
+    transaction.description.includes("Greenhill Property Management Fee")
+  );
+
+  const fundsTransferredTransaction = relatedTransactions.find(transaction =>
+    transaction.description.includes("Funds Transferred")
+  );
+
+  if (mgFeeTransaction) {
+    document.querySelector('[data=mg-fee]').textContent = formatCurrency(mgFeeTransaction.amount);
+  }
+
+  if (fundsTransferredTransaction) {
+    document.querySelector('[data=funds-transferred]').textContent = formatCurrency(fundsTransferredTransaction.amount);
+    document.querySelector('[data=transfer-date]').textContent = fundsTransferredTransaction.transaction_date;
+  }
+}
+
 /* Functions For Statements */
 
 function loadStatements(view, target, componentId) {
@@ -243,6 +276,7 @@ function loadStatements(view, target, componentId) {
       view: view,
     },
     success: function (transactions) {
+      originalTransactions = transactions; // Store the original transactions
       const statements = processStatements(transactions);
       renderStatements(statements, transactions, componentId); // Pass the correct transactions array
     },
@@ -319,6 +353,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       // Add data attributes to the row
       $row.attr('element', 'modal');
       $row.attr('modal', 'transaction-detail-modal');
+      $row.attr('data-transaction-id', transaction.transaction_id);
 
       $row.append($("<td>").text(transaction.transaction_date));
       $row.append($("<td>").text(transaction.street));
@@ -333,6 +368,29 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 
 function formatCurrency(amount) {
   return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function populateTransactionDetails(transactionId) {
+  const relatedTransactions = originalTransactions.filter(
+    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
+  );
+
+  const mgFeeTransaction = relatedTransactions.find(transaction =>
+    transaction.description.includes("Greenhill Property Management Fee")
+  );
+
+  const fundsTransferredTransaction = relatedTransactions.find(transaction =>
+    transaction.description.includes("Funds Transferred")
+  );
+
+  if (mgFeeTransaction) {
+    document.querySelector('[data=mg-fee]').textContent = formatCurrency(mgFeeTransaction.amount);
+  }
+
+  if (fundsTransferredTransaction) {
+    document.querySelector('[data=funds-transferred]').textContent = formatCurrency(fundsTransferredTransaction.amount);
+    document.querySelector('[data=transfer-date]').textContent = fundsTransferredTransaction.transaction_date;
+  }
 }
 
 function convertTableToCSV($table) {
