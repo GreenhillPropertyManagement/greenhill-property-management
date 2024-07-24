@@ -43,10 +43,17 @@ document.addEventListener("DOMContentLoaded", function () {
     downloadCSV(csvData, "noi-data.csv");
   });
 
-  // Event listener for table row clicks
+  // Event listener for table row clicks to populate transaction details
   $(document).on('click', 'table[element="noi-table"] tbody tr', function () {
     const transactionId = $(this).attr('data-transaction-id');
     populateTransactionDetails(transactionId);
+  });
+
+  // Ensure that the modal opens when elements with element="modal" are clicked
+  $(document).on('click', '[element="modal"]', function () {
+    const modalId = $(this).attr('modal');
+    // Assuming a function openModal(modalId) exists to handle the modal opening
+    openModal(modalId);
   });
 });
 
@@ -230,138 +237,6 @@ function populateTable(transactions) {
       row.appendChild(paymentCell);
 
       tableBody.appendChild(row);
-    }
-  });
-}
-
-function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function populateTransactionDetails(transactionId) {
-  const relatedTransactions = originalTransactions.filter(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
-  );
-
-  const mgFeeTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Greenhill Property Management Fee")
-  );
-
-  const fundsTransferredTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Funds Transferred")
-  );
-
-  if (mgFeeTransaction) {
-    document.querySelector('[data=mg-fee]').textContent = formatCurrency(mgFeeTransaction.amount);
-  }
-
-  if (fundsTransferredTransaction) {
-    document.querySelector('[data=funds-transferred]').textContent = formatCurrency(fundsTransferredTransaction.amount);
-    document.querySelector('[data=transfer-date]').textContent = fundsTransferredTransaction.transaction_date;
-  }
-}
-
-/* Functions For Statements */
-
-function loadStatements(view, target, componentId) {
-  $.ajax({
-    url: localStorage.baseUrl + "api:rpDXPv3x/landlord_noi",
-    method: "GET",
-    dataType: "json",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    data: {
-      target: target,
-      view: view,
-    },
-    success: function (transactions) {
-      originalTransactions = transactions; // Store the original transactions
-      const statements = processStatements(transactions);
-      renderStatements(statements, transactions, componentId); // Pass the correct transactions array
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      console.error("Error fetching data:", textStatus, errorThrown);
-    },
-  });
-}
-
-function processStatements(transactions) {
-  let statements = {};
-
-  transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
-      const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
-      const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
-
-      if (!statements[monthYear]) {
-        statements[monthYear] = [];
-      }
-
-      statements[monthYear].push(transaction);
-    }
-  });
-
-  return statements;
-}
-
-function renderStatements(statements, allTransactions, componentId) {
-  const sortedMonths = Object.keys(statements).sort(
-    (a, b) => new Date(b) - new Date(a)
-  );
-  const $container = $(`${componentId} .dyn-container__noi-statements`);
-  const $sampleStatement = $(".noi-sample-wrapper .dyn-item__noi-statement"); // Globally select the sample statement
-
-  // Clear existing content in the container
-  $container.empty();
-
-  sortedMonths.forEach((monthYear) => {
-    const $statementClone = $sampleStatement.clone();
-
-    $statementClone
-      .find(".system-text__main.is--statement")
-      .text(`Statement for ${formatMonthYear(monthYear)}`);
-
-    // Attach click event to statement item
-    $statementClone.click(function () {
-      $(`${componentId} .noi-ledger-tab`).click(); // Use componentId to target specific tab
-      populateTableWithTransactions(allTransactions, monthYear, componentId); // Pass the componentId
-    });
-
-    $container.append($statementClone);
-  });
-}
-
-function formatMonthYear(monthYear) {
-  const [year, month] = monthYear.split("-");
-  return `${new Date(year, month - 1).toLocaleString("default", {
-    month: "long",
-  })} ${year}`;
-}
-
-function populateTableWithTransactions(transactions, monthYear, componentId) {
-  const $tableBody = $(`${componentId} [element="noi-table"] tbody`);
-  $tableBody.empty(); // Clear existing rows
-
-  transactions.forEach((transaction) => {
-    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
-    const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
-
-    if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
-      const $row = $("<tr>");
-
-      // Add data attributes to the row
-      $row.attr('element', 'modal');
-      $row.attr('modal', 'transaction-detail-modal');
-      $row.attr('data-transaction-id', transaction.transaction_id);
-
-      $row.append($("<td>").text(transaction.transaction_date));
-      $row.append($("<td>").text(transaction.street));
-      $row.append($("<td>").text(transaction.unit_name));
-      $row.append($("<td>").text(transaction.tenant_info.display_name));
-      $row.append($("<td>").text(formatCurrency(transaction.amount)));
-
-      $tableBody.append($row);
     }
   });
 }
