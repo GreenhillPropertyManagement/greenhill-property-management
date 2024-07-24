@@ -104,25 +104,17 @@ function processTransactions(transactions) {
   let monthlyData = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
-      let month = transaction.transaction_date.substr(0, 7);
-      if (!monthlyData[month]) {
-        monthlyData[month] = { payments: 0, expenses: 0 };
-      }
+    let month = transaction.transaction_date.substr(0, 7);
+    if (!monthlyData[month]) {
+      monthlyData[month] = { payments: 0, expenses: 0 };
+    }
 
-      let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-      if (
-        transaction.recipient_type === "tenant" &&
-        transaction.type === "payment"
-      ) {
-        monthlyData[month].payments += amount;
-      } else if (
-        transaction.recipient_type === "landlord" &&
-        (transaction.type === "charge" || transaction.type === "credit")
-      ) {
-        monthlyData[month].expenses += amount;
-      }
+    if (transaction.recipient_type === "tenant" && transaction.type === "payment" && transaction.description === "Payment Successful") {
+      monthlyData[month].payments += amount;
+    } else if (transaction.recipient_type === "landlord" && transaction.type === "charge") {
+      monthlyData[month].expenses += amount;
     }
   });
 
@@ -238,7 +230,7 @@ function formatCurrency(amount) {
 }
 
 function showTransactionDetailModal() {
-  $('.modal__block').css('display', 'block');
+  $('.modal__block').css('display', 'flex');
   $('.modal__block > *').css('display', 'none');
   $('#transaction-detail-modal').css('display', 'block');
 }
