@@ -1,6 +1,4 @@
 var myChart = null;
-var originalTransactions = [];
-
 document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
   $("#dashboard").click(function () {
@@ -42,13 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const csvData = convertTableToCSV($('[element="noi-table"]'));
     downloadCSV(csvData, "noi-data.csv");
   });
-
-  // Event listener for table row clicks to populate transaction details and show modal
-  $(document).on('click', 'table[element="noi-table"] tbody tr', function () {
-    const transactionId = $(this).attr('data-transaction-id');
-    showTransactionDetailModal();
-    populateTransactionDetails(transactionId);
-  });
 });
 
 /* Functions For NOI Chart */
@@ -66,7 +57,6 @@ function loadNoiTransactions(view, target, canvas) {
       view: view,
     },
     success: function (transactions) {
-      originalTransactions = transactions; // Store the original transactions
       // Process the transactions and initialize the chart
       const processedData = processTransactions(transactions);
       initializeChart(processedData, canvas);
@@ -205,9 +195,6 @@ function populateTable(transactions) {
     if (transaction.description === "Payment Successful") {
       const row = document.createElement("tr");
 
-      // Add data attributes to the row
-      row.setAttribute('data-transaction-id', transaction.transaction_id);
-
       const dateCell = document.createElement("td");
       dateCell.textContent = transaction.transaction_date;
       row.appendChild(dateCell);
@@ -234,54 +221,7 @@ function populateTable(transactions) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function showTransactionDetailModal() {
-  $('.modal__block').css('display', 'block');
-  $('.modal__block > *').css('display', 'none');
-  $('#transaction-detail-modal').css('display', 'block');
-}
-
-function populateTransactionDetails(transactionId) {
-  // Clear existing values
-  $('[data=gross-payment]').text('');
-  $('[data=mg-fee]').text('');
-  $('[data=net-payment]').text('');
-  $('[data=transfer-date]').text('');
-
-  const clickedTransaction = originalTransactions.find(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description === "Payment Successful"
-  );
-
-  if (clickedTransaction) {
-    $('[data=gross-payment]').text(formatCurrency(clickedTransaction.amount));
-  }
-
-  const relatedTransactions = originalTransactions.filter(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
-  );
-
-  const mgFeeTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Greenhill Property Management Fee")
-  );
-
-  const fundsTransferredTransaction = relatedTransactions.find(transaction =>
-    transaction.description.includes("Funds Transferred")
-  );
-
-  if (mgFeeTransaction) {
-    $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
-  }
-
-  if (fundsTransferredTransaction) {
-    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
-
-    // Format the date as MM/DD/YYYY
-    const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
-    const formattedDate = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
-    $('[data=transfer-date]').text(formattedDate);
-  }
+  return '$' + Math.abs(Number(amount)).toFixed(2);
 }
 
 /* Functions For Statements */
@@ -299,7 +239,6 @@ function loadStatements(view, target, componentId) {
       view: view,
     },
     success: function (transactions) {
-      originalTransactions = transactions; // Store the original transactions
       const statements = processStatements(transactions);
       renderStatements(statements, transactions, componentId); // Pass the correct transactions array
     },
@@ -372,9 +311,6 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 
     if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
       const $row = $("<tr>");
-
-      // Add data attributes to the row
-      $row.attr('data-transaction-id', transaction.transaction_id);
 
       $row.append($("<td>").text(transaction.transaction_date));
       $row.append($("<td>").text(transaction.street));
