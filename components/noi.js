@@ -324,7 +324,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toFixed(2);
+  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function convertTableToCSV($table) {
