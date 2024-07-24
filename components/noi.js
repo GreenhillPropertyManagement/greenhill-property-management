@@ -230,7 +230,7 @@ function formatCurrency(amount) {
 }
 
 function showTransactionDetailModal() {
-  $('.modal__block').css('display', 'flex');
+  $('.modal__block').css('display', 'block');
   $('.modal__block > *').css('display', 'none');
   $('#transaction-detail-modal').css('display', 'block');
 }
