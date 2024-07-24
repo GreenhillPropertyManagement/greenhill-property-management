@@ -244,6 +244,14 @@ function showTransactionDetailModal() {
 }
 
 function populateTransactionDetails(transactionId) {
+  const clickedTransaction = originalTransactions.find(
+    (transaction) => transaction.transaction_id === transactionId && transaction.description === "Payment Successful"
+  );
+
+  if (clickedTransaction) {
+    $('[data=gross-payment]').text(formatCurrency(clickedTransaction.amount));
+  }
+
   const relatedTransactions = originalTransactions.filter(
     (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
   );
