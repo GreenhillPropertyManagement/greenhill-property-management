@@ -391,12 +391,12 @@ function populateTransactionDetails(transactionId) {
   );
 
   if (mgFeeTransaction) {
-    document.querySelector('[data=mg-fee]').textContent = formatCurrency(mgFeeTransaction.amount);
+    $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
   }
 
   if (fundsTransferredTransaction) {
-    document.querySelector('[data=funds-transferred]').textContent = formatCurrency(fundsTransferredTransaction.amount);
-    document.querySelector('[data=transfer-date]').textContent = fundsTransferredTransaction.transaction_date;
+    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=transfer-date]').text(fundsTransferredTransaction.transaction_date);
   }
 }
 
