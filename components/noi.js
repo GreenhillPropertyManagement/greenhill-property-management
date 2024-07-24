@@ -261,7 +261,7 @@ function populateTransactionDetails(transactionId) {
   }
 
   if (fundsTransferredTransaction) {
-    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
 
     // Format the date as MM/DD/YYYY
     const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
