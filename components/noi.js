@@ -195,6 +195,10 @@ function populateTable(transactions) {
     if (transaction.description === "Payment Successful") {
       const row = document.createElement("tr");
 
+      // Add data attributes to the row
+      row.setAttribute('element', 'modal');
+      row.setAttribute('modal', 'transaction-detail-modal');
+
       const dateCell = document.createElement("td");
       dateCell.textContent = transaction.transaction_date;
       row.appendChild(dateCell);
@@ -221,7 +225,7 @@ function populateTable(transactions) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toFixed(2);
+  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 /* Functions For Statements */
@@ -311,6 +315,10 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 
     if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
       const $row = $("<tr>");
+
+      // Add data attributes to the row
+      $row.attr('element', 'modal');
+      $row.attr('modal', 'transaction-detail-modal');
 
       $row.append($("<td>").text(transaction.transaction_date));
       $row.append($("<td>").text(transaction.street));
