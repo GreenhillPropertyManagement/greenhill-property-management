@@ -212,12 +212,16 @@ function populateTable(transactions) {
       row.appendChild(tenantCell);
 
       const paymentCell = document.createElement("td");
-      paymentCell.textContent = transaction.amount;
+      paymentCell.textContent = formatCurrency(transaction.amount);
       row.appendChild(paymentCell);
 
       tableBody.appendChild(row);
     }
   });
+}
+
+function formatCurrency(amount) {
+  return '$' + Number(amount).toFixed(2);
 }
 
 /* Functions For Statements */
@@ -312,7 +316,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
       $row.append($("<td>").text(transaction.tenant_info.display_name));
-      $row.append($("<td>").text(transaction.amount));
+      $row.append($("<td>").text(formatCurrency(transaction.amount)));
 
       $tableBody.append($row);
     }
@@ -320,7 +324,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 }
 
 function formatCurrency(amount) {
-  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  return '$' + Number(amount).toFixed(2);
 }
 
 function convertTableToCSV($table) {
