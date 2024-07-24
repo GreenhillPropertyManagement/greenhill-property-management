@@ -94,23 +94,25 @@ function processTransactions(transactions) {
   let monthlyData = {};
 
   transactions.forEach((transaction) => {
-    let month = transaction.transaction_date.substr(0, 7);
-    if (!monthlyData[month]) {
-      monthlyData[month] = { payments: 0, expenses: 0 };
-    }
+    if (transaction.description === "Payment Successful") {
+      let month = transaction.transaction_date.substr(0, 7);
+      if (!monthlyData[month]) {
+        monthlyData[month] = { payments: 0, expenses: 0 };
+      }
 
-    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+      let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-    if (
-      transaction.recipient_type === "tenant" &&
-      transaction.type === "payment"
-    ) {
-      monthlyData[month].payments += amount;
-    } else if (
-      transaction.recipient_type === "landlord" &&
-      (transaction.type === "charge" || transaction.type === "credit")
-    ) {
-      monthlyData[month].expenses += amount;
+      if (
+        transaction.recipient_type === "tenant" &&
+        transaction.type === "payment"
+      ) {
+        monthlyData[month].payments += amount;
+      } else if (
+        transaction.recipient_type === "landlord" &&
+        (transaction.type === "charge" || transaction.type === "credit")
+      ) {
+        monthlyData[month].expenses += amount;
+      }
     }
   });
 
@@ -124,7 +126,6 @@ function processTransactions(transactions) {
   );
 
   let processed = { labels, paymentsData, expensesData, profitsData };
-  //console.log("Processed data:", processed);
   return processed;
 }
 
@@ -247,14 +248,16 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
-    const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    if (transaction.description === "Payment Successful") {
+      const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
+      const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-    if (!statements[monthYear]) {
-      statements[monthYear] = [];
+      if (!statements[monthYear]) {
+        statements[monthYear] = [];
+      }
+
+      statements[monthYear].push(transaction);
     }
-
-    statements[monthYear].push(transaction);
   });
 
   return statements;
@@ -302,18 +305,16 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
-    if (transactionMonthYear === monthYear) {
-      if (transaction.description === "Payment Successful") {
-        const $row = $("<tr>");
+    if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
+      const $row = $("<tr>");
 
-        $row.append($("<td>").text(transaction.transaction_date));
-        $row.append($("<td>").text(transaction.street));
-        $row.append($("<td>").text(transaction.unit_name));
-        $row.append($("<td>").text(transaction.tenant_info.display_name));
-        $row.append($("<td>").text(transaction.amount));
+      $row.append($("<td>").text(transaction.transaction_date));
+      $row.append($("<td>").text(transaction.street));
+      $row.append($("<td>").text(transaction.unit_name));
+      $row.append($("<td>").text(transaction.tenant_info.display_name));
+      $row.append($("<td>").text(transaction.amount));
 
-        $tableBody.append($row);
-      }
+      $tableBody.append($row);
     }
   });
 }
