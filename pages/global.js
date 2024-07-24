@@ -294,6 +294,7 @@ function userRoleInterface () {
   
     // remove the nav links, not associated with the admins or employees
     $('#dashboard').remove();
+    $('#finance').remove();
     $('#my-profile').remove();
     $('#pay-rent').remove();
 
@@ -311,6 +312,7 @@ function userRoleInterface () {
 
       // remove the nav links, not associated with the Tenants
       $('#dashboard').remove();
+      $('#finance').remove();
       $('#users').remove();
       $('#create-user').remove();
       $('#properties').remove();
