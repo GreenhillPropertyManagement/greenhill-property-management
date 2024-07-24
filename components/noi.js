@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Property Page - NOI
   $("[component-link='noi']").click(function () {
-    $(".noi-chart-tab").click(); // default to chart view of compoenent
+    $(".noi-chart-tab").click(); // default to chart view of component
     $(".loader").css("display", "flex");
     $(".noi__component").show();
     const urlParams = new URLSearchParams(window.location.search);
@@ -303,15 +303,17 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
     if (transactionMonthYear === monthYear) {
-      const $row = $("<tr>");
+      if (transaction.description === "Payment Successful") {
+        const $row = $("<tr>");
 
-      $row.append($("<td>").text(transaction.transaction_date));
-      $row.append($("<td>").text(transaction.street));
-      $row.append($("<td>").text(transaction.unit_name));
-      $row.append($("<td>").text(transaction.tenant_info.display_name));
-      $row.append($("<td>").text(transaction.amount));
+        $row.append($("<td>").text(transaction.transaction_date));
+        $row.append($("<td>").text(transaction.street));
+        $row.append($("<td>").text(transaction.unit_name));
+        $row.append($("<td>").text(transaction.tenant_info.display_name));
+        $row.append($("<td>").text(transaction.amount));
 
-      $tableBody.append($row);
+        $tableBody.append($row);
+      }
     }
   });
 }
