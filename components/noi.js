@@ -60,6 +60,8 @@ function loadNoiTransactions(view, target, canvas) {
       // Process the transactions and initialize the chart
       const processedData = processTransactions(transactions);
       initializeChart(processedData, canvas);
+      // Populate the table with transactions
+      populateTable(transactions);
     },
     complete: function () {
       $(".loader").hide();
@@ -113,12 +115,12 @@ function processTransactions(transactions) {
   });
 
   let labels = Object.keys(monthlyData).map(
-    (key) => `${monthName(parseInt(key.split("-")[1]))} ${key.split("-")[0]}`,
+    (key) => `${monthName(parseInt(key.split("-")[1]))} ${key.split("-")[0]}`
   );
   let paymentsData = Object.values(monthlyData).map((data) => data.payments);
   let expensesData = Object.values(monthlyData).map((data) => data.expenses);
   let profitsData = paymentsData.map(
-    (payment, index) => payment - expensesData[index],
+    (payment, index) => payment - expensesData[index]
   );
 
   let processed = { labels, paymentsData, expensesData, profitsData };
@@ -128,7 +130,7 @@ function processTransactions(transactions) {
 
 function initializeChart(
   { labels, paymentsData, expensesData, profitsData },
-  chartId,
+  chartId
 ) {
   const ctx = document.getElementById(chartId).getContext("2d");
 
@@ -183,6 +185,39 @@ function initializeChart(
   });
 }
 
+// New function to populate the table
+function populateTable(transactions) {
+  const tableBody = document.querySelector('table[element="noi-table"] tbody');
+  tableBody.innerHTML = ''; // Clear existing table rows
+
+  transactions.forEach((transaction) => {
+    if (transaction.description === "Payment Successful") {
+      const row = document.createElement("tr");
+
+      const dateCell = document.createElement("td");
+      dateCell.textContent = transaction.transaction_date;
+      row.appendChild(dateCell);
+
+      const propertyCell = document.createElement("td");
+      propertyCell.textContent = transaction.street;
+      row.appendChild(propertyCell);
+
+      const unitCell = document.createElement("td");
+      unitCell.textContent = transaction.unit_name;
+      row.appendChild(unitCell);
+
+      const tenantCell = document.createElement("td");
+      tenantCell.textContent = transaction.tenant_info.display_name;
+      row.appendChild(tenantCell);
+
+      const paymentCell = document.createElement("td");
+      paymentCell.textContent = transaction.amount;
+      row.appendChild(paymentCell);
+
+      tableBody.appendChild(row);
+    }
+  });
+}
 
 /* Functions For Statements */
 
@@ -227,7 +262,7 @@ function processStatements(transactions) {
 
 function renderStatements(statements, allTransactions, componentId) {
   const sortedMonths = Object.keys(statements).sort(
-    (a, b) => new Date(b) - new Date(a),
+    (a, b) => new Date(b) - new Date(a)
   );
   const $container = $(`${componentId} .dyn-container__noi-statements`);
   const $sampleStatement = $(".noi-sample-wrapper .dyn-item__noi-statement"); // Globally select the sample statement
@@ -260,7 +295,7 @@ function formatMonthYear(monthYear) {
 }
 
 function populateTableWithTransactions(transactions, monthYear, componentId) {
-  const $tableBody = $('[element="noi-table"] tbody');
+  const $tableBody = $(`${componentId} [element="noi-table"] tbody`);
   $tableBody.empty(); // Clear existing rows
 
   transactions.forEach((transaction) => {
@@ -268,35 +303,15 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
     if (transactionMonthYear === monthYear) {
-      const formattedChargeAmount = transaction.type === "charge" ? formatCurrency(transaction.amount) : "";
-      const formattedCreditAmount = (transaction.type === "credit" || transaction.type === "payment") ? formatCurrency(transaction.amount) : "";
-
       const $row = $("<tr>");
-      $row.append($("<td>").text(transactionMonthYear));
+
       $row.append($("<td>").text(transaction.transaction_date));
-      $row.append($("<td>").text(transaction.type));
-      $row.append($("<td>").text(transaction.description));
-      $row.append($("<td>").text(formattedChargeAmount));
-      $row.append($("<td>").text(formattedCreditAmount));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
-
-      // Check if the row is a charge type and add class and data attribute
-      if (transaction.type === "charge") {
-        $row.addClass("charge-row");
-        $row.data("invoice-url", transaction.invoice_url);
-        $row.css("cursor", "pointer"); // Change cursor to pointer for charge rows
-      }
+      $row.append($("<td>").text(transaction.tenant_info.display_name));
+      $row.append($("<td>").text(transaction.amount));
 
       $tableBody.append($row);
-    }
-  });
-
-  // Add click event listener for charge rows
-  $(".charge-row").on("click", function () {
-    const invoiceUrl = $(this).data("invoice-url");
-    if (invoiceUrl) {
-      window.open(invoiceUrl, "_blank");
     }
   });
 }
