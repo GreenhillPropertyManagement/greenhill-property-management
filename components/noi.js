@@ -264,6 +264,8 @@ function populateTransactionDetails(transactionId) {
 
   if (mgFeeTransaction) {
     $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
+  } else {
+    $('[data=mg-fee]').text('Pending');
   }
 
   if (fundsTransferredTransaction) {
@@ -273,6 +275,9 @@ function populateTransactionDetails(transactionId) {
     const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
     const formattedDate = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
     $('[data=transfer-date]').text(formattedDate);
+  } else {
+    $('[data=net-payment]').text('Pending');
+    $('[data=transfer-date]').text('Pending');
   }
 }
 
