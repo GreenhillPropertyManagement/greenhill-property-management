@@ -261,8 +261,12 @@ function populateTransactionDetails(transactionId) {
   }
 
   if (fundsTransferredTransaction) {
-    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
-    $('[data=transfer-date]').text(fundsTransferredTransaction.transaction_date);
+    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
+
+    // Format the date as MM/DD/YYYY
+    const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
+    const formattedDate = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
+    $('[data=transfer-date]').text(formattedDate);
   }
 }
 
