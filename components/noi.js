@@ -261,7 +261,7 @@ function populateTransactionDetails(transactionId) {
   }
 
   if (fundsTransferredTransaction) {
-    $('[data=funds-transferred]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
     $('[data=transfer-date]').text(fundsTransferredTransaction.transaction_date);
   }
 }
