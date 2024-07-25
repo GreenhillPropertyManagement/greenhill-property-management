@@ -373,7 +373,9 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       // Add data attributes to the row
       $row.attr('data-transaction-id', transaction.transaction_id);
 
-      $row.append($("<td>").text(transaction.transaction_date));
+      // Format the date as MM/DD/YYYY
+      const formattedDate = ('0' + (transactionDate.getMonth() + 1)).slice(-2) + '/' + ('0' + transactionDate.getDate()).slice(-2) + '/' + transactionDate.getFullYear();
+      $row.append($("<td>").text(formattedDate));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
       $row.append($("<td>").text(transaction.tenant_info.display_name));
