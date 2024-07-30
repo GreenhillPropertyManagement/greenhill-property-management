@@ -26,57 +26,63 @@ function initializeApp() {
     $('[data="profile_img"]').attr('src', localStorage.profileImage);
   }
 
-  /* Global Ajax Errors Handling */
-  $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
-    // Retrieve the error code and response text
-    var errorCode = jqXHR.status;
-    var errorMessage = jqXHR.responseText;
+/* Global Ajax Errors Handling */
+$(document).ajaxError(function(event, jqXHR, settings, thrownError) {
+  // Retrieve the error code and response text
+  var errorCode = jqXHR.status;
+  var errorMessage = jqXHR.responseText;
 
-    // Try to parse the responseText to JSON if the API response is JSON
-    try {
-        var responseJson = JSON.parse(jqXHR.responseText);
-        errorMessage = responseJson.message || responseJson.error || errorMessage;
-    } catch (e) {
-        // responseText wasn't JSON, use the raw responseText
-    }
+  // Try to parse the responseText to JSON if the API response is JSON
+  try {
+      var responseJson = JSON.parse(jqXHR.responseText);
+      errorMessage = responseJson.message || responseJson.error || errorMessage;
+  } catch (e) {
+      // responseText wasn't JSON, use the raw responseText
+  }
 
-    // Check if the error is a 401 Unauthorized
-    if (errorCode === 401 && errorMessage.includes("The token expired")) {
-        alert('Session Expired');
-        window.location.href = '/app/login'; // Update this to your login page URL
-        localStorage.clear();
-    } else {
-        alert("Error " + errorCode + ": " + errorMessage);
-    }
+  // Check if the error is a 401 Unauthorized or 500 with the specific message
+  if ((errorCode === 401 && errorMessage.includes("The token expired")) || 
+      (errorCode === 500 && errorMessage.includes("Unable to locate auth: extras.user_id"))) {
+      alert('Session Expired');
+      localStorage.clear();
+      window.location.href = '/app/login'; // Update this to your login page URL
+  } else if (errorMessage.includes("Unable to locate auth: extras.user_id")) {
+      // Clear local storage
+      localStorage.clear();
+      // Simulate a click on the logout button
+      $('.logout_button').click();
+  } else {
+      alert("Error " + errorCode + ": " + errorMessage);
+  }
 
-    // Prepare the error data as a single JSON object
-    var errorData = JSON.stringify({
-        event_type: event.type,
-        endpoint: settings.url,
-        error_code: errorCode,
-        error_message: errorMessage,
-        xhr_status: jqXHR.statusText,
-        xhr_responseText: jqXHR.responseText,
-        request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
-        response_data: jqXHR.responseText,
-        settings_url: settings.url,
-        user: localStorage.displayName
-    });
-
-    // Send the error data to your server
-    $.ajax({
-        type: "POST",
-        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
-        contentType: "application/json",
-        data: errorData, // Send the stringified JSON object
-        success: function(response) {
-        console.log("Error logged successfully");
-        },
-        error: function(response) {
-        console.log("Failed to log error");
-        }
-        });
+  // Prepare the error data as a single JSON object
+  var errorData = JSON.stringify({
+      event_type: event.type,
+      endpoint: settings.url,
+      error_code: errorCode,
+      error_message: errorMessage,
+      xhr_status: jqXHR.statusText,
+      xhr_responseText: jqXHR.responseText,
+      request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
+      response_data: jqXHR.responseText,
+      settings_url: settings.url,
+      user: localStorage.displayName
   });
+
+  // Send the error data to your server
+  $.ajax({
+      type: "POST",
+      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
+      contentType: "application/json",
+      data: errorData, // Send the stringified JSON object
+      success: function(response) {
+          console.log("Error logged successfully");
+      },
+      error: function(response) {
+          console.log("Failed to log error");
+      }
+  });
+});
 
 
   /* ---  log out func ---- */
