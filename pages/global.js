@@ -45,7 +45,7 @@ $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
       (errorCode === 500 && errorMessage.includes("Unable to locate auth: extras.user_id"))) {
       alert('Session Expired');
       localStorage.clear();
-      window.location.href = '/app/login'; // Update this to your login page URL
+      $('.logout_button').click();
   } else if (errorMessage.includes("Unable to locate auth: extras.user_id")) {
       // Clear local storage
       localStorage.clear();
