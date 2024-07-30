@@ -35,11 +35,15 @@ function initializeApp() {
     window.location.href = "/app/login";
   });
 
-  /* Global Ajax Errors Handling */
+    /* Global Ajax Errors Handling */
   $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
     // Retrieve the error code and response text
     var errorCode = jqXHR.status;
     var errorMessage = jqXHR.responseText;
+
+    console.log("AJAX Error Detected:");
+    console.log("Error Code: " + errorCode);
+    console.log("Error Message: " + errorMessage);
 
     // Try to parse the responseText to JSON if the API response is JSON
     try {
@@ -49,17 +53,30 @@ function initializeApp() {
         // responseText wasn't JSON, use the raw responseText
     }
 
+    console.log("Parsed Error Message: " + errorMessage);
+
+    // Function to handle logout
+    function logoutUser() {
+        localStorage.clear();
+        var logoutButton = $('.logout_button');
+        if (logoutButton.length > 0) {
+            console.log("Logout button found. Triggering click event.");
+            logoutButton.click();
+        } else {
+            console.log("Logout button not found. Redirecting to logout URL.");
+            window.location.href = "/app/login";
+            localStorage.clear();
+        }
+    }
+
     // Check if the error is a 401 Unauthorized or 500 with the specific message
     if ((errorCode === 401 && (errorMessage.includes("The token expired") || errorMessage.includes("invalid token"))) || 
         (errorCode === 500 && errorMessage.includes("Unable to locate auth: extras.user_id"))) {
         alert('Session Expired');
-        localStorage.clear();
-        $('.logout_button').click();
+        logoutUser();
     } else if (errorMessage.includes("Unable to locate auth: extras.user_id")) {
-        // Clear local storage
-        localStorage.clear();
-        // Simulate a click on the logout button
-        $('.logout_button').click();
+        alert('Unable to locate auth: extras.user_id');
+        logoutUser();
     } else {
         alert("Error " + errorCode + ": " + errorMessage);
     }
