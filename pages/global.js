@@ -70,7 +70,7 @@ function initializeApp() {
     }
 
     // Check if the error is a 401 Unauthorized or 500 with the specific message
-    if ((errorCode === 401 && (errorMessage.includes("The token expired") || errorMessage.includes("invalid token"))) || 
+    if ((errorCode === 401 && (errorMessage.includes("This token is expired.") || errorMessage.includes("Invalid token"))) || 
         (errorCode === 500 && errorMessage.includes("Unable to locate auth: extras.user_id"))) {
         alert('Session Expired');
         logoutUser();
