@@ -79,35 +79,36 @@ function initializeApp() {
         logoutUser();
     } else {
         alert("Error " + errorCode + ": " + errorMessage);
+        // Prepare the error data as a single JSON object
+        var errorData = JSON.stringify({
+          event_type: event.type,
+          endpoint: settings.url,
+          error_code: errorCode,
+          error_message: errorMessage,
+          xhr_status: jqXHR.statusText,
+          xhr_responseText: jqXHR.responseText,
+          request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
+          response_data: jqXHR.responseText,
+          settings_url: settings.url,
+          user: localStorage.displayName
+      });
+
+      // Send the error data to your server
+      $.ajax({
+          type: "POST",
+          url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
+          contentType: "application/json",
+          data: errorData, // Send the stringified JSON object
+          success: function(response) {
+              console.log("Error logged successfully");
+          },
+          error: function(response) {
+              console.log("Failed to log error");
+          }
+      });
     }
 
-    // Prepare the error data as a single JSON object
-    var errorData = JSON.stringify({
-        event_type: event.type,
-        endpoint: settings.url,
-        error_code: errorCode,
-        error_message: errorMessage,
-        xhr_status: jqXHR.statusText,
-        xhr_responseText: jqXHR.responseText,
-        request_data: settings.data ? JSON.stringify(settings.data) : '', // Stringify if the data is an object
-        response_data: jqXHR.responseText,
-        settings_url: settings.url,
-        user: localStorage.displayName
-    });
 
-    // Send the error data to your server
-    $.ajax({
-        type: "POST",
-        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
-        contentType: "application/json",
-        data: errorData, // Send the stringified JSON object
-        success: function(response) {
-            console.log("Error logged successfully");
-        },
-        error: function(response) {
-            console.log("Failed to log error");
-        }
-    });
   });
 
 
