@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#finance").click(function () {
     $(".loader").css("display", "flex");
     $(".noi__component").show();
+    $("[noi-ledger='back-button']").click();
+
     let target = localStorage.userId;
     loadNoiTransactions("user", target, "dashboard-chart");
     loadStatements("user", target, "#landlord-dash-comp");
