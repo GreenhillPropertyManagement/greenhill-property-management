@@ -206,6 +206,10 @@ function populateTable(transactions) {
       dateCell.textContent = transaction.transaction_date;
       row.appendChild(dateCell);
 
+      const tenantCell = document.createElement("td");
+      tenantCell.textContent = transaction.tenant_info.display_name;
+      row.appendChild(tenantCell);
+
       const propertyCell = document.createElement("td");
       propertyCell.textContent = transaction.street;
       row.appendChild(propertyCell);
@@ -213,10 +217,6 @@ function populateTable(transactions) {
       const unitCell = document.createElement("td");
       unitCell.textContent = transaction.unit_name;
       row.appendChild(unitCell);
-
-      const tenantCell = document.createElement("td");
-      tenantCell.textContent = transaction.tenant_info.display_name;
-      row.appendChild(tenantCell);
 
       const paymentCell = document.createElement("td");
       paymentCell.textContent = formatCurrency(transaction.amount);
@@ -378,9 +378,10 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       // Format the date as MM/DD/YYYY
       const formattedDate = ('0' + (transactionDate.getMonth() + 1)).slice(-2) + '/' + ('0' + transactionDate.getDate()).slice(-2) + '/' + transactionDate.getFullYear();
       $row.append($("<td>").text(formattedDate));
+      
+      $row.append($("<td>").text(transaction.tenant_info.display_name));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
-      $row.append($("<td>").text(transaction.tenant_info.display_name));
       $row.append($("<td>").text(formatCurrency(transaction.amount)));
 
       $tableBody.append($row);
