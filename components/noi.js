@@ -383,11 +383,22 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       );
 
       const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-        const currentDate = new Date(current.created_at + 'T00:00:00-05:00'); // Adjust for EST timezone
-        return currentDate < new Date(earliest.created_at + 'T00:00:00-05:00') ? current : earliest;
+        const currentDate = new Date(current.created_at); // Convert Unix timestamp to date
+        const earliestDate = new Date(earliest.created_at); // Convert Unix timestamp to date
+
+        if (isNaN(currentDate) || isNaN(earliestDate)) {
+          console.error('Invalid date format:', { currentDate: current.created_at, earliestDate: earliest.created_at });
+        }
+
+        return currentDate < earliestDate ? current : earliest;
       }, relatedTransactions[0]);
 
-      const earliestDate = new Date(earliestTransaction.created_at + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+      const earliestDate = new Date(earliestTransaction.created_at); // Convert Unix timestamp to date
+
+      if (isNaN(earliestDate)) {
+        console.error('Invalid earliest date:', earliestTransaction.created_at);
+        return;
+      }
 
       const $row = $("<tr>");
 
@@ -406,10 +417,6 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       $tableBody.append($row);
     }
   });
-}
-
-function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // Function to filter transactions by selected month
