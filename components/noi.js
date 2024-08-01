@@ -1,5 +1,6 @@
 var myChart = null;
 var originalTransactions = [];
+var selectedMonthYear = null; // Variable to store the selected month and year
 
 document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
@@ -41,8 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Download NOI CSV button click
   $('[element="download-noi-csv"]').click(function () {
-    const csvData = convertTableToCSV($('[element="noi-table"]'));
-    downloadCSV(csvData, "noi-data.csv");
+    if (selectedMonthYear) {
+      const filteredTransactions = filterTransactionsByMonth(selectedMonthYear);
+      const csvData = convertTransactionsToCSV(filteredTransactions);
+      downloadCSV(csvData, `noi-data-${selectedMonthYear}.csv`);
+    } else {
+      alert("Please select a statement month first.");
+    }
   });
 
   // Event listener for table row clicks to populate transaction details and show modal
@@ -346,6 +352,7 @@ function renderStatements(statements, allTransactions, componentId) {
 
     // Attach click event to statement item
     $statementClone.click(function () {
+      selectedMonthYear = monthYear; // Update selected month and year
       $(`${componentId} .noi-ledger-tab`).click(); // Use componentId to target specific tab
       populateTableWithTransactions(allTransactions, monthYear, componentId); // Pass the componentId
     });
@@ -393,16 +400,26 @@ function formatCurrency(amount) {
   return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function convertTableToCSV($table) {
-  let csv = [];
-  $table.find("tr").each(function () {
-    let row = [];
-    $(this)
-      .find("th, td")
-      .each(function () {
-        let text = $(this).text().replace(/"/g, '""'); // Handle quotes
-        row.push(`"${text}"`);
-      });
+// Function to filter transactions by selected month
+function filterTransactionsByMonth(monthYear) {
+  return originalTransactions.filter(transaction => {
+    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00');
+    const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
+    return transactionMonthYear === monthYear && transaction.description === "Payment Successful";
+  });
+}
+
+// Function to convert filtered transactions to CSV
+function convertTransactionsToCSV(transactions) {
+  let csv = ["Date,Tenant,Property,Unit,Gross Payment"];
+  transactions.forEach(transaction => {
+    let row = [
+      `"${transaction.transaction_date}"`,
+      `"${transaction.tenant_info.display_name}"`,
+      `"${transaction.street}"`,
+      `"${transaction.unit_name}"`,
+      `"${formatCurrency(transaction.amount)}"`
+    ];
     csv.push(row.join(","));
   });
   return csv.join("\n");
