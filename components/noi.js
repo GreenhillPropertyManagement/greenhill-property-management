@@ -119,7 +119,7 @@ function processTransactions(transactions) {
 
     let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-    if (transaction.recipient_type === "tenant" && transaction.type === "payment" && transaction.description === "Payment Successful") {
+    if (transaction.recipient_type === "tenant" && transaction.type === "payment") {
       monthlyData[month].payments += amount;
     } else if (transaction.recipient_type === "landlord" && transaction.type === "charge") {
       monthlyData[month].expenses += amount;
@@ -202,7 +202,7 @@ function populateTable(transactions) {
   tableBody.innerHTML = ''; // Clear existing table rows
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
+    if (transaction.type === "payment") {
       const row = document.createElement("tr");
 
       // Add data attributes to the row
@@ -251,7 +251,7 @@ function populateTransactionDetails(transactionId) {
   $('[data=transfer-date]').text('');
 
   const clickedTransaction = originalTransactions.find(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description === "Payment Successful"
+    (transaction) => transaction.transaction_id === transactionId && transaction.type === "payment"
   );
 
   if (clickedTransaction) {
@@ -259,7 +259,7 @@ function populateTransactionDetails(transactionId) {
   }
 
   const relatedTransactions = originalTransactions.filter(
-    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
+    (transaction) => transaction.transaction_id === transactionId && transaction.type !== "payment"
   );
 
   const mgFeeTransaction = relatedTransactions.find(transaction =>
@@ -318,7 +318,7 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful") {
+    if (transaction.type === "payment") {
       const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
       const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
@@ -376,7 +376,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
-    if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
+    if (transactionMonthYear === monthYear && transaction.type === "payment") {
       // Find the earliest created_at date for the transaction
       const relatedTransactions = originalTransactions.filter(
         (t) => t.transaction_id === transaction.transaction_id
@@ -424,7 +424,7 @@ function filterTransactionsByMonth(monthYear) {
   return originalTransactions.filter(transaction => {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00');
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
-    return transactionMonthYear === monthYear && transaction.description === "Payment Successful";
+    return transactionMonthYear === monthYear && transaction.type === "payment";
   });
 }
 
