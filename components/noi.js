@@ -377,13 +377,25 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
     if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
+      // Find the earliest created_at date for the transaction
+      const relatedTransactions = originalTransactions.filter(
+        (t) => t.transaction_id === transaction.transaction_id
+      );
+
+      const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
+        const currentDate = new Date(current.created_at + 'T00:00:00-05:00'); // Adjust for EST timezone
+        return currentDate < new Date(earliest.created_at + 'T00:00:00-05:00') ? current : earliest;
+      }, relatedTransactions[0]);
+
+      const earliestDate = new Date(earliestTransaction.created_at + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+
       const $row = $("<tr>");
 
       // Add data attributes to the row
       $row.attr('data-transaction-id', transaction.transaction_id);
 
       // Format the date as MM/DD/YYYY
-      const formattedDate = ('0' + (transactionDate.getMonth() + 1)).slice(-2) + '/' + ('0' + transactionDate.getDate()).slice(-2) + '/' + transactionDate.getFullYear();
+      const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
       $row.append($("<td>").text(formattedDate));
       
       $row.append($("<td>").text(transaction.tenant_info.display_name));
