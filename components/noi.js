@@ -213,7 +213,7 @@ function populateTable(transactions) {
       row.appendChild(dateCell);
 
       const tenantCell = document.createElement("td");
-      tenantCell.textContent = transaction.tenant_info.display_name;
+      tenantCell.textContent = transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A';
       row.appendChild(tenantCell);
 
       const propertyCell = document.createElement("td");
@@ -409,7 +409,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
       $row.append($("<td>").text(formattedDate));
       
-      $row.append($("<td>").text(transaction.tenant_info.display_name));
+      $row.append($("<td>").text(transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A'));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
       $row.append($("<td>").text(formatCurrency(transaction.amount)));
