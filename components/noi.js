@@ -119,7 +119,7 @@ function processTransactions(transactions) {
 
     let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
 
-    if (transaction.recipient_type === "tenant" && transaction.type === "payment") {
+    if (transaction.recipient_type === "tenant" && transaction.type === "payment" && transaction.description === "Payment Successful") {
       monthlyData[month].payments += amount;
     } else if (transaction.recipient_type === "landlord" && transaction.type === "charge") {
       monthlyData[month].expenses += amount;
@@ -202,7 +202,7 @@ function populateTable(transactions) {
   tableBody.innerHTML = ''; // Clear existing table rows
 
   transactions.forEach((transaction) => {
-    if (transaction.type === "payment") {
+    if (transaction.description === "Payment Successful") {
       const row = document.createElement("tr");
 
       // Add data attributes to the row
@@ -213,7 +213,7 @@ function populateTable(transactions) {
       row.appendChild(dateCell);
 
       const tenantCell = document.createElement("td");
-      tenantCell.textContent = transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A';
+      tenantCell.textContent = transaction.tenant_info.display_name;
       row.appendChild(tenantCell);
 
       const propertyCell = document.createElement("td");
@@ -251,7 +251,7 @@ function populateTransactionDetails(transactionId) {
   $('[data=transfer-date]').text('');
 
   const clickedTransaction = originalTransactions.find(
-    (transaction) => transaction.transaction_id === transactionId && transaction.type === "payment"
+    (transaction) => transaction.transaction_id === transactionId && transaction.description === "Payment Successful"
   );
 
   if (clickedTransaction) {
@@ -259,7 +259,7 @@ function populateTransactionDetails(transactionId) {
   }
 
   const relatedTransactions = originalTransactions.filter(
-    (transaction) => transaction.transaction_id === transactionId && transaction.type !== "payment"
+    (transaction) => transaction.transaction_id === transactionId && transaction.description !== "Payment Successful"
   );
 
   const mgFeeTransaction = relatedTransactions.find(transaction =>
@@ -318,7 +318,7 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.type === "payment") {
+    if (transaction.description === "Payment Successful") {
       const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
       const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
@@ -376,7 +376,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
-    if (transactionMonthYear === monthYear && transaction.type === "payment") {
+    if (transactionMonthYear === monthYear && transaction.description === "Payment Successful") {
       // Find the earliest created_at date for the transaction
       const relatedTransactions = originalTransactions.filter(
         (t) => t.transaction_id === transaction.transaction_id
@@ -409,7 +409,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
       $row.append($("<td>").text(formattedDate));
       
-      $row.append($("<td>").text(transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A'));
+      $row.append($("<td>").text(transaction.tenant_info.display_name));
       $row.append($("<td>").text(transaction.street));
       $row.append($("<td>").text(transaction.unit_name));
       $row.append($("<td>").text(formatCurrency(transaction.amount)));
@@ -424,7 +424,7 @@ function filterTransactionsByMonth(monthYear) {
   return originalTransactions.filter(transaction => {
     const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00');
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
-    return transactionMonthYear === monthYear && transaction.type === "payment";
+    return transactionMonthYear === monthYear && transaction.description === "Payment Successful";
   });
 }
 
