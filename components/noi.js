@@ -203,7 +203,7 @@ function populateTable(transactions) {
 
   // Sort transactions based on transaction_date from most recent to oldest
   const sortedTransactions = transactions.filter((transaction) => transaction.description === "Payment Successful" || transaction.manually_entered)
-    .sort((a, b) => new Date(b.transaction_date + 'T00:00:00-05:00') - new Date(a.transaction_date + 'T00:00:00-05:00'));
+    .sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
 
   sortedTransactions.forEach((transaction) => {
     const relatedTransactions = originalTransactions.filter(
@@ -211,8 +211,8 @@ function populateTable(transactions) {
     );
 
     const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-      const currentDate = new Date(current.transaction_date + 'T00:00:00-05:00'); // Convert to date
-      const earliestDate = new Date(earliest.transaction_date + 'T00:00:00-05:00'); // Convert to date
+      const currentDate = new Date(current.transaction_date); // Convert to date
+      const earliestDate = new Date(earliest.transaction_date); // Convert to date
 
       if (isNaN(currentDate) || isNaN(earliestDate)) {
         console.error('Invalid date format:', { currentDate: current.transaction_date, earliestDate: earliest.transaction_date });
@@ -221,7 +221,7 @@ function populateTable(transactions) {
       return currentDate < earliestDate ? current : earliest;
     }, relatedTransactions[0]);
 
-    const earliestDate = new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00'); // Convert to date
+    const earliestDate = new Date(earliestTransaction.transaction_date); // Convert to date
 
     if (isNaN(earliestDate)) {
       console.error('Invalid earliest date:', earliestTransaction.transaction_date);
@@ -408,10 +408,10 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 
   // Filter and sort transactions based on the transaction date
   const filteredTransactions = transactions.filter((transaction) => {
-    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
+    const transactionDate = new Date(transaction.transaction_date); // Ensure the correct format
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
     return transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered);
-  }).sort((a, b) => new Date(b.transaction_date + 'T00:00:00-05:00') - new Date(a.transaction_date + 'T00:00:00-05:00'));
+  }).sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
 
   // Populate the table with sorted transactions
   filteredTransactions.forEach((transaction) => {
@@ -420,8 +420,8 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     );
 
     const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-      const currentDate = new Date(current.transaction_date + 'T00:00:00-05:00'); // Convert to date
-      const earliestDate = new Date(earliest.transaction_date + 'T00:00:00-05:00'); // Convert to date
+      const currentDate = new Date(current.transaction_date); // Convert to date
+      const earliestDate = new Date(earliest.transaction_date); // Convert to date
 
       if (isNaN(currentDate) || isNaN(earliestDate)) {
         console.error('Invalid date format:', { currentDate: current.transaction_date, earliestDate: earliest.transaction_date });
@@ -430,7 +430,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       return currentDate < earliestDate ? current : earliest;
     }, relatedTransactions[0]);
 
-    const earliestDate = new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00'); // Convert to date
+    const earliestDate = new Date(earliestTransaction.transaction_date); // Convert to date
 
     if (isNaN(earliestDate)) {
       console.error('Invalid earliest date:', earliestTransaction.transaction_date);
@@ -467,7 +467,6 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     $tableBody.append(row);
   });
 }
-
 // Function to filter transactions by selected month
 function filterTransactionsByMonth(monthYear) {
   return originalTransactions.filter(transaction => {
