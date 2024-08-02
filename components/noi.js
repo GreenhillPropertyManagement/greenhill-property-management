@@ -249,6 +249,7 @@ function populateTransactionDetails(transactionId) {
   $('[data=mg-fee]').text('');
   $('[data=net-payment]').text('');
   $('[data=transfer-date]').text('');
+  $('[data=balance-after-payment]').text('');
 
   const clickedTransaction = originalTransactions.find(
     (transaction) => transaction.transaction_id === transactionId && (transaction.description === "Payment Successful" || transaction.manually_entered)
@@ -256,6 +257,7 @@ function populateTransactionDetails(transactionId) {
 
   if (clickedTransaction) {
     $('[data=gross-payment]').text(formatCurrency(clickedTransaction.amount));
+    $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment));
   }
 
   const relatedTransactions = originalTransactions.filter(
