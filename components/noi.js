@@ -117,7 +117,7 @@ function processTransactions(transactions) {
       monthlyData[month] = { payments: 0, expenses: 0 };
     }
 
-    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+    let amount = Number(transaction.amount); // Convert amount to a number
 
     if (transaction.recipient_type === "tenant" && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
       monthlyData[month].payments += amount;
@@ -234,7 +234,14 @@ function populateTable(transactions) {
 }
 
 function formatCurrency(amount) {
-  return '$' + Math.abs(Number(amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const number = Number(amount);
+  const formattedNumber = number.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  return formattedNumber;
 }
 
 function showTransactionDetailModal() {
@@ -379,36 +386,13 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
     if (transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
-      // Find the earliest created_at date for the transaction
-      const relatedTransactions = originalTransactions.filter(
-        (t) => t.transaction_id === transaction.transaction_id
-      );
-
-      const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-        const currentDate = new Date(current.created_at); // Convert Unix timestamp to date
-        const earliestDate = new Date(earliest.created_at); // Convert Unix timestamp to date
-
-        if (isNaN(currentDate) || isNaN(earliestDate)) {
-          console.error('Invalid date format:', { currentDate: current.created_at, earliestDate: earliest.created_at });
-        }
-
-        return currentDate < earliestDate ? current : earliest;
-      }, relatedTransactions[0]);
-
-      const earliestDate = new Date(earliestTransaction.created_at); // Convert Unix timestamp to date
-
-      if (isNaN(earliestDate)) {
-        console.error('Invalid earliest date:', earliestTransaction.created_at);
-        return;
-      }
-
       const $row = $("<tr>");
 
       // Add data attributes to the row
       $row.attr('data-transaction-id', transaction.transaction_id);
 
       // Format the date as MM/DD/YYYY
-      const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
+      const formattedDate = ('0' + (transactionDate.getMonth() + 1)).slice(-2) + '/' + ('0' + transactionDate.getDate()).slice(-2) + '/' + transactionDate.getFullYear();
       $row.append($("<td>").text(formattedDate));
       
       $row.append($("<td>").text(transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A'));
