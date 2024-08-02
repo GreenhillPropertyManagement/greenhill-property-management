@@ -287,7 +287,12 @@ function populateTransactionDetails(transactionId) {
 
   if (clickedTransaction) {
     $('[data=gross-payment]').text(formatCurrency(clickedTransaction.amount));
-    $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment));
+
+    if (clickedTransaction.balance_after_payment !== null) {
+      $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment));
+    } else {
+      $('[data=balance-after-payment]').text('N/A');
+    }
   }
 
   const relatedTransactions = originalTransactions.filter(
@@ -320,7 +325,6 @@ function populateTransactionDetails(transactionId) {
     $('[data=transfer-date]').text('Pending');
   }
 }
-
 /* Functions For Statements */
 
 function loadStatements(view, target, componentId) {
