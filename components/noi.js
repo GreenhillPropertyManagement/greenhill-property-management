@@ -208,8 +208,8 @@ function populateTable(transactions) {
       );
 
       const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-        const currentDate = new Date(current.transaction_date); // Convert to date
-        const earliestDate = new Date(earliest.transaction_date); // Convert to date
+        const currentDate = new Date(current.transaction_date + 'T00:00:00-05:00'); // Convert to date
+        const earliestDate = new Date(earliest.transaction_date + 'T00:00:00-05:00'); // Convert to date
 
         if (isNaN(currentDate) || isNaN(earliestDate)) {
           console.error('Invalid date format:', { currentDate: current.transaction_date, earliestDate: earliest.transaction_date });
@@ -218,7 +218,7 @@ function populateTable(transactions) {
         return currentDate < earliestDate ? current : earliest;
       }, relatedTransactions[0]);
 
-      const earliestDate = new Date(earliestTransaction.transaction_date); // Convert to date
+      const earliestDate = new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00'); // Convert to date
 
       if (isNaN(earliestDate)) {
         console.error('Invalid earliest date:', earliestTransaction.transaction_date);
@@ -273,7 +273,6 @@ function showTransactionDetailModal() {
   $('.modal__block > *').css('display', 'none');
   $('#transaction-detail-modal').css('display', 'block');
 }
-
 function populateTransactionDetails(transactionId) {
   // Clear existing values
   $('[data=gross-payment]').text('');
@@ -415,8 +414,8 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       );
 
       const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-        const currentDate = new Date(current.transaction_date); // Convert to date
-        const earliestDate = new Date(earliest.transaction_date); // Convert to date
+        const currentDate = new Date(current.transaction_date + 'T00:00:00-05:00'); // Convert to date
+        const earliestDate = new Date(earliest.transaction_date + 'T00:00:00-05:00'); // Convert to date
 
         if (isNaN(currentDate) || isNaN(earliestDate)) {
           console.error('Invalid date format:', { currentDate: current.transaction_date, earliestDate: earliest.transaction_date });
@@ -425,7 +424,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
         return currentDate < earliestDate ? current : earliest;
       }, relatedTransactions[0]);
 
-      const earliestDate = new Date(earliestTransaction.transaction_date); // Convert to date
+      const earliestDate = new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00'); // Convert to date
 
       if (isNaN(earliestDate)) {
         console.error('Invalid earliest date:', earliestTransaction.transaction_date);
