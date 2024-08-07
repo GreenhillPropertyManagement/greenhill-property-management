@@ -402,20 +402,23 @@ function renderStatements(statements, allTransactions, componentId) {
   $container.empty();
 
   sortedMonths.forEach((monthYear) => {
-    const $statementClone = $sampleStatement.clone();
+    // Check if there are transactions for this month
+    if (statements[monthYear] && statements[monthYear].length > 0) {
+      const $statementClone = $sampleStatement.clone();
 
-    $statementClone
-      .find(".system-text__main.is--statement")
-      .text(`Statement for ${formatMonthYear(monthYear)}`);
+      $statementClone
+        .find(".system-text__main.is--statement")
+        .text(`Statement for ${formatMonthYear(monthYear)}`);
 
-    // Attach click event to statement item
-    $statementClone.click(function () {
-      selectedMonthYear = monthYear; // Update selected month and year
-      $(`${componentId} .noi-ledger-tab`).click(); // Use componentId to target specific tab
-      populateTableWithTransactions(allTransactions, monthYear, componentId); // Pass the componentId
-    });
+      // Attach click event to statement item
+      $statementClone.click(function () {
+        selectedMonthYear = monthYear; // Update selected month and year
+        $(`${componentId} .noi-ledger-tab`).click(); // Use componentId to target specific tab
+        populateTableWithTransactions(allTransactions, monthYear, componentId); // Pass the componentId
+      });
 
-    $container.append($statementClone);
+      $container.append($statementClone);
+    }
   });
 }
 
