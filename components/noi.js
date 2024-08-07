@@ -281,6 +281,8 @@ function populateTransactionDetails(transactionId) {
   $('[data=net-payment]').text('');
   $('[data=transfer-date]').text('');
   $('[data=balance-after-payment]').text('');
+  $('.transaction-description').text(''); // Clear existing description
+  $('.manual-entered-description').css('display', 'none'); // Hide by default
 
   const clickedTransaction = originalTransactions.find(
     (transaction) => transaction.transaction_id === transactionId && (transaction.description === "Payment Successful" || transaction.manually_entered)
@@ -293,6 +295,14 @@ function populateTransactionDetails(transactionId) {
       $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment)); // Keep balance after payment as is
     } else {
       $('[data=balance-after-payment]').text('N/A');
+    }
+
+    // Update the transaction description
+    $('.transaction-description').text(clickedTransaction.description);
+
+    // Show manual entered description div if transaction is manually entered
+    if (clickedTransaction.manually_entered) {
+      $('.manual-entered-description').css('display', 'flex');
     }
   }
 
