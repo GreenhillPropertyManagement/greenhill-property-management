@@ -249,7 +249,7 @@ function populateTable(transactions) {
       row.appendChild(unitCell);
 
       const paymentCell = document.createElement("td");
-      paymentCell.textContent = formatCurrency(transaction.amount);
+      paymentCell.textContent = formatCurrency(Math.abs(transaction.amount)); // Make amount positive
       row.appendChild(paymentCell);
 
       tableBody.appendChild(row);
@@ -258,7 +258,7 @@ function populateTable(transactions) {
 }
 
 function formatCurrency(amount) {
-  const number = Number(amount);
+  const number = Math.abs(Number(amount)); // Convert amount to absolute value
   const formattedNumber = number.toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -273,6 +273,7 @@ function showTransactionDetailModal() {
   $('.modal__block > *').css('display', 'none');
   $('#transaction-detail-modal').css('display', 'block');
 }
+
 function populateTransactionDetails(transactionId) {
   // Clear existing values
   $('[data=gross-payment]').text('');
@@ -286,10 +287,10 @@ function populateTransactionDetails(transactionId) {
   );
 
   if (clickedTransaction) {
-    $('[data=gross-payment]').text(formatCurrency(clickedTransaction.amount));
+    $('[data=gross-payment]').text(formatCurrency(Math.abs(clickedTransaction.amount))); // Make amount positive
 
     if (clickedTransaction.balance_after_payment !== null) {
-      $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment));
+      $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment)); // Keep balance after payment as is
     } else {
       $('[data=balance-after-payment]').text('N/A');
     }
@@ -308,13 +309,13 @@ function populateTransactionDetails(transactionId) {
   );
 
   if (mgFeeTransaction) {
-    $('[data=mg-fee]').text(formatCurrency(mgFeeTransaction.amount));
+    $('[data=mg-fee]').text(formatCurrency(Math.abs(mgFeeTransaction.amount))); // Make amount positive
   } else {
     $('[data=mg-fee]').text('Pending');
   }
 
   if (fundsTransferredTransaction) {
-    $('[data=net-payment]').text(formatCurrency(fundsTransferredTransaction.amount));
+    $('[data=net-payment]').text(formatCurrency(Math.abs(fundsTransferredTransaction.amount))); // Make amount positive
 
     // Format the date as MM/DD/YYYY
     const date = new Date(fundsTransferredTransaction.transaction_date + 'T00:00:00-05:00'); // Adjust for EST timezone
@@ -325,6 +326,7 @@ function populateTransactionDetails(transactionId) {
     $('[data=transfer-date]').text('Pending');
   }
 }
+
 /* Functions For Statements */
 
 function loadStatements(view, target, componentId) {
@@ -459,7 +461,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       row.appendChild(unitCell);
 
       const paymentCell = document.createElement("td");
-      paymentCell.textContent = formatCurrency(transaction.amount);
+      paymentCell.textContent = formatCurrency(Math.abs(transaction.amount)); // Make amount positive
       row.appendChild(paymentCell);
 
       $tableBody.append(row);
@@ -485,7 +487,7 @@ function convertTransactionsToCSV(transactions) {
       `"${transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A'}"`,
       `"${transaction.street}"`,
       `"${transaction.unit_name}"`,
-      `"${formatCurrency(transaction.amount)}"`
+      `"${formatCurrency(Math.abs(transaction.amount))}"` // Make amount positive
     ];
     csv.push(row.join(","));
   });
