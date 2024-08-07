@@ -112,7 +112,7 @@ function processTransactions(transactions) {
   let monthlyData = {};
 
   transactions.forEach((transaction) => {
-    let month = transaction.transaction_date.substr(0, 7);
+    let month = transaction.payment_initiated_date.substr(0, 7);
     if (!monthlyData[month]) {
       monthlyData[month] = { payments: 0, expenses: 0 };
     }
@@ -367,7 +367,7 @@ function processStatements(transactions) {
 
   transactions.forEach((transaction) => {
     if (transaction.description === "Payment Successful" || transaction.manually_entered) {
-      const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
+      const date = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00'); // EST timezone
       const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
       if (!statements[monthYear]) {
@@ -421,7 +421,7 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
   $tableBody.empty(); // Clear existing rows
 
   transactions.forEach((transaction) => {
-    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
+    const transactionDate = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
 
     if (transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
@@ -430,20 +430,20 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
       );
 
       const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-        const currentDate = new Date(current.transaction_date + 'T00:00:00-05:00'); // Convert to date
-        const earliestDate = new Date(earliest.transaction_date + 'T00:00:00-05:00'); // Convert to date
+        const currentDate = new Date(current.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
+        const earliestDate = new Date(earliest.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
 
         if (isNaN(currentDate) || isNaN(earliestDate)) {
-          console.error('Invalid date format:', { currentDate: current.transaction_date, earliestDate: earliest.transaction_date });
+          console.error('Invalid date format:', { currentDate: current.payment_initiated_date, earliestDate: earliest.payment_initiated_date });
         }
 
         return currentDate < earliestDate ? current : earliest;
       }, relatedTransactions[0]);
 
-      const earliestDate = new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00'); // Convert to date
+      const earliestDate = new Date(earliestTransaction.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
 
       if (isNaN(earliestDate)) {
-        console.error('Invalid earliest date:', earliestTransaction.transaction_date);
+        console.error('Invalid earliest date:', earliestTransaction.payment_initiated_date);
         return;
       }
 
@@ -478,11 +478,10 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
     }
   });
 }
-
 // Function to filter transactions by selected month
 function filterTransactionsByMonth(monthYear) {
   return originalTransactions.filter(transaction => {
-    const transactionDate = new Date(transaction.transaction_date + 'T00:00:00-05:00');
+    const transactionDate = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00');
     const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
     return transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered);
   });
