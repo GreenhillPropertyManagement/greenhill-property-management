@@ -112,21 +112,24 @@ function processTransactions(transactions) {
   let monthlyData = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.payment_initiated_date) {
-      let month = transaction.payment_initiated_date.substr(0, 7);
-      if (!monthlyData[month]) {
-        monthlyData[month] = { payments: 0, expenses: 0 };
-      }
+    let month;
 
-      let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
-
-      if (transaction.recipient_type === "tenant" && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
-        monthlyData[month].payments += amount;
-      } else if (transaction.recipient_type === "landlord" && transaction.type === "charge") {
-        monthlyData[month].expenses += amount;
-      }
+    if (transaction.type === "payment" && transaction.payment_initiated_date) {
+      month = transaction.payment_initiated_date.substr(0, 7);
     } else {
-      console.error("Transaction missing payment_initiated_date:", transaction);
+      month = transaction.transaction_date.substr(0, 7);
+    }
+
+    if (!monthlyData[month]) {
+      monthlyData[month] = { payments: 0, expenses: 0 };
+    }
+
+    let amount = Math.abs(Number(transaction.amount)); // Convert amount to absolute value
+
+    if (transaction.recipient_type === "tenant" && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
+      monthlyData[month].payments += amount;
+    } else if (transaction.recipient_type === "landlord" && transaction.type === "charge") {
+      monthlyData[month].expenses += amount;
     }
   });
 
@@ -142,6 +145,8 @@ function processTransactions(transactions) {
   let processed = { labels, paymentsData, expensesData, profitsData };
   return processed;
 }
+
+
 function initializeChart(
   { labels, paymentsData, expensesData, profitsData },
   chartId
@@ -369,16 +374,18 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    if (transaction.description === "Payment Successful" || transaction.manually_entered) {
-      const date = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00'); // EST timezone
-      const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    let monthYear;
+    const date = transaction.type === "payment" && transaction.payment_initiated_date
+      ? new Date(transaction.payment_initiated_date + 'T00:00:00-05:00')
+      : new Date(transaction.transaction_date + 'T00:00:00-05:00');
 
-      if (!statements[monthYear]) {
-        statements[monthYear] = [];
-      }
+    monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-      statements[monthYear].push(transaction);
+    if (!statements[monthYear]) {
+      statements[monthYear] = [];
     }
+
+    statements[monthYear].push(transaction);
   });
 
   return statements;
@@ -424,64 +431,61 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
   $tableBody.empty(); // Clear existing rows
 
   transactions.forEach((transaction) => {
-    if (transaction.payment_initiated_date) {
-      const transactionDate = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00'); // Adjusted for Eastern Time Zone
-      const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
+    const date = transaction.type === "payment" && transaction.payment_initiated_date
+      ? new Date(transaction.payment_initiated_date + 'T00:00:00-05:00')
+      : new Date(transaction.transaction_date + 'T00:00:00-05:00');
 
-      if (transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
-        const relatedTransactions = originalTransactions.filter(
-          (t) => t.transaction_id === transaction.transaction_id
-        );
+    const transactionMonthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-        const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
-          const currentDate = new Date(current.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
-          const earliestDate = new Date(earliest.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
+    if (transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered)) {
+      const relatedTransactions = originalTransactions.filter(
+        (t) => t.transaction_id === transaction.transaction_id
+      );
 
-          if (isNaN(currentDate) || isNaN(earliestDate)) {
-            console.error('Invalid date format:', { currentDate: current.payment_initiated_date, earliestDate: earliest.payment_initiated_date });
-          }
+      const earliestTransaction = relatedTransactions.reduce((earliest, current) => {
+        const currentDate = current.type === "payment" && current.payment_initiated_date
+          ? new Date(current.payment_initiated_date + 'T00:00:00-05:00')
+          : new Date(current.transaction_date + 'T00:00:00-05:00');
 
-          return currentDate < earliestDate ? current : earliest;
-        }, relatedTransactions[0]);
+        const earliestDate = earliest.type === "payment" && earliest.payment_initiated_date
+          ? new Date(earliest.payment_initiated_date + 'T00:00:00-05:00')
+          : new Date(earliest.transaction_date + 'T00:00:00-05:00');
 
-        const earliestDate = new Date(earliestTransaction.payment_initiated_date + 'T00:00:00-05:00'); // Convert to date
+        return currentDate < earliestDate ? current : earliest;
+      }, relatedTransactions[0]);
 
-        if (isNaN(earliestDate)) {
-          console.error('Invalid earliest date:', earliestTransaction.payment_initiated_date);
-          return;
-        }
+      const earliestDate = earliestTransaction.type === "payment" && earliestTransaction.payment_initiated_date
+        ? new Date(earliestTransaction.payment_initiated_date + 'T00:00:00-05:00')
+        : new Date(earliestTransaction.transaction_date + 'T00:00:00-05:00');
 
-        const row = document.createElement("tr");
+      const row = document.createElement("tr");
 
-        // Add data attributes to the row
-        row.setAttribute('data-transaction-id', transaction.transaction_id);
+      // Add data attributes to the row
+      row.setAttribute('data-transaction-id', transaction.transaction_id);
 
-        // Format the date as MM/DD/YYYY
-        const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
-        const dateCell = document.createElement("td");
-        dateCell.textContent = formattedDate;
-        row.appendChild(dateCell);
+      // Format the date as MM/DD/YYYY
+      const formattedDate = ('0' + (earliestDate.getMonth() + 1)).slice(-2) + '/' + ('0' + earliestDate.getDate()).slice(-2) + '/' + earliestDate.getFullYear();
+      const dateCell = document.createElement("td");
+      dateCell.textContent = formattedDate;
+      row.appendChild(dateCell);
 
-        const tenantCell = document.createElement("td");
-        tenantCell.textContent = transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A';
-        row.appendChild(tenantCell);
+      const tenantCell = document.createElement("td");
+      tenantCell.textContent = transaction.tenant_info ? transaction.tenant_info.display_name : 'N/A';
+      row.appendChild(tenantCell);
 
-        const propertyCell = document.createElement("td");
-        propertyCell.textContent = transaction.street;
-        row.appendChild(propertyCell);
+      const propertyCell = document.createElement("td");
+      propertyCell.textContent = transaction.street;
+      row.appendChild(propertyCell);
 
-        const unitCell = document.createElement("td");
-        unitCell.textContent = transaction.unit_name;
-        row.appendChild(unitCell);
+      const unitCell = document.createElement("td");
+      unitCell.textContent = transaction.unit_name;
+      row.appendChild(unitCell);
 
-        const paymentCell = document.createElement("td");
-        paymentCell.textContent = formatCurrency(Math.abs(transaction.amount)); // Make amount positive
-        row.appendChild(paymentCell);
+      const paymentCell = document.createElement("td");
+      paymentCell.textContent = formatCurrency(Math.abs(transaction.amount)); // Make amount positive
+      row.appendChild(paymentCell);
 
-        $tableBody.append(row);
-      }
-    } else {
-      console.error("Transaction missing payment_initiated_date:", transaction);
+      $tableBody.append(row);
     }
   });
 }
@@ -490,14 +494,12 @@ function populateTableWithTransactions(transactions, monthYear, componentId) {
 // Function to filter transactions by selected month
 function filterTransactionsByMonth(monthYear) {
   return originalTransactions.filter(transaction => {
-    if (transaction.payment_initiated_date) {
-      const transactionDate = new Date(transaction.payment_initiated_date + 'T00:00:00-05:00');
-      const transactionMonthYear = `${transactionDate.getFullYear()}-${transactionDate.getMonth() + 1}`;
-      return transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered);
-    } else {
-      console.error("Transaction missing payment_initiated_date:", transaction);
-      return false;
-    }
+    const date = transaction.type === "payment" && transaction.payment_initiated_date
+      ? new Date(transaction.payment_initiated_date + 'T00:00:00-05:00')
+      : new Date(transaction.transaction_date + 'T00:00:00-05:00');
+    
+    const transactionMonthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    return transactionMonthYear === monthYear && (transaction.description === "Payment Successful" || transaction.manually_entered);
   });
 }
 
