@@ -273,7 +273,6 @@ function showTransactionDetailModal() {
   $('.modal__block > *').css('display', 'none');
   $('#transaction-detail-modal').css('display', 'block');
 }
-
 function populateTransactionDetails(transactionId) {
   // Clear existing values
   $('[data=gross-payment]').text('');
@@ -326,7 +325,6 @@ function populateTransactionDetails(transactionId) {
     $('[data=transfer-date]').text('Pending');
   }
 }
-
 /* Functions For Statements */
 
 function loadStatements(view, target, componentId) {
@@ -358,15 +356,6 @@ function processStatements(transactions) {
   transactions.forEach((transaction) => {
     if (transaction.description === "Payment Successful" || transaction.manually_entered) {
       const date = new Date(transaction.transaction_date + 'T00:00:00-05:00'); // EST timezone
-      const month = date.getMonth();
-      const year = date.getFullYear();
-      const day = date.getDate();
-      
-      // Check if the transaction date is at the end of the month and adjust if needed
-      if (day >= 30 && month !== 11) { // Assuming transactions should be pushed to the next month if it's the end of the month (except December)
-        date.setMonth(month + 1);
-      }
-      
       const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
       if (!statements[monthYear]) {
