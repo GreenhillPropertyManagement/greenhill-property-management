@@ -374,18 +374,20 @@ function processStatements(transactions) {
   let statements = {};
 
   transactions.forEach((transaction) => {
-    let monthYear;
-    const date = transaction.type === "payment" && transaction.payment_initiated_date
-      ? new Date(transaction.payment_initiated_date + 'T00:00:00-05:00')
-      : new Date(transaction.transaction_date + 'T00:00:00-05:00');
+    if (transaction.type === "payment") {
+      let monthYear;
+      const date = transaction.payment_initiated_date
+        ? new Date(transaction.payment_initiated_date + 'T00:00:00-05:00')
+        : new Date(transaction.transaction_date + 'T00:00:00-05:00');
 
-    monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-    if (!statements[monthYear]) {
-      statements[monthYear] = [];
+      if (!statements[monthYear]) {
+        statements[monthYear] = [];
+      }
+
+      statements[monthYear].push(transaction);
     }
-
-    statements[monthYear].push(transaction);
   });
 
   return statements;
