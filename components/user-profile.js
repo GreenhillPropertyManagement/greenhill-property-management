@@ -227,6 +227,7 @@ function adminUpdateProfilePic() {
 function loadUserProfile(user) {
   let apiResponse;
   adminUpdateProfilePic();
+  clearUserProfile();
 
   // Fetch User Info
   $.ajax({
@@ -558,6 +559,15 @@ function loadUserProfile(user) {
     },
     error: function (error) {},
   });
+}
+
+function clearUserProfile() {
+  $("[data-profile]").each(function () {
+      $(this).text("");  // Clear text values
+      $(this).val("");   // Clear input values
+  });
+
+  $("[data-profile=profile_img]").attr("src", ""); // Reset profile image
 }
 
 function adminUpdateUser(form) {
