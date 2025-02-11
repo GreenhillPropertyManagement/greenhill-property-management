@@ -487,7 +487,11 @@ function createUserTransaction(view, form) {
     complete: function () {
       // re-populate form fields and trigger additional actions
       $("[data-api-input='recipient']").val("");
-      //$("[dynamic-element='recipient']").hide();
+      // Ensure "Transaction Date" is hidden initially
+      $("#unit-trans-date").closest(".form__item").hide();
+      $("#unit-trans-start-date").closest(".form__item").hide();
+      $("#unit-trans-end-date").closest(".form__item").hide();
+      
       $("[api-button='all-user-transactions']").click();
     },
   });
