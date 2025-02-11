@@ -49,6 +49,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadUnitAndTenantData(unit) {
 
+  // Clear profile image before fetching new data
+  $("[data-unit='tenant_profile_img']").attr("src", "");
+
   // If unit is vacant
   if (localStorage.unitEmpty === 'true') {
 
