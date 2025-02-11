@@ -204,6 +204,9 @@ function loadUnitAndTenantData(unit) {
             "src",
             response.active_tenant_info.user_info.profile_img,
           );
+        } else {
+          // Set to a default placeholder if no image exists
+          $("[data-unit='tenant_profile_img']").attr("src", "https://uploads-ssl.webflow.com/64ef87a21e6d1b3957b7416b/650da99e0c1b7c27da0f68c8_icons8-user%20(1).svg");
         }
         $("[data-unit='tenant_name']").text(
           response.active_tenant_info.user_info.display_name
