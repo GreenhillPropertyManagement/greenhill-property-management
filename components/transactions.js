@@ -486,8 +486,8 @@ function createUserTransaction(view, form) {
     },
     complete: function () {
       // re-populate form fields and trigger additional actions
-      $("[data-api-input='recipient']").val("tenant");
-      $("[dynamic-element='recipient']").hide();
+      $("[data-api-input='recipient']").val("");
+      //$("[dynamic-element='recipient']").hide();
       $("[api-button='all-user-transactions']").click();
     },
   });
