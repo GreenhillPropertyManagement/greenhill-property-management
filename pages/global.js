@@ -213,9 +213,12 @@ function initializeApp() {
   $('.modal__block').hide();
   });
 
-  // conditional logic for testing
+  // conditional logic for testing (dummy tenant account)
   if(localStorage.userId === "682fd788-ebea-4246-b6fe-54c2709eb191") {
     alert('Testing Mode!');
+    $('[dynamic-visibility=test-mode]').show();
+  } else {
+    $('[dynamic-visibility=test-mode]').remove();
   }
       
 }
