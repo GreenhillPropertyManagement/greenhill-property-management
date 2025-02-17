@@ -212,6 +212,11 @@ function initializeApp() {
   $(window).on('popstate', function() {
   $('.modal__block').hide();
   });
+
+  // conditional logic for testing
+  if(localStorage.userId === "682fd788-ebea-4246-b6fe-54c2709eb191") {
+    alert('Testing Mode!');
+  }
       
 }
 /* Utlity Functions */
