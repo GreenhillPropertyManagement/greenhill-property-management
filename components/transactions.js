@@ -780,5 +780,3 @@ function tenantMakesPayment(amount) {
     error: function (error) {},
   });
 }
-
-
