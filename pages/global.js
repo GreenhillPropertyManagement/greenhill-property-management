@@ -529,16 +529,25 @@ function updateNotifications(notifications) {
       let timestamp = notification.activity_record.created_at;
       let formattedTimestamp = formatDateToLocalTimezone(timestamp);
       let description = notification.activity_record.description;
+      let notificationType = notification.type; // Get type
 
       let notificationItem = $(`
-          <div class="notification__item-wrapper" id="notification-${notificationId}" data-id="${notificationId}">
+          <div class="notification__item-wrapper" id="notification-${notificationId}" data-id="${notificationId}" data-type="${notificationType}">
               <div data-api="description" class="notification__item__text">${description}</div>
               <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
           </div>
       `);
 
-      // Attach click event to mark notification as seen
+      // Attach click event to mark notification as seen and trigger logic based on user role
       notificationItem.on("click", function () {
+          let userRole = localStorage.getItem("userRole"); // Get user role from localStorage
+          
+          // Handle different click actions based on notification type and userRole
+          if (notificationType === "transaction" && userRole === "Tenant") {
+              $("#pay-rent").trigger("click"); // Simulate clicking the "pay-rent" button
+          }
+
+          // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
           $(this).fadeOut(300, function () {
               $(this).remove(); // Remove from DOM
@@ -556,7 +565,6 @@ function updateNotifications(notifications) {
       $counter.show();
   }
 }
-
 function markNotificationAsSeen(notificationId) {
   $.ajax({
       url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification",
