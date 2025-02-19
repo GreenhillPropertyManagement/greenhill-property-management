@@ -503,18 +503,29 @@ function updateNotifications(notifications) {
   $wrapper.empty();
 
   notifications.forEach(notification => {
-      // Convert from milliseconds to a Date object in UTC
-      let dateObj = new Date(notification.activity_record.created_at);
+      let timestamp = notification.activity_record.created_at;
+      let dateObj = new Date(timestamp); // Convert from milliseconds
 
-      // Ensure we pass the correct UTC timestamp
-      let createdAt = formatDateToCustomFormat(dateObj.toISOString());
+      // Extract UTC components and format manually
+      const day = String(dateObj.getUTCDate()).padStart(2, '0');
+      const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');  // +1 because months are 0-based
+      const year = String(dateObj.getUTCFullYear()).slice(-2);  // Last two digits of the year
+
+      let hours = dateObj.getUTCHours();
+      const minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
+      const amOrPm = hours >= 12 ? 'pm' : 'am';
+
+      hours = hours % 12;
+      hours = hours ? hours : 12;  // If 0, make it 12
+
+      let formattedTimestamp = `${month}/${day}/${year} ${hours}:${minutes}${amOrPm}`;
 
       let description = notification.activity_record.description;
 
       let notificationItem = `
           <div class="notification__item-wrapper">
               <div data-api="description" class="notification__item__text">${description}</div>
-              <div data-api="timestamp" class="notification__timestamp">${createdAt}</div>
+              <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
           </div>
       `;
 
