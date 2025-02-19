@@ -116,6 +116,7 @@ function initializeApp() {
   urlRouting();
   userRoleInterface();
   loadUsersInFormSelectFields();
+  fetchNotifications();
 
 
 
@@ -476,4 +477,45 @@ function formatDateNoTime(dateString) {
   const year = String(dateObj.getUTCFullYear()).slice(-2);  // Last two digits of the year
 
   return `${month}/${day}/${year}`;
+}
+
+function fetchNotifications() {
+  $.ajax({
+      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
+      method: "GET",
+      dataType: "json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      success: function(response) {
+          updateNotifications(response);
+      },
+      error: function(xhr, status, error) {
+          console.error("Error fetching notifications:", error);
+      }
+  });
+}
+
+function updateNotifications(notifications) {
+  // Update the notification count
+  $("[data-api='notification-count']").text(notifications.length);
+
+  // Get the notification wrapper
+  let $wrapper = $(".notification__dropdown-list");
+  $wrapper.empty(); // Clear existing notifications
+
+  // Loop through notifications and append new ones
+  notifications.forEach(notification => {
+      let createdAt = formatDateToCustomFormat(notification.activity_record.created_at);
+      let description = notification.activity_record.description;
+
+      let notificationItem = `
+          <div class="notification__item-wrapper">
+              <div data-api="description" class="notification__item__text">${description}</div>
+              <div data-api="timestamp" class="notification__timestamp">${createdAt}</div>
+          </div>
+      `;
+
+      $wrapper.append(notificationItem);
+  });
 }
