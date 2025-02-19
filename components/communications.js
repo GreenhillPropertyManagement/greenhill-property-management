@@ -76,11 +76,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadConvos(targetUser, type) {
-  let loadType = type; // store type of load (user getting their own convos, or someone elses om their profile page. options: 'self' or 'user')
+  let loadType = type; // store type of load (options: 'self' or 'user')
 
-  $("[dyn-container='chat-container']").empty(); // clear the messages container
+  $("[dyn-container='chat-container']").empty(); // clear messages container
   var convosContainer = $("[dyn-container='convos-container']");
-  $(".chat__input-wrapper").hide(); // hide the chat input initially until a convo is selected
+  $(".chat__input-wrapper").hide(); // hide chat input initially
   $(".loader").css("display", "flex"); // show loader
 
   $.ajax({
@@ -100,43 +100,34 @@ function loadConvos(targetUser, type) {
 
       convosContainer.empty(); // clear the convos container
 
-      /* loop through each convo */
       response.forEach((convo) => {
-        /* clone the sample card for the convo and append to users container */
         let convoItem = $(sampleConvo).clone().appendTo(convosContainer);
-
-        /* bind the convo's data to the cloned card */
-        convoItem.attr("id", convo.conversation_sid); // bind the convo sid as the element's ID
-        convoItem.find("[data-convo='convo-title']").text(convo.friendly_name); // bind the convo title
+        convoItem.attr("id", convo.conversation_sid);
+        convoItem.find("[data-convo='convo-title']").text(convo.friendly_name);
         convoItem
           .find("[data-convo='timestamp']")
-          .text(formatDateToCustomFormat(convo.attributes.last_updated)); // bind timestamp of the last message
-
-        // get the ID of the sender of the last message
+          .text(formatDateToCustomFormat(convo.attributes.last_updated));
 
         const lastMessageSender =
           convo.attributes.last_message_sender != null
             ? convo.attributes.last_message_sender.toString()
             : "";
 
-        /* ---------- logic for peer-to-peer convo convo types -------------*/
-        if (convo.attributes.convo_type === "peer_to_peer") {
-          let activeUserId = targetUser;
+        let activeUserId = targetUser;
 
-          // ------ logic for new message indicator
+        /* ---------- logic for peer-to-peer convo types -------------*/
+        if (convo.attributes.convo_type === "peer_to_peer") {
           if (
             loadType === "self" &&
             convo.attributes.convo_status === "updated" &&
             lastMessageSender !== activeUserId
           ) {
-            convoItem.find("[data-convo='new-message-badge']").show(); // show the new message badge
-            convoItem.addClass("new-message"); // add the new message state combo class
+            convoItem.find("[data-convo='new-message-badge']").show();
+            convoItem.addClass("new-message");
           } else {
-            convoItem.find("[data-convo='new-message-badge']").hide(); // hide the new message badge
-            convoItem.removeClass("new-message"); // remove the new message state combo class
+            convoItem.find("[data-convo='new-message-badge']").hide();
+            convoItem.removeClass("new-message");
           }
-
-          // ------  logic for convo particpant indicator (show the other person in convo)
 
           const participants = convo.attributes.convo_participants;
           let otherParticipantInfo = null;
@@ -147,125 +138,119 @@ function loadConvos(targetUser, type) {
             }
           });
 
-          convoItem
-            .find('[data-convo="recipient-info"]')
-            .text(otherParticipantInfo); // Update the text of the last message sender element
+          convoItem.find('[data-convo="recipient-info"]').text(otherParticipantInfo);
 
-          /* click handler for Peer to Peer convos to load convo messages */
           convoItem.click(function () {
-            
             $('.chat__messages-wrapper').show();
 
-            let convoSid = $(this).attr("id"); // get the convo SID from the element's ID
-            localStorage.setItem("activeConvo", convoSid); // set the clicked convo as the active convo in local storage
+            let convoSid = $(this).attr("id");
+            localStorage.setItem("activeConvo", convoSid);
 
-            $("[data-convo='chat-container']").empty(); // clear the chat container from any messages
-            $(".loader").css("display", "flex"); // show loader
-            loadConvoMessages(convoSid); // load new convo messages in the chat container
-            $(".chat__input-wrapper").css("display", "flex"); // show chat input
+            $("[data-convo='chat-container']").empty();
+            $(".loader").css("display", "flex");
+            loadConvoMessages(convoSid);
+            $(".chat__input-wrapper").css("display", "flex");
 
-            // ---- update convo status
             if (
               convo.attributes.last_message_sender !== activeUserId &&
               loadType === "self"
             ) {
-              updateConvoStatus(convoSid); // update convo status to 'read'
-
-              // update convo item UI to no longer show new message state
-              convoItem.removeClass("new-message"); // remove new message class (state)
-              convoItem.find("[data-convo='new-message-badge']").hide(); // hide the new message badge
+              updateConvoStatus(convoSid);
+              convoItem.removeClass("new-message");
+              convoItem.find("[data-convo='new-message-badge']").hide();
+              updateConvoCounter();
             }
           });
         }
 
-        /* ------------- logic for property blasts convo types ---------------*/
-
+        /* ------------- logic for property blast convo types ---------------*/
         if (convo.attributes.convo_type === "blast") {
-          let activeUserId = targetUser;
-          // ---- show 'message broadcast' instead of participant info in convo item
           convoItem
             .find("[data-convo='recipient-info']")
             .text("Broadcast:" + " " + convo.attributes.property);
           convoItem.find("[data-convo='blast-icon']").show();
 
-          // ------ logic for new message indicator for broadcast conversations
-
-          // run only if the active user is NOT the creator of the conversation
           if (
             loadType === "self" &&
             activeUserId !== convo.attributes.last_message_sender
           ) {
-            // Loop through the conversation's participants
             const participants = convo.attributes.convo_participants;
-            let hasUnreadMessage = true; // Initialize as true
+            let hasUnreadMessage = true;
 
             participants.forEach(function (participant) {
               if (
                 participant.user === activeUserId &&
                 participant.message_seen
               ) {
-                // If the active user has message_seen: true, update the flag
                 hasUnreadMessage = false;
-                return false; // Exit the loop early if message_seen is true
+                return false;
               }
             });
 
-            // Now check the hasUnreadMessage flag
             if (hasUnreadMessage) {
-              convoItem.find("[data-convo='new-message-badge']").show(); // Show the new message badge
-              convoItem.addClass("new-message"); // Add the new message state combo class
+              convoItem.find("[data-convo='new-message-badge']").show();
+              convoItem.addClass("new-message");
             } else {
-              convoItem.find("[data-convo='new-message-badge']").hide(); // Hide the new message badge
-              convoItem.removeClass("new-message"); // Remove the new message state combo class
+              convoItem.find("[data-convo='new-message-badge']").hide();
+              convoItem.removeClass("new-message");
             }
           } else {
-            convoItem.find("[data-convo='new-message-badge']").hide(); // Hide the new message badge
-            convoItem.removeClass("new-message"); // Remove the new message state combo class
+            convoItem.find("[data-convo='new-message-badge']").hide();
+            convoItem.removeClass("new-message");
           }
 
-          /* Click Handler for Broadcast Convo Types */
           convoItem.click(function () {
-
             $('.chat__messages-wrapper').show();
-            let convoSid = $(this).attr("id"); // get the convo SID from the element's ID
-            localStorage.setItem("activeConvo", convoSid); // set the clicked convo as the active convo in local storage
+            let convoSid = $(this).attr("id");
+            localStorage.setItem("activeConvo", convoSid);
 
-            /* Hide the chat input so that only admins can add to the broadcast chats (1 way communication) */
             if (localStorage.userRole !== "Admin") {
-              $(".chat__input-wrapper").hide(); // hide chat input
+              $(".chat__input-wrapper").hide();
             } else {
-              $(".chat__input-wrapper").css("display", "flex"); // show chat input
+              $(".chat__input-wrapper").css("display", "flex");
             }
 
-            /* Update UI, Load Messages */
-            $("[data-convo='chat-container']").empty(); // clear the chat container from any messages
-            $(".loader").css("display", "flex"); // show loader
-            loadConvoMessages(convoSid); // load new convo messages in the chat container
-            convoItem.removeClass("new-message"); // remove new message class (state)
-            convoItem.find("[data-convo='new-message-badge']").hide(); // hide the new message badge
+            $("[data-convo='chat-container']").empty();
+            $(".loader").css("display", "flex");
+            loadConvoMessages(convoSid);
+            convoItem.removeClass("new-message");
+            convoItem.find("[data-convo='new-message-badge']").hide();
+            updateConvoCounter();
 
-            /* Update Convo Status */
             if (
               loadType === "self" &&
               activeUserId !== convo.attributes.last_message_sender
             ) {
-              updateBroadcastMessageViewers(convoSid, activeUserId); // update the users status to 'read message'
+              updateBroadcastMessageViewers(convoSid, activeUserId);
             }
           });
         } else {
           convoItem.find("[data-convo='blast-icon']").hide();
         }
       });
+
+      updateConvoCounter(); // Update the counter after conversations load
     },
     complete: function () {
       $(".loader").hide();
-        // ---- (mobile only) back button for convos
       $('.back-convo-button').click(function(){
         $('.chat__messages-wrapper').hide();
       });
     },
     error: function (error) {},
   });
+}
+
+/* Function to Update Convo Counter */
+function updateConvoCounter() {
+  let unreadCount = $(".new-message").length;
+  let counterElement = $("[data-api='convo-counter']");
+
+  if (unreadCount > 0) {
+    counterElement.text(unreadCount).show();
+  } else {
+    counterElement.hide();
+  }
 }
 
 function convoInFocus() {
