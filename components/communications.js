@@ -247,8 +247,14 @@ function updateConvoCounter() {
   let counterElement = $("[data-api='convo-counter']");
 
   console.log("Unread count:", unreadCount); // Debugging
+  console.log("Counter element found?", counterElement.length > 0);
 
-  counterElement.text(unreadCount); // Set the correct count
+  if (!counterElement.length) {
+    console.warn("Counter element not found!");
+    return;
+  }
+
+  counterElement.text(unreadCount); // Update the counter text
 
   if (unreadCount > 0) {
     counterElement.show();
