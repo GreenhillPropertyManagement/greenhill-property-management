@@ -455,95 +455,78 @@ function loadRecipients(recipient) {
 }
 
 function createNewConvo() {
-  // Form Submission API Call
   $("#new-convo-form")
-    .off("submit")
-    .submit(function (event) {
-      // Prevent the default form submission behavior
+    .off("submit") // ✅ Ensure event is only bound once
+    .on("submit", function (event) {
       event.preventDefault();
 
       if ($("#convo_recipient").find(":selected").val() === "") {
         alert("Please Select a recipient");
         $("#new-convo-form")[0].reset();
-        $("#convo_recipient").val(""); // Explicitly set select to its default state
+        $("#convo_recipient").val(""); // Explicitly reset select
         return;
-      } else {
-        // Handle 'Loading' State
-        $(".modal__block").hide();
-        $(".loader").css("display", "flex");
-
-        const formData = {};
-
-        // Get the message input value and replace line breaks with '\n'
-        const messageInput = $("#convo-message");
-        const messageValue = messageInput.val().replace(/\r?\n/g, "\n");
-
-        // Collect other key-value pairs from form inputs
-        $(this)
-          .find("[data-api-input]")
-          .each(function () {
-            const input = $(this);
-            const key = input.data("api-input"); // Get the data attribute value
-            const value = input.val();
-            formData[key] = value;
-          });
-
-        // Set recipient_formatted_info only if a valid recipient is selected
-        if ($("#convo_recipient").find(":selected").val() !== "") {
-          formData["recipient_formatted_info"] = $("#convo_recipient")
-            .find(":selected")
-            .text();
-        }
-
-        /* Add additional info to formData */
-
-        formData["convo_message"] = messageValue; // message contents
-        formData["sender"] = localStorage.userId; // sender uuid
-        formData["sender_formatted_info"] =
-          localStorage.firstName +
-          " " +
-          localStorage.lastName +
-          " " +
-          "(" +
-          localStorage.email +
-          ")";
-        formData["sender_first_name"] = localStorage.firstName;
-        formData["sender_last_name"] = localStorage.lastName;
-
-        /* Make an AJAX POST request */
-
-        $.ajax({
-          url: localStorage.baseUrl + "api:LEAuXkTc/create_new_convo",
-          type: "POST",
-          headers: {
-            Authorization: "Bearer " + localStorage.authToken,
-          },
-          data: JSON.stringify(formData), // Convert formData to JSON
-          contentType: "application/json", // Set the content type to JSON
-          success: function (response) {
-            loadConvos(localStorage.userId);
-            loadConvoMessages(response.convo.sid);
-          },
-          complete: function () {
-            /* Reset Form */
-            $("#new-convo-form")[0].reset();
-
-            /* Reset the Uploadcare widget */
-            var widget = uploadcare.Widget("#convo-media");
-            widget.value(null);
-            var page = localStorage.getItem('pageId');
-
-            if (page == "profile") {
-              $("[api-button=user-convos]").click();
-            }
-            $(".loader").hide();
-
-          },
-          error: function (error) {
-            // Handle the error here
-          },
-        });
       }
+
+      // Handle 'Loading' State
+      $(".modal__block").hide();
+      $(".loader").css("display", "flex");
+
+      const formData = {};
+
+      // Get the message input value and replace line breaks with '\n'
+      const messageInput = $("#convo-message");
+      const messageValue = messageInput.val().replace(/\r?\n/g, "\n");
+
+      // Collect key-value pairs from form inputs
+      $(this).find("[data-api-input]").each(function () {
+        const input = $(this);
+        const key = input.data("api-input");
+        const value = input.val();
+        formData[key] = value;
+      });
+
+      // Set recipient formatted info if a recipient is selected
+      if ($("#convo_recipient").find(":selected").val() !== "") {
+        formData["recipient_formatted_info"] = $("#convo_recipient").find(":selected").text();
+      }
+
+      // Additional sender details
+      formData["convo_message"] = messageValue;
+      formData["sender"] = localStorage.userId;
+      formData["sender_formatted_info"] = `${localStorage.firstName} ${localStorage.lastName} (${localStorage.email})`;
+      formData["sender_first_name"] = localStorage.firstName;
+      formData["sender_last_name"] = localStorage.lastName;
+
+      /* ✅ Make an AJAX POST request */
+      $.ajax({
+        url: localStorage.baseUrl + "api:LEAuXkTc/create_new_convo",
+        type: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.authToken,
+        },
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        success: function (response) {
+          console.log("✅ New conversation created:", response.convo.sid);
+
+          /* ✅ Call `loadConvos()` **AFTER** the AJAX request is fully complete */
+          loadConvos(localStorage.userId, "self");
+          loadConvoMessages(response.convo.sid);
+        },
+        complete: function () {
+          /* Reset Form */
+          $("#new-convo-form")[0].reset();
+
+          /* Reset the Uploadcare widget */
+          var widget = uploadcare.Widget("#convo-media");
+          widget.value(null);
+
+          $(".loader").hide();
+        },
+        error: function (error) {
+          console.error("Error creating new conversation:", error);
+        },
+      });
     });
 }
 
