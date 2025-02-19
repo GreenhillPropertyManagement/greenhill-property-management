@@ -482,16 +482,23 @@ function formatDateNoTime(dateString) {
 function formatDateToLocalTimezone(dateString) {
   const dateObj = new Date(dateString);
 
-  return new Intl.DateTimeFormat(undefined, {
+  // Extract the formatted date
+  const formattedDate = new Intl.DateTimeFormat(undefined, {
     year: '2-digit',
     month: '2-digit',
     day: '2-digit',
+  }).format(dateObj);
+
+  // Extract the formatted time
+  const formattedTime = new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true, // Ensures AM/PM format
   }).format(dateObj);
-}
 
+  // Concatenate without a comma
+  return `${formattedDate} ${formattedTime}`;
+}
 function fetchNotifications() {
   $.ajax({
       url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
