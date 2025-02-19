@@ -479,6 +479,25 @@ function formatDateNoTime(dateString) {
   return `${month}/${day}/${year}`;
 }
 
+function formatDateToUTCFormat(dateString) {
+  const dateObj = new Date(dateString);
+
+  // Extract UTC date components
+  const day = String(dateObj.getUTCDate()).padStart(2, '0');
+  const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0'); // +1 because months are 0-based
+  const year = String(dateObj.getUTCFullYear()).slice(-2); // Last two digits of the year
+
+  // Get UTC hours and minutes
+  let hours = dateObj.getUTCHours();
+  const minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
+  const amOrPm = hours >= 12 ? 'pm' : 'am';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // If 0, make it 12
+
+  return `${month}/${day}/${year} ${hours}:${minutes}${amOrPm} UTC`;
+}
+
 function fetchNotifications() {
   $.ajax({
       url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
@@ -505,8 +524,8 @@ function updateNotifications(notifications) {
   notifications.forEach(notification => {
       let timestamp = notification.activity_record.created_at;
 
-      // ✅ Pass the raw timestamp directly to `formatDateToCustomFormat`
-      let formattedTimestamp = formatDateToCustomFormat(timestamp);
+      // ✅ Use the new UTC-based format function
+      let formattedTimestamp = formatDateToUTCFormat(timestamp);
 
       let description = notification.activity_record.description;
 
