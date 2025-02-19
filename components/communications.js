@@ -76,12 +76,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadConvos(targetUser, type) {
-  let loadType = type; // store type of load (options: 'self' or 'user')
+  let loadType = type; // Store type of load (options: 'self' or 'user')
 
-  $("[dyn-container='chat-container']").empty(); // clear messages container
+  $("[dyn-container='chat-container']").empty(); // Clear messages container
   var convosContainer = $("[dyn-container='convos-container']");
-  $(".chat__input-wrapper").hide(); // hide chat input initially
-  $(".loader").css("display", "flex"); // show loader
+  $(".chat__input-wrapper").hide(); // Hide chat input initially
+  $(".loader").css("display", "flex"); // Show loader
 
   $.ajax({
     url: localStorage.baseUrl + "api:LEAuXkTc/fetch_user_conversations",
@@ -95,10 +95,10 @@ function loadConvos(targetUser, type) {
     },
     success: function (response) {
       var sampleConvo = $(".convo-item-sample-wrapper").find(
-        "[comm-sample-item='convo-item']",
-      ); // store the sample convo item
+        "[comm-sample-item='convo-item']"
+      ); // Store the sample convo item
 
-      convosContainer.empty(); // clear the convos container
+      convosContainer.empty(); // Clear the convos container
 
       response.forEach((convo) => {
         let convoItem = $(sampleConvo).clone().appendTo(convosContainer);
@@ -115,7 +115,7 @@ function loadConvos(targetUser, type) {
 
         let activeUserId = targetUser;
 
-        /* ---------- logic for peer-to-peer convo types -------------*/
+        /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
         if (convo.attributes.convo_type === "peer_to_peer") {
           if (
             loadType === "self" &&
@@ -128,17 +128,6 @@ function loadConvos(targetUser, type) {
             convoItem.find("[data-convo='new-message-badge']").hide();
             convoItem.removeClass("new-message");
           }
-
-          const participants = convo.attributes.convo_participants;
-          let otherParticipantInfo = null;
-
-          participants.forEach(function (participant) {
-            if (participant.id !== activeUserId) {
-              otherParticipantInfo = participant.info;
-            }
-          });
-
-          convoItem.find('[data-convo="recipient-info"]').text(otherParticipantInfo);
 
           convoItem.click(function () {
             $('.chat__messages-wrapper').show();
@@ -163,7 +152,7 @@ function loadConvos(targetUser, type) {
           });
         }
 
-        /* ------------- logic for property blast convo types ---------------*/
+        /* ------------- Logic for Property Blast Convo Types ---------------*/
         if (convo.attributes.convo_type === "blast") {
           convoItem
             .find("[data-convo='recipient-info']")
@@ -228,17 +217,41 @@ function loadConvos(targetUser, type) {
           convoItem.find("[data-convo='blast-icon']").hide();
         }
       });
-
-      updateConvoCounter(); // Update the counter after conversations load
     },
     complete: function () {
+      console.log("Conversations loaded. Updating counter...");
+      updateConvoCounter(); // Ensures the counter updates only after conversations are loaded
       $(".loader").hide();
-      $('.back-convo-button').click(function(){
+      $('.back-convo-button').click(function () {
         $('.chat__messages-wrapper').hide();
       });
     },
-    error: function (error) {},
+    error: function (error) {
+      console.error("Error fetching conversations:", error);
+    },
   });
+}
+
+/* Function to Update Convo Counter */
+function updateConvoCounter() {
+  let unreadCount = $("div[dyn-container='convos-container'] .new-message").length;
+  let counterElement = $("[data-api='convo-counter']");
+
+  console.log("Unread count:", unreadCount); // Debugging
+  console.log("Counter element found?", counterElement.length > 0);
+
+  if (!counterElement.length) {
+    console.warn("Counter element not found!");
+    return;
+  }
+
+  counterElement.text(unreadCount); // Set the correct count
+
+  if (unreadCount > 0) {
+    counterElement.show();
+  } else {
+    counterElement.hide();
+  }
 }
 
 /* Function to Update Convo Counter */
