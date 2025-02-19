@@ -234,11 +234,8 @@ function loadConvos(targetUser, type) {
 
 /* Function to Update Convo Counter */
 function updateConvoCounter() {
-  // Select all conversation items inside the container
-  let allConversations = $("div[dyn-container='convos-container'] .dyn-item__chat-convo-item");
-
-  // Filter conversations that have the 'new-message' class
-  let unreadMessages = allConversations.filter(".new-message");
+  // Select only the conversation items with the `.new-message` class
+  let unreadMessages = $("div[dyn-container='convos-container'] .dyn-item__chat-convo-item.new-message");
 
   // Get the count of unread messages
   let unreadCount = unreadMessages.length;
@@ -246,8 +243,12 @@ function updateConvoCounter() {
   // Select the counter element
   let counterElement = $("[data-api='convo-counter']");
 
-  console.log("Total conversations:", allConversations.length);
-  console.log("Unread messages count:", unreadCount);
+  console.log("DEBUG - Total conversations:", $("div[dyn-container='convos-container'] .dyn-item__chat-convo-item").length);
+  console.log("DEBUG - Unread messages found:", unreadCount);
+
+  unreadMessages.each(function(index, element) {
+    console.log("Unread Message", index + 1, "ID:", $(element).attr("id"));
+  });
 
   if (!counterElement.length) {
     console.warn("Counter element not found!");
