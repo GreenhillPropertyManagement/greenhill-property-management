@@ -503,7 +503,15 @@ function updateNotifications(notifications) {
   $wrapper.empty();
 
   notifications.forEach(notification => {
-      let createdAt = formatDateToCustomFormat(new Date(notification.activity_record.created_at).toLocaleString("en-US", { timeZone: "UTC" }));
+      // Convert from milliseconds to a proper Date object (ensuring UTC)
+      let dateObj = new Date(notification.activity_record.created_at);
+
+      // Pass the correct UTC-adjusted timestamp to your formatter
+      let createdAt = formatDateToCustomFormat(
+          new Date(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate(), 
+                   dateObj.getUTCHours(), dateObj.getUTCMinutes(), dateObj.getUTCSeconds())
+      );
+
       let description = notification.activity_record.description;
 
       let notificationItem = `
