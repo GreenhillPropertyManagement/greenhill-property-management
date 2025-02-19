@@ -529,7 +529,7 @@ function updateNotifications(notifications) {
       let timestamp = notification.activity_record.created_at;
       let formattedTimestamp = formatDateToLocalTimezone(timestamp);
       let description = notification.activity_record.description;
-      let notificationType = notification.type; // Get type
+      let notificationType = notification.type;
 
       let notificationItem = $(`
           <div class="notification__item-wrapper" id="notification-${notificationId}" data-id="${notificationId}" data-type="${notificationType}">
@@ -552,6 +552,9 @@ function updateNotifications(notifications) {
           $(this).fadeOut(300, function () {
               $(this).remove(); // Remove from DOM
               updateNotificationCounter(-1); // Decrement counter
+
+              // ✅ Close the Webflow dropdown
+              $(".notification__dropdown-toggle").trigger("click");
           });
       });
 
@@ -565,6 +568,7 @@ function updateNotifications(notifications) {
       $counter.show();
   }
 }
+
 function markNotificationAsSeen(notificationId) {
   $.ajax({
       url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification",
