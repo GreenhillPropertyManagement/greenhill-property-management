@@ -95,7 +95,7 @@ function loadConvos(targetUser, type) {
       success: function (response) {
           console.log("Loading conversations for:", targetUser);
 
-          let seenConvos = new Set(); // Track conversations to prevent duplicates
+          let seenConvos = new Set();
           let sampleConvo = $(".convo-item-sample-wrapper").find("[comm-sample-item='convo-item']");
 
           response.forEach((convo) => {
@@ -110,7 +110,6 @@ function loadConvos(targetUser, type) {
                   const lastMessageSender = convo.attributes.last_message_sender ? convo.attributes.last_message_sender.toString() : "";
                   let activeUserId = targetUser;
 
-                  // Remove previous `new-message` class before applying conditions
                   convoItem.removeClass("new-message");
 
                   /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
@@ -132,10 +131,12 @@ function loadConvos(targetUser, type) {
                           loadConvoMessages(convoSid);
                           $(".chat__input-wrapper").css("display", "flex");
 
+                          // ✅ Update convo status and remove new-message
                           if (convo.attributes.last_message_sender !== activeUserId && loadType === "self") {
                               updateConvoStatus(convoSid);
                               convoItem.removeClass("new-message");
                               convoItem.find("[data-convo='new-message-badge']").hide();
+                              updateConvoCounter(); // ✅ Re-run counter update
                           }
                       });
                   }
@@ -175,6 +176,7 @@ function loadConvos(targetUser, type) {
                           loadConvoMessages(convoSid);
                           convoItem.removeClass("new-message");
                           convoItem.find("[data-convo='new-message-badge']").hide();
+                          updateConvoCounter(); // ✅ Update counter after clicking
 
                           if (loadType === "self" && activeUserId !== convo.attributes.last_message_sender) {
                               updateBroadcastMessageViewers(convoSid, activeUserId);
@@ -194,7 +196,7 @@ function loadConvos(targetUser, type) {
           $('.back-convo-button').click(function () {
               $('.chat__messages-wrapper').hide();
           });
-          updateConvoCounter(); // Ensure counter updates after conversations load
+          updateConvoCounter(); // ✅ Ensure counter updates after conversations load
       },
       error: function (error) {
           console.error("Error fetching conversations:", error);
