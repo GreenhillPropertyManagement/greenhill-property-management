@@ -497,16 +497,13 @@ function fetchNotifications() {
 }
 
 function updateNotifications(notifications) {
-  // Update the notification count
   $("[data-api='notification-count']").text(notifications.length);
 
-  // Get the notification wrapper
   let $wrapper = $(".notification__dropdown-list");
-  $wrapper.empty(); // Clear existing notifications
+  $wrapper.empty();
 
-  // Loop through notifications and append new ones
   notifications.forEach(notification => {
-      let createdAt = formatDateToCustomFormat(notification.activity_record.created_at);
+      let createdAt = formatDateToCustomFormat(new Date(notification.activity_record.created_at).toISOString());
       let description = notification.activity_record.description;
 
       let notificationItem = `
