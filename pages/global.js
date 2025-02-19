@@ -504,14 +504,14 @@ function updateNotifications(notifications) {
 
   notifications.forEach(notification => {
       let timestamp = notification.activity_record.created_at;
-      let dateObj = new Date(timestamp); // Convert from milliseconds
+      let dateObj = new Date(timestamp); // Ensure this is treated as UTC
 
-      // Extract UTC components and format manually
+      // ✅ Use `getUTC*` methods to ensure the time stays in UTC
       const day = String(dateObj.getUTCDate()).padStart(2, '0');
       const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');  // +1 because months are 0-based
       const year = String(dateObj.getUTCFullYear()).slice(-2);  // Last two digits of the year
 
-      let hours = dateObj.getUTCHours();
+      let hours = dateObj.getUTCHours();  // ✅ Ensure UTC hours are used
       const minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
       const amOrPm = hours >= 12 ? 'pm' : 'am';
 
