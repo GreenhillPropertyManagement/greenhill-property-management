@@ -223,7 +223,7 @@ function loadConvos(targetUser, type) {
       $('.back-convo-button').click(function () {
         $('.chat__messages-wrapper').hide();
       });
-      //updateConvoCounter();
+      updateConvoCounter();
     },
     error: function (error) {
       console.error("Error fetching conversations:", error);
