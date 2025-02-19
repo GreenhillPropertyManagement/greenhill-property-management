@@ -147,7 +147,7 @@ function loadConvos(targetUser, type) {
               updateConvoStatus(convoSid);
               convoItem.removeClass("new-message");
               convoItem.find("[data-convo='new-message-badge']").hide();
-              updateConvoCounter();
+              
             }
           });
         }
@@ -215,11 +215,6 @@ function loadConvos(targetUser, type) {
           convoItem.find("[data-convo='blast-icon']").hide();
         }
 
-        // 🔹 Only update counter when last convo is loaded
-        if (index === array.length - 1) {
-          console.log("All conversations loaded, updating counter...");
-          setTimeout(updateConvoCounter, 0); // Ensure all DOM changes are applied
-        }
       });
     },
     complete: function () {
