@@ -243,13 +243,13 @@ function loadConvos(targetUser, type) {
 
 /* Function to Update Convo Counter */
 function updateConvoCounter() {
-  let unreadCount = $(".new-message").length;
+  let unreadCount = $("[dyn-container='convos-container'] .new-message").length; 
   let counterElement = $("[data-api='convo-counter']");
 
   if (unreadCount > 0) {
-    counterElement.text(unreadCount).show();
+    counterElement.text(unreadCount).show(); // Show and update counter
   } else {
-    counterElement.hide();
+    counterElement.hide(); // Hide when there are no unread messages
   }
 }
 
