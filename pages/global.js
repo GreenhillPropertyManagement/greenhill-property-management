@@ -547,14 +547,16 @@ function updateNotifications(notifications) {
               $("#pay-rent").trigger("click"); // Simulate clicking the "pay-rent" button
           }
 
-          // Mark as seen and update UI
+          // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
           $(this).fadeOut(300, function () {
               $(this).remove(); // Remove from DOM
               updateNotificationCounter(-1); // Decrement counter
 
-              // Close the Webflow dropdown--
-              $(".notification__dropdown-toggle").trigger("click");
+              // ✅ Close the Webflow dropdown by removing `w--open` class
+              $(".w-dropdown").removeClass("w--open");
+              $(".w-dropdown-toggle").removeClass("w--open");
+              $(".w-dropdown-list").removeClass("w--open").hide();
           });
       });
 
