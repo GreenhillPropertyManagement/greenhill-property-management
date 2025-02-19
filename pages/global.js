@@ -553,7 +553,7 @@ function updateNotifications(notifications) {
               $(this).remove(); // Remove from DOM
               updateNotificationCounter(-1); // Decrement counter
 
-              // Close the Webflow dropdown
+              // Close the Webflow dropdown--
               $(".notification__dropdown-toggle").trigger("click");
           });
       });
