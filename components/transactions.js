@@ -491,8 +491,21 @@ function createUserTransaction(view, form) {
       $("#unit-trans-date").closest(".form__item").hide();
       $("#unit-trans-start-date").closest(".form__item").hide();
       $("#unit-trans-end-date").closest(".form__item").hide();
+
+      // Determine view and set recipient correctly
+      let recipientFieldWrapper = $("[dynamic-element='recipient']");
+      let recipientField = $("[data-api-input='recipient']");
+
+      if (localStorage.pageId === "profile") {
+          recipientField.val("tenant"); // Default to tenant in profile view
+          recipientFieldWrapper.hide(); // Hide recipient in profile view
+      } else if (localStorage.pageId === "unit") {
+          recipientField.val(""); // Keep recipient blank in unit view
+          recipientFieldWrapper.show(); // Show recipient field in unit view
+      }     
       
       $("[api-button='all-user-transactions']").click();
+      
     },
   });
 }
