@@ -533,7 +533,7 @@ function updateNotifications(notifications) {
       let description = notification.activity_record.description;
 
       let notificationItem = `
-          <div class="notification__item-wrapper" id="notification-${notificationId}">
+          <div class="notification__item-wrapper" id="${notificationId}">
               <div data-api="description" class="notification__item__text">${description}</div>
               <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
           </div>
