@@ -479,23 +479,17 @@ function formatDateNoTime(dateString) {
   return `${month}/${day}/${year}`;
 }
 
-function formatDateToUTCFormat(dateString) {
+function formatDateToLocalTimezone(dateString) {
   const dateObj = new Date(dateString);
 
-  // Extract UTC date components
-  const day = String(dateObj.getUTCDate()).padStart(2, '0');
-  const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0'); // +1 because months are 0-based
-  const year = String(dateObj.getUTCFullYear()).slice(-2); // Last two digits of the year
-
-  // Get UTC hours and minutes
-  let hours = dateObj.getUTCHours();
-  const minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
-  const amOrPm = hours >= 12 ? 'pm' : 'am';
-
-  hours = hours % 12;
-  hours = hours ? hours : 12; // If 0, make it 12
-
-  return `${month}/${day}/${year} ${hours}:${minutes}${amOrPm} UTC`;
+  return new Intl.DateTimeFormat(undefined, {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true, // Ensures AM/PM format
+  }).format(dateObj);
 }
 
 function fetchNotifications() {
@@ -524,8 +518,8 @@ function updateNotifications(notifications) {
   notifications.forEach(notification => {
       let timestamp = notification.activity_record.created_at;
 
-      // ✅ Use the new UTC-based format function
-      let formattedTimestamp = formatDateToUTCFormat(timestamp);
+      // ✅ Use the local timezone format function
+      let formattedTimestamp = formatDateToLocalTimezone(timestamp);
 
       let description = notification.activity_record.description;
 
