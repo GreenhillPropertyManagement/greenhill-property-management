@@ -216,7 +216,7 @@ function initializeApp() {
   });
 
   // conditional logic for testing (dummy tenant account)
-  if(localStorage.userId === "682fd788-ebea-4246-b6fe-54c2709eb191") {
+  if(localStorage.userId === "9e60fffc-5f8e-4a3d-9411-99d4df9d852c") {
     alert('Testing Mode!');
     $('[dynamic-visibility=test-mode]').show();
   } else {
