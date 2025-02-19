@@ -538,9 +538,12 @@ function setupCustomDropdown() {
 
 function updateNotifications(notifications) {
   let $counter = document.querySelector("[data-api='notification-count']");
+  let $maintenanceCounter = document.querySelector("[data-api='maintenance-counter']");
   let $wrapper = document.getElementById("notification-list");
 
   $wrapper.innerHTML = ""; // Clear old notifications
+
+  let workOrderCount = 0; // Track "work-order" notifications
 
   notifications.forEach(notification => {
       let notificationId = notification.id;
@@ -548,6 +551,11 @@ function updateNotifications(notifications) {
       let formattedTimestamp = formatDateToLocalTimezone(timestamp);
       let description = notification.activity_record.description;
       let notificationType = notification.type;
+
+      // ✅ Count "work-order" notifications
+      if (notificationType === "work-order") {
+          workOrderCount++;
+      }
 
       let notificationItem = document.createElement("div");
       notificationItem.classList.add("notification__item-wrapper");
@@ -579,6 +587,19 @@ function updateNotifications(notifications) {
               // ✅ Update counter dynamically
               let remainingNotifications = document.querySelectorAll(".notification__item-wrapper").length;
               
+              // ✅ Update maintenance counter dynamically
+              if (notificationType === "work-order") {
+                  workOrderCount--;
+              }
+
+              // Hide or update maintenance counter
+              if (workOrderCount === 0) {
+                  $maintenanceCounter.style.setProperty("display", "none", "important");
+              } else {
+                  $maintenanceCounter.textContent = workOrderCount;
+                  $maintenanceCounter.style.setProperty("display", "flex", "important");
+              }
+
               if (remainingNotifications === 0) {
                   $counter.style.setProperty("display", "none", "important"); // Hide counter
               } else {
@@ -591,12 +612,20 @@ function updateNotifications(notifications) {
       $wrapper.appendChild(notificationItem);
   });
 
-  // ✅ Update counter visibility after loading notifications
+  // ✅ Update notification counter visibility
   if (notifications.length === 0) {
       $counter.style.setProperty("display", "none", "important"); // Hide counter
   } else {
       $counter.textContent = notifications.length;
       $counter.style.setProperty("display", "flex", "important"); // Show counter
+  }
+
+  // ✅ Show or hide maintenance counter based on work-order notifications
+  if (workOrderCount === 0) {
+      $maintenanceCounter.style.setProperty("display", "none", "important");
+  } else {
+      $maintenanceCounter.textContent = workOrderCount;
+      $maintenanceCounter.style.setProperty("display", "flex", "important");
   }
 }
 
