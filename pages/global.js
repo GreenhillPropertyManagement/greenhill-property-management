@@ -503,7 +503,7 @@ function updateNotifications(notifications) {
   $wrapper.empty();
 
   notifications.forEach(notification => {
-      let createdAt = formatDateToCustomFormat(new Date(notification.activity_record.created_at).toISOString());
+      let createdAt = formatDateToCustomFormat(new Date(notification.activity_record.created_at).toLocaleString("en-US", { timeZone: "UTC" }));
       let description = notification.activity_record.description;
 
       let notificationItem = `
