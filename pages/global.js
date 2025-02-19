@@ -577,6 +577,9 @@ function updateNotifications(notifications) {
           if (notificationType === "transaction" && userRole === "Landlord") {
               document.getElementById("finance").click(); 
           }
+          if (notificationType === "work-order") {
+              document.getElementById("maintenance").click();
+          }
 
           // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
