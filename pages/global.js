@@ -542,18 +542,6 @@ function updateNotifications(notifications) {
 
   $wrapper.innerHTML = ""; // Clear old notifications
 
-  if (notifications.length === 0) {
-      // ✅ Show "You're all caught up" message when there are no notifications
-      let noNotificationsMessage = document.createElement("div");
-      noNotificationsMessage.classList.add("notification__empty-message");
-      noNotificationsMessage.textContent = "You're all caught up!";
-      $wrapper.appendChild(noNotificationsMessage);
-
-      $counter.style.setProperty("display", "none", "important"); // Hide counter
-      $wrapper.style.display = "block"; // Keep dropdown visible with the message
-      return; // Stop function execution
-  }
-
   notifications.forEach(notification => {
       let notificationId = notification.id;
       let timestamp = notification.activity_record.created_at;
@@ -579,7 +567,7 @@ function updateNotifications(notifications) {
               document.getElementById("pay-rent").click(); 
           }
           if (notificationType === "transaction" && userRole === "Landlord") {
-            document.getElementById("finance").click(); 
+              document.getElementById("finance").click(); 
           }
 
           // ✅ Mark as seen and update UI
@@ -593,8 +581,6 @@ function updateNotifications(notifications) {
               
               if (remainingNotifications === 0) {
                   $counter.style.setProperty("display", "none", "important"); // Hide counter
-                  $wrapper.innerHTML = `<div class="notification__empty-message">You're all caught up!</div>`; // Show empty message
-                  $wrapper.style.display = "block"; // Keep dropdown visible
               } else {
                   $counter.textContent = remainingNotifications;
                   $counter.style.setProperty("display", "flex", "important"); // Show counter
@@ -606,11 +592,23 @@ function updateNotifications(notifications) {
   });
 
   // ✅ Update counter visibility after loading notifications
-  if (notifications.length > 0) {
+  if (notifications.length === 0) {
+      $counter.style.setProperty("display", "none", "important"); // Hide counter
+  } else {
       $counter.textContent = notifications.length;
       $counter.style.setProperty("display", "flex", "important"); // Show counter
   }
 }
+
+// ✅ Show "You're all caught up!" message ONLY when the dropdown is opened and there are no notifications
+document.getElementById("notification-toggle").addEventListener("click", function () {
+  let $wrapper = document.getElementById("notification-list");
+  let hasNotifications = document.querySelectorAll(".notification__item-wrapper").length > 0;
+
+  if (!hasNotifications) {
+      $wrapper.innerHTML = `<div class="notification__empty-message">You're all caught up!</div>`;
+  }
+});
 
 function markNotificationAsSeen(notificationId) {
   $.ajax({
