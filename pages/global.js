@@ -577,11 +577,11 @@ function updateNotifications(notifications) {
               let remainingNotifications = document.querySelectorAll(".notification__item-wrapper").length;
               
               if (remainingNotifications === 0) {
-                  $counter.style.display = "none"; // Hide counter completely
+                  $counter.style.setProperty("display", "none", "important"); // Force hide counter
                   $wrapper.style.display = "none"; // Close dropdown if empty
               } else {
                   $counter.textContent = remainingNotifications;
-                  $counter.style.display = "flex"; // Ensure it stays visible if there are notifications
+                  $counter.style.setProperty("display", "flex", "important"); // Force show counter
               }
           }, 300);
       });
@@ -591,10 +591,10 @@ function updateNotifications(notifications) {
 
   // ✅ Update counter visibility after loading notifications
   if (notifications.length === 0) {
-      $counter.style.display = "none"; // Hide counter if there are zero notifications
+      $counter.style.setProperty("display", "none", "important"); // Force hide counter
   } else {
       $counter.textContent = notifications.length;
-      $counter.style.display = "flex"; // Ensure counter is visible
+      $counter.style.setProperty("display", "flex", "important"); // Force show counter
   }
 }
 
