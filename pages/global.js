@@ -524,6 +524,7 @@ function updateNotifications(notifications) {
   $wrapper.empty();
 
   notifications.forEach(notification => {
+      let notificationId = notification.id; // Retrieve the ID from the response
       let timestamp = notification.activity_record.created_at;
 
       // ✅ Use the local timezone format function
@@ -532,7 +533,7 @@ function updateNotifications(notifications) {
       let description = notification.activity_record.description;
 
       let notificationItem = `
-          <div class="notification__item-wrapper">
+          <div class="notification__item-wrapper" id="notification-${notificationId}">
               <div data-api="description" class="notification__item__text">${description}</div>
               <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
           </div>
