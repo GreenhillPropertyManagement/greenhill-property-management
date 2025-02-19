@@ -202,7 +202,7 @@ function loadConvos(targetUser, type) {
             loadConvoMessages(convoSid);
             convoItem.removeClass("new-message");
             convoItem.find("[data-convo='new-message-badge']").hide();
-            updateConvoCounter();
+           
 
             if (
               loadType === "self" &&
@@ -228,6 +228,7 @@ function loadConvos(targetUser, type) {
       $('.back-convo-button').click(function () {
         $('.chat__messages-wrapper').hide();
       });
+      updateConvoCounter();
     },
     error: function (error) {
       console.error("Error fetching conversations:", error);
