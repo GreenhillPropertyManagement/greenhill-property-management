@@ -456,7 +456,7 @@ function loadRecipients(recipient) {
 
 function createNewConvo() {
   $("#new-convo-form")
-    .off("submit") // ✅ Ensure event is only bound once
+    .off("submit") // ✅ Prevent multiple event bindings
     .on("submit", function (event) {
       event.preventDefault();
 
@@ -467,13 +467,12 @@ function createNewConvo() {
         return;
       }
 
-      // Handle 'Loading' State
       $(".modal__block").hide();
       $(".loader").css("display", "flex");
 
       const formData = {};
 
-      // Get the message input value and replace line breaks with '\n'
+      // Get the message input value
       const messageInput = $("#convo-message");
       const messageValue = messageInput.val().replace(/\r?\n/g, "\n");
 
@@ -485,12 +484,10 @@ function createNewConvo() {
         formData[key] = value;
       });
 
-      // Set recipient formatted info if a recipient is selected
       if ($("#convo_recipient").find(":selected").val() !== "") {
         formData["recipient_formatted_info"] = $("#convo_recipient").find(":selected").text();
       }
 
-      // Additional sender details
       formData["convo_message"] = messageValue;
       formData["sender"] = localStorage.userId;
       formData["sender_formatted_info"] = `${localStorage.firstName} ${localStorage.lastName} (${localStorage.email})`;
@@ -509,9 +506,23 @@ function createNewConvo() {
         success: function (response) {
           console.log("✅ New conversation created:", response.convo.sid);
 
-          /* ✅ Call `loadConvos()` **AFTER** the AJAX request is fully complete */
-          loadConvos(localStorage.userId, "self");
-          loadConvoMessages(response.convo.sid);
+          /* ✅ Dynamically add the new conversation */
+          let newConvoId = response.convo.sid;
+          let page = localStorage.getItem("pageId");
+
+          if (page === "profile") {
+            // ✅ If on the user’s profile, load THEIR conversations
+            loadConvos(localStorage.pageRefreshParam, "user");
+          } else if (page === "communications") {
+            // ✅ If on the communications tab, load only MY conversations
+            loadConvos(localStorage.userId, "self");
+          } else if (page === "unit") {
+            // ✅ If on a property unit page, load tenant conversations
+            loadConvos(localStorage.activeTenantUserUuid, "user");
+          }
+
+          // ✅ Load messages for the new conversation
+          loadConvoMessages(newConvoId);
         },
         complete: function () {
           /* Reset Form */
