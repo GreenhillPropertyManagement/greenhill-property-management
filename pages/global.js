@@ -499,6 +499,7 @@ function formatDateToLocalTimezone(dateString) {
   // Concatenate without a comma
   return `${formattedDate} ${formattedTime}`;
 }
+
 function fetchNotifications() {
   $.ajax({
       url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
