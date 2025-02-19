@@ -117,6 +117,7 @@ function initializeApp() {
   userRoleInterface();
   loadUsersInFormSelectFields();
   fetchNotifications();
+  setupCustomDropdown();
 
 
 
@@ -517,12 +518,30 @@ function fetchNotifications() {
   });
 }
 
-function updateNotifications(notifications) {
-  let $counter = $("[data-api='notification-count']");
-  $counter.text(notifications.length);
+function setupCustomDropdown() {
+  const toggleButton = document.getElementById("notification-toggle");
+  const dropdownList = document.getElementById("notification-list");
 
-  let $wrapper = $(".notification__dropdown-list");
-  $wrapper.empty();
+  // Toggle dropdown visibility
+  toggleButton.addEventListener("click", function (event) {
+      event.stopPropagation(); // Prevent click from propagating to body
+      dropdownList.style.display = dropdownList.style.display === "block" ? "none" : "block";
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", function (event) {
+      if (!toggleButton.contains(event.target) && !dropdownList.contains(event.target)) {
+          dropdownList.style.display = "none";
+      }
+  });
+}
+
+function updateNotifications(notifications) {
+  let $counter = document.querySelector("[data-api='notification-count']");
+  $counter.textContent = notifications.length;
+
+  let $wrapper = document.getElementById("notification-list");
+  $wrapper.innerHTML = ""; // Clear old notifications
 
   notifications.forEach(notification => {
       let notificationId = notification.id;
@@ -531,41 +550,55 @@ function updateNotifications(notifications) {
       let description = notification.activity_record.description;
       let notificationType = notification.type;
 
-      let notificationItem = $(`
-          <div class="notification__item-wrapper" id="notification-${notificationId}" data-id="${notificationId}" data-type="${notificationType}">
-              <div data-api="description" class="notification__item__text">${description}</div>
-              <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
-          </div>
-      `);
+      let notificationItem = document.createElement("div");
+      notificationItem.classList.add("notification__item-wrapper");
+      notificationItem.setAttribute("data-id", notificationId);
+      notificationItem.setAttribute("data-type", notificationType);
+      notificationItem.innerHTML = `
+          <div class="notification__item__text">${description}</div>
+          <div class="notification__timestamp">${formattedTimestamp}</div>
+      `;
 
       // Attach click event to mark notification as seen and trigger logic based on user role
-      notificationItem.on("click", function () {
+      notificationItem.addEventListener("click", function () {
           let userRole = localStorage.getItem("userRole"); // Get user role from localStorage
           
           // Handle different click actions based on notification type and userRole
           if (notificationType === "transaction" && userRole === "Tenant") {
-              $("#pay-rent").trigger("click"); // Simulate clicking the "pay-rent" button
+              document.getElementById("pay-rent").click(); // Simulate clicking the "pay-rent" button
           }
 
           // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
-          $(this).fadeOut(300, function () {
-              $(this).remove(); // Remove from DOM
-              updateNotificationCounter(-1); // Decrement counter
+          this.style.opacity = "0";
+          setTimeout(() => {
+              this.remove(); // Remove from DOM
+              
+              // ✅ Update counter
+              let count = parseInt($counter.textContent, 10) || 0;
+              count = Math.max(0, count - 1);
+              $counter.textContent = count;
+              
+              // ✅ Hide counter if no notifications left
+              if (count === 0) {
+                  $counter.style.display = "none";
+              }
 
-              // ✅ Simulate clicking outside the dropdown to close it properly
-              $("body").trigger("click");
-          });
+              // ✅ Close dropdown if empty
+              if (document.querySelectorAll(".notification__item-wrapper").length === 0) {
+                  document.getElementById("notification-list").style.display = "none";
+              }
+          }, 300);
       });
 
-      $wrapper.append(notificationItem);
+      $wrapper.appendChild(notificationItem);
   });
 
   // Hide counter if there are no notifications
   if (notifications.length === 0) {
-      $counter.hide();
+      $counter.style.display = "none";
   } else {
-      $counter.show();
+      $counter.style.display = "block";
   }
 }
 
