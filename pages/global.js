@@ -567,6 +567,10 @@ function updateNotifications(notifications) {
           if (notificationType === "transaction" && userRole === "Tenant") {
               document.getElementById("pay-rent").click(); // Simulate clicking the "pay-rent" button
           }
+          if (notificationType === "transaction" && userRole === "Landlord") {
+            document.getElementById("finance").click(); // Simulate clicking the "pay-rent" button
+        }
+
 
           // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
