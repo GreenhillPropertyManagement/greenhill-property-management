@@ -236,33 +236,6 @@ function loadConvos(targetUser, type) {
   });
 }
 
-/* Function to Update Convo Counter */
-function updateConvoCounter() {
-  let unreadMessages = $("div[dyn-container='convos-container'] .new-message");
-  let unreadCount = unreadMessages.length;
-  let counterElement = $("[data-api='convo-counter']");
-
-  console.log("Unread messages found:", unreadCount); // Debugging
-
-  unreadMessages.each(function (index, element) {
-    console.log("Unread Message", index + 1, "ID:", $(element).attr("id"));
-  });
-
-  console.log("Counter element found?", counterElement.length > 0);
-
-  if (!counterElement.length) {
-    console.warn("Counter element not found!");
-    return;
-  }
-
-  counterElement.text(unreadCount); // Set the correct count
-
-  if (unreadCount > 0) {
-    counterElement.show();
-  } else {
-    counterElement.hide();
-  }
-}
 
 /* Function to Update Convo Counter */
 function updateConvoCounter() {
