@@ -100,7 +100,7 @@ function loadConvos(targetUser, type) {
 
       convosContainer.empty(); // Clear the convos container
 
-      response.forEach((convo) => {
+      response.forEach((convo, index, array) => {
         let convoItem = $(sampleConvo).clone().appendTo(convosContainer);
         convoItem.attr("id", convo.conversation_sid);
         convoItem.find("[data-convo='convo-title']").text(convo.friendly_name);
@@ -116,6 +116,8 @@ function loadConvos(targetUser, type) {
         let activeUserId = targetUser;
 
         /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
+        convoItem.removeClass("new-message"); // Ensure reset before applying
+
         if (convo.attributes.convo_type === "peer_to_peer") {
           if (
             loadType === "self" &&
@@ -126,12 +128,10 @@ function loadConvos(targetUser, type) {
             convoItem.addClass("new-message");
           } else {
             convoItem.find("[data-convo='new-message-badge']").hide();
-            convoItem.removeClass("new-message");
           }
 
           convoItem.click(function () {
             $('.chat__messages-wrapper').show();
-
             let convoSid = $(this).attr("id");
             localStorage.setItem("activeConvo", convoSid);
 
@@ -181,11 +181,9 @@ function loadConvos(targetUser, type) {
               convoItem.addClass("new-message");
             } else {
               convoItem.find("[data-convo='new-message-badge']").hide();
-              convoItem.removeClass("new-message");
             }
           } else {
             convoItem.find("[data-convo='new-message-badge']").hide();
-            convoItem.removeClass("new-message");
           }
 
           convoItem.click(function () {
@@ -216,11 +214,16 @@ function loadConvos(targetUser, type) {
         } else {
           convoItem.find("[data-convo='blast-icon']").hide();
         }
+
+        // 🔹 Only update counter when last convo is loaded
+        if (index === array.length - 1) {
+          console.log("All conversations loaded, updating counter...");
+          setTimeout(updateConvoCounter, 0); // Ensure all DOM changes are applied
+        }
       });
     },
     complete: function () {
-      console.log("Conversations loaded. Updating counter...");
-      updateConvoCounter(); // Ensures the counter updates only after conversations are loaded
+      console.log("AJAX completed, conversations should be loaded.");
       $(".loader").hide();
       $('.back-convo-button').click(function () {
         $('.chat__messages-wrapper').hide();
@@ -234,10 +237,16 @@ function loadConvos(targetUser, type) {
 
 /* Function to Update Convo Counter */
 function updateConvoCounter() {
-  let unreadCount = $("div[dyn-container='convos-container'] .new-message").length;
+  let unreadMessages = $("div[dyn-container='convos-container'] .new-message");
+  let unreadCount = unreadMessages.length;
   let counterElement = $("[data-api='convo-counter']");
 
-  console.log("Unread count:", unreadCount); // Debugging
+  console.log("Unread messages found:", unreadCount); // Debugging
+
+  unreadMessages.each(function (index, element) {
+    console.log("Unread Message", index + 1, "ID:", $(element).attr("id"));
+  });
+
   console.log("Counter element found?", counterElement.length > 0);
 
   if (!counterElement.length) {
