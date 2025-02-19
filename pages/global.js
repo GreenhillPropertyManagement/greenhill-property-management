@@ -553,8 +553,8 @@ function updateNotifications(notifications) {
               $(this).remove(); // Remove from DOM
               updateNotificationCounter(-1); // Decrement counter
 
-              // ✅ Close the dropdown by triggering a click on the toggle
-              $(".notification__dropdown-toggle").trigger("click");
+              // ✅ Simulate clicking outside the dropdown to close it properly
+              $("body").trigger("click");
           });
       });
 
