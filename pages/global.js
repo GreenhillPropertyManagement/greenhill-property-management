@@ -553,10 +553,8 @@ function updateNotifications(notifications) {
               $(this).remove(); // Remove from DOM
               updateNotificationCounter(-1); // Decrement counter
 
-              // ✅ Close the Webflow dropdown by removing `w--open` class
-              $(".w-dropdown").removeClass("w--open");
-              $(".w-dropdown-toggle").removeClass("w--open");
-              $(".w-dropdown-list").removeClass("w--open").hide();
+              // ✅ Close the dropdown by triggering a click on the toggle
+              $(".notification__dropdown-toggle").trigger("click");
           });
       });
 
