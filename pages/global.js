@@ -118,7 +118,7 @@ function initializeApp() {
   loadUsersInFormSelectFields();
   fetchNotifications();
   setupCustomDropdown();
-  loadConvos(localStorage.userId, "self");
+  //loadConvos(localStorage.userId, "self");
 
 
 
