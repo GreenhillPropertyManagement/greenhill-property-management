@@ -518,27 +518,71 @@ function fetchNotifications() {
 }
 
 function updateNotifications(notifications) {
-  $("[data-api='notification-count']").text(notifications.length);
+  let $counter = $("[data-api='notification-count']");
+  $counter.text(notifications.length);
 
   let $wrapper = $(".notification__dropdown-list");
   $wrapper.empty();
 
   notifications.forEach(notification => {
-      let notificationId = notification.id; // Retrieve the ID from the response
+      let notificationId = notification.id;
       let timestamp = notification.activity_record.created_at;
-
-      // ✅ Use the local timezone format function
       let formattedTimestamp = formatDateToLocalTimezone(timestamp);
-
       let description = notification.activity_record.description;
 
-      let notificationItem = `
-          <div class="notification__item-wrapper" id="${notificationId}">
+      let notificationItem = $(`
+          <div class="notification__item-wrapper" id="notification-${notificationId}" data-id="${notificationId}">
               <div data-api="description" class="notification__item__text">${description}</div>
               <div data-api="timestamp" class="notification__timestamp">${formattedTimestamp}</div>
           </div>
-      `;
+      `);
+
+      // Attach click event to mark notification as seen
+      notificationItem.on("click", function () {
+          markNotificationAsSeen(notificationId);
+          $(this).fadeOut(300, function () {
+              $(this).remove(); // Remove from DOM
+              updateNotificationCounter(-1); // Decrement counter
+          });
+      });
 
       $wrapper.append(notificationItem);
   });
+
+  // Hide counter if there are no notifications
+  if (notifications.length === 0) {
+      $counter.hide();
+  } else {
+      $counter.show();
+  }
+}
+
+function markNotificationAsSeen(notificationId) {
+  $.ajax({
+      url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ notification_id: notificationId }),
+      headers: {
+          Authorization: "Bearer " + localStorage.authToken,
+      },
+      success: function(response) {
+          console.log("Notification marked as seen:", response);
+      },
+      error: function(xhr, status, error) {
+          console.error("Error marking notification as seen:", error);
+      }
+  });
+}
+
+function updateNotificationCounter(change) {
+  let $counter = $("[data-api='notification-count']");
+  let currentCount = parseInt($counter.text()) || 0;
+  let newCount = Math.max(currentCount + change, 0); // Prevent negative count
+
+  if (newCount > 0) {
+      $counter.text(newCount).show();
+  } else {
+      $counter.hide();
+  }
 }
