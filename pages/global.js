@@ -538,9 +538,8 @@ function setupCustomDropdown() {
 
 function updateNotifications(notifications) {
   let $counter = document.querySelector("[data-api='notification-count']");
-  $counter.textContent = notifications.length;
-
   let $wrapper = document.getElementById("notification-list");
+
   $wrapper.innerHTML = ""; // Clear old notifications
 
   notifications.forEach(notification => {
@@ -567,10 +566,6 @@ function updateNotifications(notifications) {
           if (notificationType === "transaction" && userRole === "Tenant") {
               document.getElementById("pay-rent").click(); // Simulate clicking the "pay-rent" button
           }
-          if (notificationType === "transaction" && userRole === "Landlord") {
-            document.getElementById("finance").click(); // Simulate clicking the "pay-rent" button
-        }
-
 
           // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
@@ -578,19 +573,15 @@ function updateNotifications(notifications) {
           setTimeout(() => {
               this.remove(); // Remove from DOM
               
-              // ✅ Update counter
-              let count = parseInt($counter.textContent, 10) || 0;
-              count = Math.max(0, count - 1);
-              $counter.textContent = count;
+              // ✅ Update counter dynamically
+              let remainingNotifications = document.querySelectorAll(".notification__item-wrapper").length;
               
-              // ✅ Hide counter if no notifications left
-              if (count === 0) {
-                  $counter.style.display = "none";
-              }
-
-              // ✅ Close dropdown if empty
-              if (document.querySelectorAll(".notification__item-wrapper").length === 0) {
-                  document.getElementById("notification-list").style.display = "none";
+              if (remainingNotifications === 0) {
+                  $counter.style.display = "none"; // Hide counter completely
+                  $wrapper.style.display = "none"; // Close dropdown if empty
+              } else {
+                  $counter.textContent = remainingNotifications;
+                  $counter.style.display = "flex"; // Ensure it stays visible if there are notifications
               }
           }, 300);
       });
@@ -598,11 +589,12 @@ function updateNotifications(notifications) {
       $wrapper.appendChild(notificationItem);
   });
 
-  // Hide counter if there are no notifications
+  // ✅ Update counter visibility after loading notifications
   if (notifications.length === 0) {
-      $counter.style.display = "none";
+      $counter.style.display = "none"; // Hide counter if there are zero notifications
   } else {
-      $counter.style.display = "block";
+      $counter.textContent = notifications.length;
+      $counter.style.display = "flex"; // Ensure counter is visible
   }
 }
 
