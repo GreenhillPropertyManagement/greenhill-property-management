@@ -123,7 +123,7 @@ function initializeApp() {
   /* maintnenace tab button clear notifications */
   $("#maintenance").on("click", function () {
     $('[data-api=maintenance-counter]').hide();
-  }
+  });
 
   /* ---- Modal Functionality ----- */
 
