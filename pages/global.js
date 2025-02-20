@@ -121,9 +121,9 @@ function initializeApp() {
   loadConvos(localStorage.userId, "self");
 
   /* maintnenace tab button clear notifications */
-  /*$("#maintenance").on("click", function () {
+  $("#maintenance").on("click", function () {
     $('[data-api=maintenance-counter]').hide();
-  });*/
+  });
 
   /* ---- Modal Functionality ----- */
 
