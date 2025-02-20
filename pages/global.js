@@ -121,9 +121,9 @@ function initializeApp() {
   loadConvos(localStorage.userId, "self");
 
   /* maintnenace tab button clear notifications */
-  $("#maintenance").on("click", function () {
+  /*$("#maintenance").on("click", function () {
     $('[data-api=maintenance-counter]').hide();
-  });
+  });*/
 
   /* ---- Modal Functionality ----- */
 
@@ -559,7 +559,7 @@ function updateNotifications(notifications) {
 
       // ✅ Count "work-order" notifications
       if (notificationType === "work-order") {
-          $maintenanceCounter.css("display","flex");
+          //$maintenanceCounter.css("display","flex");
           workOrderCount++;
       }
 
