@@ -120,7 +120,10 @@ function initializeApp() {
   setupCustomDropdown();
   loadConvos(localStorage.userId, "self");
 
-
+  /* maintnenace tab button clear notifications */
+  $("#maintenance").on("click", function () {
+    $('[data-api=maintenance-counter]').hide();
+  }
 
   /* ---- Modal Functionality ----- */
 
@@ -538,6 +541,7 @@ function setupCustomDropdown() {
 }
 
 function updateNotifications(notifications) {
+
   let $counter = document.querySelector("[data-api='notification-count']");
   let $maintenanceCounter = document.querySelector("[data-api='maintenance-counter']");
   let $wrapper = document.getElementById("notification-list");
@@ -555,6 +559,7 @@ function updateNotifications(notifications) {
 
       // ✅ Count "work-order" notifications
       if (notificationType === "work-order") {
+          $maintenanceCounter.css("display","flex");
           workOrderCount++;
       }
 
