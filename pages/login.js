@@ -66,7 +66,7 @@ $("#login-form").submit(function (event) {
         // if tenant has not verified bank
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status !== 'pending' && response.user_info.tenant_info.enable_payments == true && (!response.user_info.tenant_info.bank_last_4 || response.user_info.tenant_info.bank_last_4.trim() === "")) {
 
-          window.location.href = "/tenant/link-bank-account";
+          window.location.href = "/bank-account/link-bank-account";
 
       // if tenant has not updated their info  
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
