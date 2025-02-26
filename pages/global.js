@@ -35,6 +35,14 @@ function initializeApp() {
     window.location.href = "/app/login";
   });
 
+  $('[global-function=logout]').on("click", function () {
+    // Clear all local storage
+    localStorage.clear();
+
+    // Redirect user to /app/login
+    window.location.href = "/app/login";
+  });
+
     /* Global Ajax Errors Handling */
   $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
     // Retrieve the error code and response text
