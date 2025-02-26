@@ -1,4 +1,12 @@
-
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.authToken == null) {
+      //run code if they are not logged in
+      alert("You are not logged in");
+      location.href = "/app/login";
+    } else {
+      authUser();
+    }
+  });
 
 function authUser() {
     $.ajax({
