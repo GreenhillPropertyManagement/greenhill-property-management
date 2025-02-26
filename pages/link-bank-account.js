@@ -67,10 +67,19 @@ function createLinkToken() {
                     data: JSON.stringify({
                         public_token: public_token
                     }),
-                    success: function (data) {       
-
+                    success: function (data) {  
+                           
+                        // Run for Tenants...
                         // Redirect the user to the auto-pay page
-                        window.location.href = '/tenant/auto-pay-confirmation';
+                        if (localStorage.userRole === "Tenant") {
+                          window.location.href = '/tenant/auto-pay-confirmation';
+                        } else {
+                          //run for landlords...
+                          alert("Bank Account Successfuly Linked!");
+                          localStorage.setItem("pageId", "dashboard");
+                          window.location.href = '/app/home';
+                        }
+                        
 
                     },
                     error: function (error) {
