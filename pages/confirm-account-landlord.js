@@ -143,7 +143,7 @@ function confirmLandlord() {
       data: formData,
       success: function (response) {
         localStorage.setItem("pageId", "dashboard");
-        window.location.href = "/bank-account/choose-method";
+        window.location.href = "/link-bank-account/choose-method";
       },
       error: function (error) {
         // Handle error here
