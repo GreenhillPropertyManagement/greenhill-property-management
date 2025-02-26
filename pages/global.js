@@ -35,7 +35,7 @@ function initializeApp() {
     window.location.href = "/app/login";
   });
 
-  $('[global-function=logout]').on("click", function () {
+  $('[global-func=logout]').on("click", function () {
     // Clear all local storage
     localStorage.clear();
 
