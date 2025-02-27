@@ -66,7 +66,7 @@ $("#login-form").submit(function (event) {
       // if tenant has not verified bank
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status !== 'pending' && response.user_info.tenant_info.enable_payments == true && (!response.user_info.tenant_info.bank_last_4 || response.user_info.tenant_info.bank_last_4.trim() === "")) {
 
-          window.location.href = "/bank-account/link-bank-account";
+          window.location.href = "/banking/choose-method";
 
       // if tenant has not updated their info  
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
@@ -80,7 +80,7 @@ $("#login-form").submit(function (event) {
 
       // if landlord has not connected bank
       } else if (response.user_info.user_role === 'Landlord' && response.user_info.landlord_info.stripe_bank_last_4 === "") {
-        window.location.href = "/link-bank-account/choose-method";
+        window.location.href = "/banking/choose-method";
       }
       else {
 
