@@ -57,14 +57,25 @@ function manualBankLink() {
       data: formData,
       success: function (response) {
 
-        if (localStorage.userRole === "Landlord"){
+        // if landlord bank was instant verified 
+        if (response.user_role === "Landlord" && response.bank_verified === "yes") {
           alert("Bank Account Successfully Linked!");
           localStorage.setItem("pageId", "dashboard");
           window.location.href = "/app/home";
-        } else {
+        }
+
+        // if landlord bank was not instant verified
+        if (response.user_role === "Landlord" && response.bank_verified === "no") {
           alert("Bank Account Successfully Linked!");
           window.location.href = "/banking/verify-bank-account";
         }
+
+        // if user is a tenant...
+        if (response.user_role === "Tenant") {
+          alert("Bank Account Successfully Linked!");
+          window.location.href = "/banking/verify-bank-account";
+        }
+
 
       },
       error: function (error) {
