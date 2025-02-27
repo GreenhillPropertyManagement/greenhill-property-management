@@ -84,8 +84,13 @@ $("#login-form").submit(function (event) {
           window.location.href = "/landlord/confirm-account?user=" + response.user_info.user_id;
 
       // if landlord has not connected bank -------------------
-      } else if (response.user_info.user_role === 'Landlord' && response.user_info.landlord_info.stripe_bank_last_4 === "") {
+      } else if (response.user_info.user_role === 'Landlord' && response.user_info.landlord_info.bank_account_status === "not_connected") {
         window.location.href = "/banking/choose-method";
+
+      // if landlord bank is waiting on micro deposits
+      } else if (response.user_info.user_role === 'Landlord' && response.user_info.landlord_info.bank_account_status === "pending" && response.user_info.landlord_info.bank_verification_method === "manual") {
+        window.location.href = "/banking/verify-bank-account";
+        
       }
       else {
 
