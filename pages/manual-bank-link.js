@@ -49,7 +49,7 @@ function manualBankLink() {
 
     // Make an AJAX POST request to the specified API endpoint
     $.ajax({
-      url: localStorage.baseUrl + "api:sElUkr6t/landlord_mannual_bank_link",
+      url: localStorage.baseUrl + "api:sElUkr6t/manual_bank_link",
       type: "POST",
       headers: {
         Authorization: "Bearer " + localStorage.authToken,
