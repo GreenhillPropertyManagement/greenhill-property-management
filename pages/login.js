@@ -58,33 +58,32 @@ $("#login-form").submit(function (event) {
         localStorage.setItem("editPermissions", 'true');
       }       
 
-      // if user access is revoked
+      // if user access is revoked ----------------------
       if (response.user_info.user_status === 'access-revoked') {
 
         window.location.href = "/app/access-denied"; 
 
-      // if tenant has not verified bank
-      } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status !== 'pending' && response.user_info.tenant_info.enable_payments == true && (!response.user_info.tenant_info.bank_last_4 || response.user_info.tenant_info.bank_last_4.trim() === "")) {
-
-          window.location.href = "/banking/choose-method";
-
-      // if tenant bank is pending on micro-deposits...    
+      // if tenant bank is pending on micro-deposits -----------------  
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.tenant_info.bank_account_status === "pending" && response.user_info.tenant_info.bank_verification_method === "manual") {
 
-        window.location.href = "/banking/verify-bank-account";
-        
+          window.location.href = "/banking/verify-bank-account";
 
-      // if tenant has not updated their info  
+      // if tenant has not connected bank ----------------
+      } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status !== 'pending' && response.user_info.tenant_info.enable_payments == true && response.user_info.tenant_info.bank_account_status === "pending" ) {
+
+          window.location.href = "/banking/choose-method";       
+
+      // if tenant has not updated their info ------------------ 
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
 
           window.location.href = "/tenant/confirm-account?user=" + response.user_info.user_id;
 
-      // if landlord has not updated their info   
+      // if landlord has not updated their info  ------------------ 
       } else if (response.user_info.user_role === 'Landlord' && response.user_info.user_status === 'pending') {
 
           window.location.href = "/landlord/confirm-account?user=" + response.user_info.user_id;
 
-      // if landlord has not connected bank
+      // if landlord has not connected bank -------------------
       } else if (response.user_info.user_role === 'Landlord' && response.user_info.landlord_info.stripe_bank_last_4 === "") {
         window.location.href = "/banking/choose-method";
       }
