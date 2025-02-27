@@ -133,7 +133,7 @@ function confirmTenant(){
       success: function (response) {
 
         if (enablePayments == true){ // take them to bank linking page
-          window.location.href = "/bank-account/link-bank-account";
+          window.location.href = "/banking/link-bank-account";
         } else { // send them to their dashboard
           window.location.href = "/app/home";
         }
