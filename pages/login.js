@@ -68,6 +68,12 @@ $("#login-form").submit(function (event) {
 
           window.location.href = "/banking/choose-method";
 
+      // if tenant bank is pending on micro-deposits...    
+      } else if (response.user_info.user_role === 'Tenant' && response.user_info.tenant_info.bank_account_status === "pending" && response.user_info.tenant_info.bank_verification_method === "manual") {
+
+        window.location.href = "/banking/verify-bank-account";
+        
+
       // if tenant has not updated their info  
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
 
