@@ -56,9 +56,16 @@ function manualBankLink() {
       },
       data: formData,
       success: function (response) {
-        alert("Bank Account Successfully Linked!");
-        localStorage.setItem("pageId", "dashboard");
-        window.location.href = "/app/home";
+
+        if (localStorage.userRole === "Landlord"){
+          alert("Bank Account Successfully Linked!");
+          localStorage.setItem("pageId", "dashboard");
+          window.location.href = "/app/home";
+        } else {
+          alert("Bank Account Successfully Linked!");
+          window.location.href = "/banking/verify-bank-account";
+        }
+
       },
       error: function (error) {
         // Handle error here
