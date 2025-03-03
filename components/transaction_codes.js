@@ -1,16 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-  loadTransactionCodes()
+  loadTransactionCodes();
   createTransCode();
-
 });
-
-
 
 // Function to load and display all transaction codes
 function loadTransactionCodes() {
   $.ajax({
-      url: localStorage.baseUrl + "api:ehsPQykn/get_transaction_codes", // Replace with actual API endpoint
+      url: localStorage.baseUrl + "api:ehsPQykn/get_transaction_codes",
       type: "GET",
       headers: {
           'Authorization': "Bearer " + localStorage.authToken,
@@ -25,6 +21,9 @@ function loadTransactionCodes() {
               let $item = createTransactionCodeElement(code);
               $container.append($item);
           });
+
+          // Ensure delete functionality works on loaded items
+          setupDeleteTransactionHandler();
       },
       error: function (error) {
           console.error("Error loading transaction codes:", error);
@@ -34,8 +33,8 @@ function loadTransactionCodes() {
 
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
-  let $item = $(`
-      <div class="transaction-code-item" data-id="${codeData.id}">
+  return $(`
+      <div class="transaction-code-item" data-id="${codeData.id}" data-code="${codeData.code}" data-title="${codeData.title}">
           <div class="transaction-code-item__title-wrapper">
               <div class="transaction-code-item__title-group">
                   <div class="transaction-code-item__code" data-api-input="code-number">${codeData.code}</div>
@@ -49,8 +48,6 @@ function createTransactionCodeElement(codeData) {
           <div class="transaction-code-item__description" data-api-input="code-description">${codeData.description}</div>
       </div>
   `);
-
-  return $item;
 }
 
 // Function to insert new transaction code in sorted order
@@ -81,7 +78,6 @@ function createTransCode() {
       $('.loader').css('display', 'flex'); // Show loader
 
       let formData = {};
-
       $(this).find('[data-api-input]').each(function () {
           let key = $(this).attr("data-api-input");
           let value = $(this).val();
@@ -102,12 +98,15 @@ function createTransCode() {
               // Create new item
               let $newItem = createTransactionCodeElement(response);
 
-              // Ensure function is available before calling it
+              // Ensure sorting
               if (typeof insertSortedTransactionCode === "function") {
                   insertSortedTransactionCode($newItem);
               } else {
-                  console.error("insertSortedTransactionCode function is missing.");
+                  $(".transcton-codes-container").append($newItem); // Default append if sorting fails
               }
+
+              // Reinitialize delete functionality for new items
+              setupDeleteTransactionHandler();
 
               // Clear form fields
               $("#code-transaction-form").trigger("reset");
@@ -118,6 +117,56 @@ function createTransCode() {
           },
           complete: function () {
               $('.loader').hide(); // Hide loader
+          }
+      });
+  });
+}
+
+// Function to setup the delete transaction handler
+function setupDeleteTransactionHandler() {
+  $(document).on("click", ".transaction-code-icon.delete", function () {
+      let $transactionItem = $(this).closest(".transaction-code-item");
+
+      // Extract transaction details
+      let transactionId = $transactionItem.attr("data-id");
+      let transactionCode = $transactionItem.attr("data-code");
+      let transactionTitle = $transactionItem.attr("data-title");
+
+      // Update the popup text with "code - title"
+      let transactionDisplay = `${transactionCode} - ${transactionTitle}`;
+      $('[data=transaction-code]').text(transactionDisplay);
+
+      // Store the transaction ID in a data attribute for deletion
+      $('[data-api-button="delete-trans-code"]').attr("data-transaction-id", transactionId);
+  });
+
+  $(document).on("click", '[data-api-button="delete-trans-code"]', function () {
+      let transactionId = $(this).attr("data-transaction-id");
+
+      if (!transactionId) {
+          console.error("No transaction ID found for deletion.");
+          return;
+      }
+
+      $.ajax({
+          url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/delete_transaction_code",
+          type: "POST",
+          headers: {
+              'Authorization': "Bearer " + localStorage.authToken,
+              'Content-Type': 'application/json'
+          },
+          data: JSON.stringify({ transaction_code_id: transactionId }),
+          success: function () {
+              alert("Transaction Code Deleted Successfully!");
+
+              // Remove the deleted transaction from the list
+              $(`.transaction-code-item[data-id="${transactionId}"]`).fadeOut(300, function () {
+                  $(this).remove();
+              });
+          },
+          error: function (error) {
+              console.error("Error deleting transaction code:", error);
+              alert("Something went wrong. Please try again.");
           }
       });
   });
