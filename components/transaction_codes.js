@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+  loadTransactionCodes()
   createTransCode();
 
 });
@@ -59,6 +60,9 @@ function createTransCode() {
 }
 
 function loadTransactionCodes() {
+
+    $('.loader').css('display','flex'); // show loader
+
     $.ajax({
         url: localStorage.baseUrl + "api:ehsPQykn/get_transaction_codes",
         type: "GET",
@@ -75,6 +79,9 @@ function loadTransactionCodes() {
                 let $item = createTransactionCodeElement(code);
                 $container.append($item);
             });
+        },
+        complete: function (){
+          $('.loader').hide(); // Hide loading indicator
         },
         error: function (error) {
             console.error("Error loading transaction codes:", error);
