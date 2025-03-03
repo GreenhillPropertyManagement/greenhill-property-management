@@ -36,15 +36,22 @@ function loadTransactionCodes() {
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
   return $(`
-      <div class="transaction-code-item" data-id="${codeData.id}" data-code="${codeData.code}" data-title="${codeData.title}">
+      <div class="transaction-code-item" 
+          data-id="${codeData.id}" 
+          data-code="${codeData.code}" 
+          data-title="${codeData.title}" 
+          data-description="${codeData.description}">
+          
           <div class="transaction-code-item__title-wrapper">
               <div class="transaction-code-item__title-group">
                   <div class="transaction-code-item__code" data-api-input="code-number">${codeData.code}</div>
                   <div class="transaction-code-item__title" data-api-input="code-title">${codeData.title}</div>
               </div>
               <div class="transaction-code-item__icon-group">
-                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" loading="lazy" alt="Edit" element="modal" modal="edit-trans-code" class="transaction-code-icon edit">
-                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" loading="lazy" alt="Delete" element="modal" modal="delete-transaction-code" class="transaction-code-icon delete">
+                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" 
+                      loading="lazy" alt="Edit" element="modal" modal="edit-trans-code" class="transaction-code-icon edit">
+                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" 
+                      loading="lazy" alt="Delete" element="modal" modal="delete-transaction-code" class="transaction-code-icon delete">
               </div>
           </div>
           <div class="transaction-code-item__description" data-api-input="code-description">${codeData.description}</div>
