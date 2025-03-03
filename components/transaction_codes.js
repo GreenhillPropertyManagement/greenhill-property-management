@@ -224,7 +224,7 @@ function setupEditTransactionHandler() {
       };
 
       $.ajax({
-          url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/edit_transaction_code",
+          url: localStorage.baseUrl + "api:ehsPQykn/edit_transaction_code",
           type: "POST",
           headers: {
               'Authorization': "Bearer " + localStorage.authToken,
