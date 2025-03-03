@@ -190,7 +190,7 @@ function profileSettingsLoad() {
         $('#edit-work-phone').hide(); // hide work phone input
         $('#edit-company').hide(); // hide company input
 
-        $('#transaction-code-button').click(function (){ // direct admin to transaction code page on button click
+        $(document).on('click', '#transaction-code-button', function () {
           $('#transaction-codes').click();
         });
 
