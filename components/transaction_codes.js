@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   if (localStorage.userRole === "Admin") {
-    
+
     createTransCode();
     loadTransactionCodes();
     setupEditTransactionHandler();
@@ -135,61 +135,62 @@ function createTransCode() {
   });
 }
 
-// Function to setup the delete transaction handler
 function setupDeleteTransactionHandler() {
-  $(document).on("click", ".transaction-code-icon.delete", function () {
-      let $transactionItem = $(this).closest(".transaction-code-item");
+    // Remove previous click event to prevent duplicates
+    $(document).off("click", ".transaction-code-icon.delete").on("click", ".transaction-code-icon.delete", function () {
+        let $transactionItem = $(this).closest(".transaction-code-item");
 
-      // Extract transaction details
-      let transactionId = $transactionItem.attr("data-id");
-      let transactionCode = $transactionItem.attr("data-code");
-      let transactionTitle = $transactionItem.attr("data-title");
+        // Extract transaction details
+        let transactionId = $transactionItem.attr("data-id");
+        let transactionCode = $transactionItem.attr("data-code");
+        let transactionTitle = $transactionItem.attr("data-title");
 
-      // Update the popup text with "code - title"
-      let transactionDisplay = `${transactionCode} - ${transactionTitle}`;
-      $('[data=transaction-code]').text(transactionDisplay);
+        // Update the popup text with "code - title"
+        let transactionDisplay = `${transactionCode} - ${transactionTitle}`;
+        $('[data=transaction-code]').text(transactionDisplay);
 
-      // Store the transaction ID in a data attribute for deletion
-      $('[data-api-button="delete-trans-code"]').attr("data-transaction-id", transactionId);
-  });
+        // Store the transaction ID in a data attribute for deletion
+        $('[data-api-button="delete-trans-code"]').attr("data-transaction-id", transactionId);
+    });
 
-  $(document).on("click", '[data-api-button="delete-trans-code"]', function () {
+    // Ensure the delete button only sends one request
+    $(document).off("click", '[data-api-button="delete-trans-code"]').on("click", '[data-api-button="delete-trans-code"]', function () {
+        let transactionId = $(this).attr("data-transaction-id");
 
-      $('.loader').css('display','flex'); //show loader
-      let transactionId = $(this).attr("data-transaction-id");
+        if (!transactionId) {
+            console.error("No transaction ID found for deletion.");
+            return;
+        }
 
-      if (!transactionId) {
-          console.error("No transaction ID found for deletion.");
-          return;
-      }
+        // Disable the button to prevent multiple clicks
+        $(this).prop("disabled", true);
 
-      $.ajax({
-          url: localStorage.baseUrl + "api:ehsPQykn/delete_transaction_code",
-          type: "POST",
-          headers: {
-              'Authorization': "Bearer " + localStorage.authToken,
-              'Content-Type': 'application/json'
-          },
-          data: JSON.stringify({ transaction_code_id: transactionId }),
-          success: function () {
+        $.ajax({
+            url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/delete_transaction_code",
+            type: "POST",
+            headers: {
+                'Authorization': "Bearer " + localStorage.authToken,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({ transaction_code_id: transactionId }),
+            success: function () {
+                alert("Transaction Code Deleted Successfully!");
 
-              alert("Transaction Code Deleted Successfully!");
-              $('.modal__block').hide(); //hide modal
-              $('.loader').hide() //hide loader
-
-              // Remove the deleted transaction from the list
-              $(`.transaction-code-item[data-id="${transactionId}"]`).fadeOut(300, function () {
-                  $(this).remove();
-              });
-          },
-          error: function (error) {
-              console.error("Error deleting transaction code:", error);
-              alert("Something went wrong. Please try again.");
-              $('.modal__block').hide(); //hide modal
-              $('.loader').hide() //hide loader
-          }
-      });
-  });
+                // Remove the deleted transaction from the list
+                $(`.transaction-code-item[data-id="${transactionId}"]`).fadeOut(300, function () {
+                    $(this).remove();
+                });
+            },
+            error: function (error) {
+                console.error("Error deleting transaction code:", error);
+                alert("Something went wrong. Please try again.");
+            },
+            complete: function () {
+                // Re-enable the button after the request is completed
+                $('[data-api-button="delete-trans-code"]').prop("disabled", false);
+            }
+        });
+    });
 }
 
 // Function to setup the edit transaction handler
