@@ -155,6 +155,7 @@ function setupDeleteTransactionHandler() {
 
     // Ensure the delete button only sends one request
     $(document).off("click", '[data-api-button="delete-trans-code"]').on("click", '[data-api-button="delete-trans-code"]', function () {
+        $('.loader').css('display','flex');
         let transactionId = $(this).attr("data-transaction-id");
 
         if (!transactionId) {
@@ -166,7 +167,7 @@ function setupDeleteTransactionHandler() {
         $(this).prop("disabled", true);
 
         $.ajax({
-            url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/delete_transaction_code",
+            url: localStorage.baseUrl + "api:ehsPQykn/delete_transaction_code",
             type: "POST",
             headers: {
                 'Authorization': "Bearer " + localStorage.authToken,
@@ -175,6 +176,8 @@ function setupDeleteTransactionHandler() {
             data: JSON.stringify({ transaction_code_id: transactionId }),
             success: function () {
                 alert("Transaction Code Deleted Successfully!");
+                $('.modal__block').hide();
+                $('.loader').hide();
 
                 // Remove the deleted transaction from the list
                 $(`.transaction-code-item[data-id="${transactionId}"]`).fadeOut(300, function () {
@@ -184,6 +187,8 @@ function setupDeleteTransactionHandler() {
             error: function (error) {
                 console.error("Error deleting transaction code:", error);
                 alert("Something went wrong. Please try again.");
+                $('.modal__block').hide();
+                $('.loader').hide();
             },
             complete: function () {
                 // Re-enable the button after the request is completed
