@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-  loadTransactionCodes();
   createTransCode();
+  loadTransactionCodes();
+  setupEditTransactionHandler();
+  setupDeleteTransactionHandler();
 });
 
 // Function to load and display all transaction codes
@@ -174,6 +176,83 @@ function setupDeleteTransactionHandler() {
               alert("Something went wrong. Please try again.");
               $('.modal__block').hide(); //hide modal
               $('.loader').hide() //hide loader
+          }
+      });
+  });
+}
+
+// Function to setup the edit transaction handler
+function setupEditTransactionHandler() {
+  $(document).on("click", ".transaction-code-icon.edit", function () {
+      let $transactionItem = $(this).closest(".transaction-code-item");
+
+      // Extract transaction details
+      let transactionId = $transactionItem.attr("data-id");
+      let transactionCode = $transactionItem.attr("data-code");
+      let transactionTitle = $transactionItem.attr("data-title");
+      let transactionDescription = $transactionItem.attr("data-description");
+
+      // Populate form fields
+      $("#edit-trans-code-number").val(transactionCode);
+      $("#edit-trans-title").val(transactionTitle);
+      $("#edit-trans-description").val(transactionDescription);
+
+      // Store transaction ID in a hidden attribute for updating
+      $("#edit-trans-code-form").attr("data-transaction-id", transactionId);
+  });
+
+  $("#edit-trans-code-form").submit(function (event) {
+      event.preventDefault(); // Prevent default form submission
+
+      $('.loader').css('display', 'flex'); // Show loader
+
+      let transactionId = $(this).attr("data-transaction-id");
+      let updatedCode = $("#edit-trans-code-number").val();
+      let updatedTitle = $("#edit-trans-title").val();
+      let updatedDescription = $("#edit-trans-description").val();
+
+      if (!transactionId) {
+          console.error("No transaction ID found for editing.");
+          return;
+      }
+
+      let formData = {
+          transaction_code_id: transactionId,
+          number: updatedCode,
+          title: updatedTitle,
+          description: updatedDescription
+      };
+
+      $.ajax({
+          url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/edit_transaction_code",
+          type: "POST",
+          headers: {
+              'Authorization': "Bearer " + localStorage.authToken,
+              'Content-Type': 'application/json'
+          },
+          data: JSON.stringify(formData),
+          success: function (response) {
+              alert("Transaction Code Updated Successfully!");
+              $('.modal__block').hide(); //hide modal
+
+              // Find and update the UI with new values
+              let $updatedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
+              $updatedItem.attr("data-code", updatedCode);
+              $updatedItem.attr("data-title", updatedTitle);
+              $updatedItem.attr("data-description", updatedDescription);
+
+              $updatedItem.find(".transaction-code-item__code").text(updatedCode);
+              $updatedItem.find(".transaction-code-item__title").text(updatedTitle);
+              $updatedItem.find(".transaction-code-item__description").text(updatedDescription);
+          },
+          error: function (error) {
+              console.error("Error updating transaction code:", error);
+              $('.modal__block').hide(); //hide modal
+              alert("Something went wrong. Please try again.");
+              $('.loader').hide(); // Hide loader
+          },
+          complete: function () {
+              $('.loader').hide(); // Hide loader
           }
       });
   });
