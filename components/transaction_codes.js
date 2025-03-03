@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
-  createTransCode();
-  loadTransactionCodes();
-  setupEditTransactionHandler();
-  setupDeleteTransactionHandler();
+  if (localStorage.userRole === "Admin") {
+    
+    createTransCode();
+    loadTransactionCodes();
+    setupEditTransactionHandler();
+    setupDeleteTransactionHandler();
+  }
+   
 });
 
 // Function to load and display all transaction codes
