@@ -190,6 +190,10 @@ function profileSettingsLoad() {
         $('#edit-work-phone').hide(); // hide work phone input
         $('#edit-company').hide(); // hide company input
 
+        $('#transaction-code-button').click(function (){ // direct admin to transaction code page on button click
+          $('#transaction-codes').click();
+        });
+
       }
 
       // Update UI For Landlords
