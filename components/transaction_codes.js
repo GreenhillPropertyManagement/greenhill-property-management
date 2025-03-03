@@ -161,6 +161,7 @@ function setupDeleteTransactionHandler() {
           success: function () {
 
               alert("Transaction Code Deleted Successfully!");
+              $('.modal__block').hide(); //hide modal
               $('.loader').hide() //hide loader
 
               // Remove the deleted transaction from the list
@@ -171,6 +172,7 @@ function setupDeleteTransactionHandler() {
           error: function (error) {
               console.error("Error deleting transaction code:", error);
               alert("Something went wrong. Please try again.");
+              $('.modal__block').hide(); //hide modal
               $('.loader').hide() //hide loader
           }
       });
