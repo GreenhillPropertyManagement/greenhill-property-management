@@ -89,6 +89,26 @@ function loadTransactionCodes() {
     });
 }
 
+// Function to insert new transaction code in sorted order
+function insertSortedTransactionCode($newItem) {
+  let $container = $(".transcton-codes-container");
+  let inserted = false;
+  let newCode = $newItem.find(".transaction-code-item__code").text();
+
+  $container.children(".transaction-code-item").each(function () {
+      let existingCode = $(this).find(".transaction-code-item__code").text();
+      if (newCode < existingCode) {
+          $(this).before($newItem);
+          inserted = true;
+          return false; // Break loop
+      }
+  });
+
+  if (!inserted) {
+      $container.append($newItem); // Append if it's the highest number
+  }
+}
+
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
     let $item = $(`
