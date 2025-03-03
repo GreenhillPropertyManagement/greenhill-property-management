@@ -1,32 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
-    if (localStorage.authToken == null) {
-      //run code if they are not logged in
-      alert("You are not logged in");
-      location.href = "/app/login";
-    } else {
-      authUser();
-    }
-  });
+
+  createTransCode();
+
+});
 
 
-function authUser() {
-    $.ajax({
-      url: localStorage.baseUrl + "api:2yadJ61L/auth/me",
-      type: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      success: function (data) {
-        createTransCode();
-      },
-      error: function (error) {
-        //run code if they are not logged in
-        alert("You are not logged in");
-        window.location.href = "/app/login";
-      },
-    });
-  }
+
 
   function createTransCode() {
 
@@ -46,7 +25,7 @@ function authUser() {
 
         // Make an AJAX POST request to Xano API
         $.ajax({
-            url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:ehsPQykn/create_transaction_code",
+            url: localStorage.baseUrl + "api:ehsPQykn/create_transaction_code",
             type: "POST",
             headers: {
                 'Authorization': "Bearer " + localStorage.authToken, // Add token if needed
