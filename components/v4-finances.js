@@ -150,7 +150,10 @@ function renderChart(chartType, chartData) {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: chartType !== "pie" // ✅ Hide legend for pie charts
+                display: true, // ✅ Keep legend for all chart types
+                labels: {
+                    usePointStyle: true, // ✅ Makes the legend circles match the dataset color
+                }
             },
             tooltip: {
                 callbacks: {
@@ -192,28 +195,45 @@ function renderChart(chartType, chartData) {
         };
     }
 
+    // Define correct colors for pie chart and other types
+    let datasetConfig = [
+        {
+            label: "Payments",
+            data: chartData.paymentData,
+            backgroundColor: "rgba(75, 192, 192, 0.5)", // Payments (Teal)
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+            yAxisID: chartType !== "pie" ? "y-axis-payments" : undefined
+        },
+        {
+            label: "Expenses",
+            data: chartData.expenseData,
+            backgroundColor: "rgba(255, 99, 132, 0.5)", // Expenses (Red)
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+            yAxisID: chartType !== "pie" ? "y-axis-expenses" : undefined
+        }
+    ];
+
+    // **If it's a pie chart, merge payments and expenses into one dataset**
+    if (chartType === "pie") {
+        datasetConfig = [{
+            label: "Transactions",
+            data: [
+                chartData.paymentData.reduce((acc, val) => acc + val, 0), // Total Payments
+                chartData.expenseData.reduce((acc, val) => acc + val, 0)  // Total Expenses
+            ],
+            backgroundColor: ["rgba(75, 192, 192, 0.5)", "rgba(255, 99, 132, 0.5)"], // Payments (Teal), Expenses (Red)
+            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
+            borderWidth: 1
+        }];
+    }
+
     new Chart(ctx, {
         type: chartType, // Dynamic chart type
         data: {
-            labels: chartData.labels,
-            datasets: [
-                {
-                    label: "Payments",
-                    data: chartData.paymentData,
-                    backgroundColor: "rgba(75, 192, 192, 0.5)", // Payments (Teal)
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 1,
-                    yAxisID: chartType !== "pie" ? "y-axis-payments" : undefined
-                },
-                {
-                    label: "Expenses",
-                    data: chartData.expenseData,
-                    backgroundColor: "rgba(255, 99, 132, 0.5)", // Expenses (Red)
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    borderWidth: 1,
-                    yAxisID: chartType !== "pie" ? "y-axis-expenses" : undefined
-                }
-            ]
+            labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels, // ✅ Custom labels for pie chart
+            datasets: datasetConfig
         },
         options: chartOptions
     });
