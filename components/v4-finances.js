@@ -168,7 +168,7 @@ function renderChart(chartType, chartData) {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return "$" + value.toLocaleString();
+                            return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
                         }
                     }
                 },
@@ -181,7 +181,17 @@ function renderChart(chartType, chartData) {
                     },
                     ticks: {
                         callback: function(value) {
-                            return "$" + value.toLocaleString();
+                            return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            let value = tooltipItem.raw;
+                            return `$${value.toLocaleString()}`; // ✅ Adds $ to tooltips
                         }
                     }
                 }
