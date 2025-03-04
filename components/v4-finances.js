@@ -71,9 +71,15 @@ function updateQuickStats(response) {
 
 // Function to format date to M/D/YY
 function formatDate(dateString) {
-    let date = new Date(dateString + "T00:00:00Z"); // Force UTC
+    let dateParts = dateString.split("-");
+    let date = new Date(Date.UTC(
+        parseInt(dateParts[0]), // Year
+        parseInt(dateParts[1]) - 1, // Month (0-based)
+        parseInt(dateParts[2]) // Day
+    ));
+
     if (isNaN(date)) return ""; // Ensure date is valid
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear().toString().slice(-2)}`;
 }
 
 function extractChartData(response, transactionType) {
