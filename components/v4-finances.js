@@ -36,6 +36,7 @@ function initLandlordFinances() {
             dataType: "json",
             success: function(response) {
                 console.log("API Response:", response);
+                alert('Success!');
 
                 // Extract graph_type and transaction_type
                 let graphType = formData.graph_type || "bar"; // Default to bar
@@ -68,6 +69,7 @@ function formatDate(dateString) {
 function extractChartData(response, transactionType) {
     let data = [];
     let labels = [];
+    let backgroundColors = [];
 
     if (transactionType === "noi") {
         let transactions = [...response.payments, ...response.expenses];
@@ -76,29 +78,36 @@ function extractChartData(response, transactionType) {
         transactions.forEach(item => {
             labels.push(formatDate(item.transaction_date)); // Format date
             let amount = item.amount;
+            let color = "rgba(75, 192, 192, 0.5)"; // Default (Payments color)
 
-            // Convert payments to positive
+            // Convert payments to positive & apply colors
             if (response.payments.some(p => p.transaction_date === item.transaction_date)) {
                 amount = Math.abs(amount);
+                color = "rgba(75, 192, 192, 0.5)"; // Payments (Teal)
+            } else {
+                color = "rgba(255, 99, 132, 0.5)"; // Expenses (Red)
             }
 
             data.push(amount);
+            backgroundColors.push(color);
         });
 
     } else if (transactionType === "payments") {
         response.payments.forEach(payment => {
             labels.push(formatDate(payment.transaction_date)); // Format date
             data.push(Math.abs(payment.amount)); // Convert payments to positive
+            backgroundColors.push("rgba(75, 192, 192, 0.5)"); // Payments color
         });
 
     } else if (transactionType === "expenses") {
         response.expenses.forEach(expense => {
             labels.push(formatDate(expense.transaction_date)); // Format date
             data.push(expense.amount);
+            backgroundColors.push("rgba(255, 99, 132, 0.5)"); // Expenses color
         });
     }
 
-    return { labels, data };
+    return { labels, data, backgroundColors };
 }
 
 // Function to render chart
@@ -117,8 +126,8 @@ function renderChart(chartType, chartData) {
             datasets: [{
                 label: "Amount ($)",
                 data: chartData.data,
-                backgroundColor: ["rgba(75, 192, 192, 0.2)"],
-                borderColor: ["rgba(75, 192, 192, 1)"],
+                backgroundColor: chartData.backgroundColors, // Assign dynamic colors
+                borderColor: ["rgba(0, 0, 0, 0.2)"], // Border color for bars
                 borderWidth: 1
             }]
         },
