@@ -149,6 +149,9 @@ function renderChart(chartType, chartData) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
+            legend: {
+                display: chartType !== "pie" // ✅ Hide legend for pie charts
+            },
             tooltip: {
                 callbacks: {
                     label: function(tooltipItem) {
