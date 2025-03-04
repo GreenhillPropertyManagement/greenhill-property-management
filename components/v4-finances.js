@@ -1,4 +1,4 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances();
     
 });
@@ -6,7 +6,7 @@ $(document).ready(function () {
 function initLandlordFinances () {
 
     $('[api-form="finance-filter"]').on("submit", function (event) {
-        
+
         $('.loader').css('display','flex'); // show loader
         event.preventDefault(); // Prevent default form submission
 
