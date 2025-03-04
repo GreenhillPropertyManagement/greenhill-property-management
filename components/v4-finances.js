@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", function() {
 function initLandlordFinances () {
 
     $('[api-form="finance-filter"]').on("submit", function (event) {
+
         event.preventDefault(); // Prevent default form submission
+        $('.loader').css('display','flex');
 
         let form = $(this); // Store reference to the current form
         let loader = $('.loader'); // Store reference to the loader
@@ -43,10 +45,12 @@ function initLandlordFinances () {
             success: function (response) {
                 console.log("API Response:", response);
                 alert('Success!');
+                $('.loader').hide(); //hide loader
             },
             error: function (xhr, status, error) {
                 console.error("API Error:", error, xhr.responseText);
                 alert('Something went wrong, please try again.');
+                $('.loader').hide(); //hide loader
             },
             complete: function () {
                 loader.hide(); // Hide loader
