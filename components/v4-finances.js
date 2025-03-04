@@ -71,7 +71,7 @@ function updateQuickStats(response) {
 
 // Function to format date to M/D/YY
 function formatDate(dateString) {
-    let date = new Date(dateString);
+    let date = new Date(dateString + "T00:00:00Z"); // Force UTC
     if (isNaN(date)) return ""; // Ensure date is valid
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
 }
