@@ -34,7 +34,7 @@ function initLandlordFinances () {
         // Make the AJAX request
         $.ajax({
             url: localStorage.baseUrl + "api:rpDXPv3x/v4_landlord_finances",
-            type: "POST", // Change to "GET" if needed
+            type: "GET", // Change to "GET" if needed
             headers: {
                 "Authorization": "Bearer " + localStorage.authToken
             },
