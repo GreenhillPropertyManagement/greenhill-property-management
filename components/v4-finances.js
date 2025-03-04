@@ -57,11 +57,11 @@ function initLandlordFinances() {
     });
 }
 
-// Function to format date to MM-DD-YYYY
+// Function to format date to M/D/YY
 function formatDate(dateString) {
     let date = new Date(dateString);
     if (isNaN(date)) return ""; // Ensure date is valid
-    return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
 }
 
 // Function to extract data based on transaction_type
@@ -107,7 +107,7 @@ function extractChartData(response, transactionType) {
     return { labels, paymentData, expenseData };
 }
 
-// Function to render chart
+// Function to render chart with secondary y-axis
 function renderChart(chartType, chartData) {
     let chartContainer = $(".chart-block");
 
@@ -126,21 +126,45 @@ function renderChart(chartType, chartData) {
                     data: chartData.paymentData,
                     backgroundColor: "rgba(75, 192, 192, 0.5)", // Payments (Teal)
                     borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 1
+                    borderWidth: 1,
+                    yAxisID: "y-axis-payments" // Assign to primary y-axis
                 },
                 {
                     label: "Expenses",
                     data: chartData.expenseData,
                     backgroundColor: "rgba(255, 99, 132, 0.5)", // Expenses (Red)
                     borderColor: "rgba(255, 99, 132, 1)",
-                    borderWidth: 1
+                    borderWidth: 1,
+                    yAxisID: "y-axis-expenses" // Assign to secondary y-axis
                 }
             ]
         },
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true }
+                "y-axis-payments": {
+                    type: "linear",
+                    position: "left",
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return "$" + value.toLocaleString();
+                        }
+                    }
+                },
+                "y-axis-expenses": {
+                    type: "linear",
+                    position: "right",
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false // Hide gridlines for secondary axis
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return "$" + value.toLocaleString();
+                        }
+                    }
+                }
             }
         }
     });
