@@ -81,47 +81,53 @@ function extractChartData(response, transactionType) {
     let paymentData = {};
     let expenseData = {};
 
-    // Convert form start_date & end_date to Date objects for filtering
-    let startDate = formData.start_date ? new Date(`${formData.start_date}T00:00:00Z`) : null;
-    let endDate = formData.end_date ? new Date(`${formData.end_date}T23:59:59Z`) : null;
-
-    function addTransaction(transaction, isPayment) {
-        let formattedDate = formatDate(transaction.transaction_date);
-        let transactionDate = new Date(`${transaction.transaction_date}T00:00:00Z`);
-
-        // ✅ Ensure transactions are within the selected date range
-        if ((startDate && transactionDate < startDate) || (endDate && transactionDate > endDate)) {
-            return; // Skip transactions outside the selected date range
-        }
-
-        // Ensure each date appears only once
-        if (!labels.includes(formattedDate)) {
-            labels.push(formattedDate);
-            paymentData[formattedDate] = 0; // Initialize payment value
-            expenseData[formattedDate] = 0; // Initialize expense value
-        }
-
-        // Aggregate totals for the day
-        if (isPayment) {
-            paymentData[formattedDate] += Math.abs(transaction.amount); // Convert payments to positive
-        } else {
-            expenseData[formattedDate] += transaction.amount; // Expenses stay as is
-        }
-    }
-
     if (transactionType === "noi") {
-        [...response.payments, ...response.expenses].sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date))
-            .forEach(transaction => {
-                addTransaction(transaction, transaction.type === "payment");
-            });
+        let transactions = [...response.payments, ...response.expenses];
+        transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+
+        transactions.forEach(item => {
+            let formattedDate = formatDate(item.transaction_date);
+
+            // Ensure each date appears only once
+            if (!labels.includes(formattedDate)) {
+                labels.push(formattedDate);
+                paymentData[formattedDate] = 0; // Initialize payment value
+                expenseData[formattedDate] = 0; // Initialize expense value
+            }
+
+            // Aggregate totals for the day
+            if (item.type === "payment") {
+                paymentData[formattedDate] += Math.abs(item.amount); // Convert payments to positive
+            } else {
+                expenseData[formattedDate] += item.amount; // Expenses stay as is
+            }
+        });
 
     } else if (transactionType === "payments") {
-        response.payments.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date))
-            .forEach(payment => addTransaction(payment, true));
+        response.payments.forEach(payment => {
+            let formattedDate = formatDate(payment.transaction_date);
+
+            if (!labels.includes(formattedDate)) {
+                labels.push(formattedDate);
+                paymentData[formattedDate] = 0;
+                expenseData[formattedDate] = 0;
+            }
+
+            paymentData[formattedDate] += Math.abs(payment.amount);
+        });
 
     } else if (transactionType === "expenses") {
-        response.expenses.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date))
-            .forEach(expense => addTransaction(expense, false));
+        response.expenses.forEach(expense => {
+            let formattedDate = formatDate(expense.transaction_date);
+
+            if (!labels.includes(formattedDate)) {
+                labels.push(formattedDate);
+                paymentData[formattedDate] = 0;
+                expenseData[formattedDate] = 0;
+            }
+
+            expenseData[formattedDate] += expense.amount;
+        });
     }
 
     // Convert objects to arrays for Chart.js
