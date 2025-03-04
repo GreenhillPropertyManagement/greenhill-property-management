@@ -30,22 +30,9 @@ function initLandlordFinances () {
             formData[key] = value; // Add to formData object
         });
 
-        // Debug: Check if JSON is correctly formatted
-        console.log("Corrected Form Data Sent:", formData);
-
-        // Ensure base URL has a trailing slash
-        let baseUrl = localStorage.baseUrl ? 
-            (localStorage.baseUrl.endsWith("/") ? localStorage.baseUrl : localStorage.baseUrl + "/") : 
-            "https://your-default-api-url.com/";
-
-        let apiUrl = baseUrl + "api:rpDXPv3x/v4_landlord_finances";
-
-        console.log("Final API URL:", apiUrl);
-        console.log("Auth Token:", localStorage.authToken);
-
         // Make the AJAX request
         $.ajax({
-            url: apiUrl,
+            url: localStorage.baseUrl + "api:rpDXPv3x/v4_landlord_finances",
             type: "POST", // Change to "GET" if needed
             headers: {
                 "Authorization": "Bearer " + localStorage.authToken
