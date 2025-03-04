@@ -76,11 +76,10 @@ function formatDate(dateString) {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
 }
 
-// Function to extract data based on transaction_type
 function extractChartData(response, transactionType) {
     let labels = [];
-    let paymentData = [];
-    let expenseData = [];
+    let paymentData = {};
+    let expenseData = {};
 
     if (transactionType === "noi") {
         let transactions = [...response.payments, ...response.expenses];
@@ -88,35 +87,44 @@ function extractChartData(response, transactionType) {
 
         transactions.forEach(item => {
             let formattedDate = formatDate(item.transaction_date);
+
+            // Ensure the date is added to labels only once
             if (!labels.includes(formattedDate)) {
                 labels.push(formattedDate);
+                paymentData[formattedDate] = 0; // Default value
+                expenseData[formattedDate] = 0; // Default value
             }
 
-            if (response.payments.some(p => p.transaction_date === item.transaction_date)) {
-                paymentData.push(Math.abs(item.amount)); // Convert payments to positive
-                expenseData.push(0); // No expense on this entry
+            // Check if it's a payment or an expense and store in respective object
+            if (item.type === "payment") {
+                paymentData[formattedDate] += Math.abs(item.amount); // Convert payments to positive
             } else {
-                paymentData.push(0); // No payment on this entry
-                expenseData.push(item.amount); // Expense as is
+                expenseData[formattedDate] += item.amount; // Expenses remain as is
             }
         });
 
     } else if (transactionType === "payments") {
         response.payments.forEach(payment => {
-            labels.push(formatDate(payment.transaction_date)); // Format date
-            paymentData.push(Math.abs(payment.amount)); // Convert payments to positive
-            expenseData.push(0); // No expenses in this case
+            let formattedDate = formatDate(payment.transaction_date);
+            labels.push(formattedDate);
+            paymentData[formattedDate] = Math.abs(payment.amount);
+            expenseData[formattedDate] = 0;
         });
 
     } else if (transactionType === "expenses") {
         response.expenses.forEach(expense => {
-            labels.push(formatDate(expense.transaction_date)); // Format date
-            expenseData.push(expense.amount);
-            paymentData.push(0); // No payments in this case
+            let formattedDate = formatDate(expense.transaction_date);
+            labels.push(formattedDate);
+            expenseData[formattedDate] = expense.amount;
+            paymentData[formattedDate] = 0;
         });
     }
 
-    return { labels, paymentData, expenseData };
+    // Convert objects to arrays for Chart.js
+    let paymentArray = labels.map(date => paymentData[date] || 0);
+    let expenseArray = labels.map(date => expenseData[date] || 0);
+
+    return { labels, paymentData: paymentArray, expenseData: expenseArray };
 }
 
 function renderChart(chartType, chartData) {
