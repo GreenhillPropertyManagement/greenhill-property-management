@@ -88,35 +88,45 @@ function extractChartData(response, transactionType) {
         transactions.forEach(item => {
             let formattedDate = formatDate(item.transaction_date);
 
-            // Ensure the date is added to labels only once
+            // Ensure each date appears only once
             if (!labels.includes(formattedDate)) {
                 labels.push(formattedDate);
-                paymentData[formattedDate] = 0; // Default value
-                expenseData[formattedDate] = 0; // Default value
+                paymentData[formattedDate] = 0; // Initialize payment value
+                expenseData[formattedDate] = 0; // Initialize expense value
             }
 
-            // Check if it's a payment or an expense and store in respective object
+            // Aggregate totals for the day
             if (item.type === "payment") {
                 paymentData[formattedDate] += Math.abs(item.amount); // Convert payments to positive
             } else {
-                expenseData[formattedDate] += item.amount; // Expenses remain as is
+                expenseData[formattedDate] += item.amount; // Expenses stay as is
             }
         });
 
     } else if (transactionType === "payments") {
         response.payments.forEach(payment => {
             let formattedDate = formatDate(payment.transaction_date);
-            labels.push(formattedDate);
-            paymentData[formattedDate] = Math.abs(payment.amount);
-            expenseData[formattedDate] = 0;
+
+            if (!labels.includes(formattedDate)) {
+                labels.push(formattedDate);
+                paymentData[formattedDate] = 0;
+                expenseData[formattedDate] = 0;
+            }
+
+            paymentData[formattedDate] += Math.abs(payment.amount);
         });
 
     } else if (transactionType === "expenses") {
         response.expenses.forEach(expense => {
             let formattedDate = formatDate(expense.transaction_date);
-            labels.push(formattedDate);
-            expenseData[formattedDate] = expense.amount;
-            paymentData[formattedDate] = 0;
+
+            if (!labels.includes(formattedDate)) {
+                labels.push(formattedDate);
+                paymentData[formattedDate] = 0;
+                expenseData[formattedDate] = 0;
+            }
+
+            expenseData[formattedDate] += expense.amount;
         });
     }
 
