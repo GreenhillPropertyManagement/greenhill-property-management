@@ -8,7 +8,6 @@ function initLandlordFinances () {
     $('[api-form="finance-filter"]').on("submit", function (event) {
 
         event.preventDefault(); // Prevent default form submission
-        $('.loader').css('display','flex');
 
         let form = $(this); // Store reference to the current form
         let loader = $('.loader'); // Store reference to the loader
