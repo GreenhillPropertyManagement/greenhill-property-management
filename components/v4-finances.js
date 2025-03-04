@@ -1,66 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {    
-    initLandlordFinances();    
-});
-
-function initLandlordFinances () {
-
-    $('[api-form="finance-filter"]').on("submit", function (event) {
-
-        event.preventDefault(); // Prevent default form submission
-
-        let form = $(this); // Store reference to the current form
-        let submitButton = form.find('input[type="submit"]');
-
-        $('.loader').css('display', 'flex'); // Show loader
-        submitButton.prop("disabled", true); // Disable submit button to prevent multiple submissions
-
-        let formData = {}; // Create object for form data
-
-        // Select all inputs within the current form and extract values
-        form.find('[form-input]').each(function () {
-            let key = $(this).attr("form-input"); // Get the form-input attribute name
-            let value = $(this).val(); // Get the input value
-            
-            // Convert empty date values to null
-            if (key === "start_date" || key === "end_date") {
-                value = value.trim() === "" ? null : value;
-            }
-
-            formData[key] = value; // Add to formData object
-        });
-
-        // Make the AJAX request
-        $.ajax({
-            url: localStorage.baseUrl + "api:rpDXPv3x/v4_landlord_finances",
-            type: "GET", 
-            headers: {
-                "Authorization": "Bearer " + localStorage.authToken
-            },
-            data: formData, // 
-            contentType: "application/json",
-            dataType: "json",
-            success: function (response) {
-
-                console.log("API Response:", response);
-                alert('Success!');
-                $('.loader').hide(); // Hide loader
-
-            },
-            error: function (xhr, status, error) {
-
-                console.error("API Error:", error, xhr.responseText);
-                alert('Something went wrong, please try again.');
-                $('.loader').hide(); // Hide loader
-
-            },
-            complete: function () {
-
-                submitButton.prop("disabled", false); // Re-enable submit button after request completes
-            }
-        });
-    });
-
-}document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances();
 });
 
@@ -71,7 +9,6 @@ function initLandlordFinances() {
         let form = $(this);
         let loader = $('.loader');
         let submitButton = form.find('input[type="submit"]');
-        let chartContainer = $(".chart-block"); // Target chart div
 
         loader.css('display', 'flex'); // Show loader
         submitButton.prop("disabled", true); // Disable submit button
@@ -99,7 +36,6 @@ function initLandlordFinances() {
             dataType: "json",
             success: function(response) {
                 console.log("API Response:", response);
-                alert('Success!');
 
                 // Extract graph_type and transaction_type
                 let graphType = formData.graph_type || "bar"; // Default to bar
@@ -107,8 +43,7 @@ function initLandlordFinances() {
                 let chartData = extractChartData(response, transactionType);
 
                 // Render Chart
-                renderChart(chartType = graphType, chartData);
-
+                renderChart(graphType, chartData);
             },
             error: function(xhr, status, error) {
                 console.error("API Error:", error, xhr.responseText);
@@ -122,6 +57,13 @@ function initLandlordFinances() {
     });
 }
 
+// Function to format date to MM-DD-YYYY
+function formatDate(dateString) {
+    let date = new Date(dateString);
+    if (isNaN(date)) return ""; // Ensure date is valid
+    return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+}
+
 // Function to extract data based on transaction_type
 function extractChartData(response, transactionType) {
     let data = [];
@@ -132,19 +74,26 @@ function extractChartData(response, transactionType) {
         transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
         transactions.forEach(item => {
-            labels.push(item.transaction_date);
-            data.push(item.amount);
+            labels.push(formatDate(item.transaction_date)); // Format date
+            let amount = item.amount;
+
+            // Convert payments to positive
+            if (response.payments.some(p => p.transaction_date === item.transaction_date)) {
+                amount = Math.abs(amount);
+            }
+
+            data.push(amount);
         });
 
     } else if (transactionType === "payments") {
         response.payments.forEach(payment => {
-            labels.push(payment.transaction_date);
-            data.push(payment.amount);
+            labels.push(formatDate(payment.transaction_date)); // Format date
+            data.push(Math.abs(payment.amount)); // Convert payments to positive
         });
 
     } else if (transactionType === "expenses") {
         response.expenses.forEach(expense => {
-            labels.push(expense.transaction_date);
+            labels.push(formatDate(expense.transaction_date)); // Format date
             data.push(expense.amount);
         });
     }
