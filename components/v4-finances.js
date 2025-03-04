@@ -145,6 +145,50 @@ function renderChart(chartType, chartData) {
 
     let ctx = document.getElementById("financeChart").getContext("2d");
 
+    let chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(tooltipItem) {
+                        let value = tooltipItem.raw;
+                        return `$${value.toLocaleString()}`; // ✅ Adds $ to tooltips
+                    }
+                }
+            }
+        }
+    };
+
+    // **Remove Y-axis if chart type is "pie"**
+    if (chartType !== "pie") {
+        chartOptions.scales = {
+            "y-axis-payments": {
+                type: "linear",
+                position: "left",
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
+                    }
+                }
+            },
+            "y-axis-expenses": {
+                type: "linear",
+                position: "right",
+                beginAtZero: true,
+                grid: {
+                    drawOnChartArea: false // Hide gridlines for secondary axis
+                },
+                ticks: {
+                    callback: function(value) {
+                        return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
+                    }
+                }
+            }
+        };
+    }
+
     new Chart(ctx, {
         type: chartType, // Dynamic chart type
         data: {
@@ -156,7 +200,7 @@ function renderChart(chartType, chartData) {
                     backgroundColor: "rgba(75, 192, 192, 0.5)", // Payments (Teal)
                     borderColor: "rgba(75, 192, 192, 1)",
                     borderWidth: 1,
-                    yAxisID: "y-axis-payments" // Assign to primary y-axis
+                    yAxisID: chartType !== "pie" ? "y-axis-payments" : undefined
                 },
                 {
                     label: "Expenses",
@@ -164,48 +208,10 @@ function renderChart(chartType, chartData) {
                     backgroundColor: "rgba(255, 99, 132, 0.5)", // Expenses (Red)
                     borderColor: "rgba(255, 99, 132, 1)",
                     borderWidth: 1,
-                    yAxisID: "y-axis-expenses" // Assign to secondary y-axis
+                    yAxisID: chartType !== "pie" ? "y-axis-expenses" : undefined
                 }
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // ✅ Ensures the chart resizes properly
-            scales: {
-                "y-axis-payments": {
-                    type: "linear",
-                    position: "left",
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
-                        }
-                    }
-                },
-                "y-axis-expenses": {
-                    type: "linear",
-                    position: "right",
-                    beginAtZero: true,
-                    grid: {
-                        drawOnChartArea: false // Hide gridlines for secondary axis
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
-                        }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            let value = tooltipItem.raw;
-                            return `$${value.toLocaleString()}`; // ✅ Adds $ to tooltips
-                        }
-                    }
-                }
-            }
-        }
+        options: chartOptions
     });
 }
