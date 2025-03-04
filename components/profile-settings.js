@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     $('.loader').css('display','flex');
     profileSettingsInit();
+    $('#v4-finance').click(function (){
+      $('#finance-v4').click();
+    });
 
   }); 
 
