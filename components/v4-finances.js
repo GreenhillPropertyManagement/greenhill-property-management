@@ -44,6 +44,8 @@ function initLandlordFinances() {
 
                 // Render Chart
                 renderChart(graphType, chartData);
+                // update quick stats
+                updateQuickStats(response);
             },
             error: function(xhr, status, error) {
                 console.error("API Error:", error, xhr.responseText);
@@ -55,6 +57,16 @@ function initLandlordFinances() {
             }
         });
     });
+}
+
+function updateQuickStats(response) {
+    const totalRentCollected = response.total_rent_collected || 0;
+    const totalExpenses = response.total_expenses || 0;
+    const noi = response.noi || 0;
+
+    $('[data-api="total_rent_collected"]').text(`$${totalRentCollected.toLocaleString()}`);
+    $('[data-api="total_expenses"]').text(`$${totalExpenses.toLocaleString()}`);
+    $('[data-api="noi"]').text(`$${noi.toLocaleString()}`);
 }
 
 // Function to format date to M/D/YY
