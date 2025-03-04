@@ -1,6 +1,5 @@
-document.addEventListener("DOMContentLoaded", function() {
-    initLandlordFinances();
-    
+document.addEventListener("DOMContentLoaded", function() {    
+    initLandlordFinances();    
 });
 
 function initLandlordFinances () {
@@ -10,10 +9,9 @@ function initLandlordFinances () {
         event.preventDefault(); // Prevent default form submission
 
         let form = $(this); // Store reference to the current form
-        let loader = $('.loader'); // Store reference to the loader
         let submitButton = form.find('input[type="submit"]');
 
-        loader.css('display', 'flex'); // Show loader
+        $('.loader').css('display', 'flex'); // Show loader
         submitButton.prop("disabled", true); // Disable submit button to prevent multiple submissions
 
         let formData = {}; // Create object for form data
@@ -34,25 +32,29 @@ function initLandlordFinances () {
         // Make the AJAX request
         $.ajax({
             url: localStorage.baseUrl + "api:rpDXPv3x/v4_landlord_finances",
-            type: "GET", // Change to "GET" if needed
+            type: "GET", 
             headers: {
                 "Authorization": "Bearer " + localStorage.authToken
             },
-            data: JSON.stringify(formData), // Ensure JSON is properly formatted
+            data: formData, // 
             contentType: "application/json",
             dataType: "json",
             success: function (response) {
+
                 console.log("API Response:", response);
                 alert('Success!');
-                $('.loader').hide(); //hide loader
+                $('.loader').hide(); // Hide loader
+
             },
             error: function (xhr, status, error) {
+
                 console.error("API Error:", error, xhr.responseText);
                 alert('Something went wrong, please try again.');
-                $('.loader').hide(); //hide loader
+                $('.loader').hide(); // Hide loader
+
             },
             complete: function () {
-                loader.hide(); // Hide loader
+
                 submitButton.prop("disabled", false); // Re-enable submit button after request completes
             }
         });
