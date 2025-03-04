@@ -107,7 +107,6 @@ function extractChartData(response, transactionType) {
     return { labels, paymentData, expenseData };
 }
 
-// Function to render chart with secondary y-axis
 function renderChart(chartType, chartData) {
     let chartContainer = $(".chart-block");
 
@@ -141,6 +140,7 @@ function renderChart(chartType, chartData) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // ✅ Ensures the chart resizes properly
             scales: {
                 "y-axis-payments": {
                     type: "linear",
