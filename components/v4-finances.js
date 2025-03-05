@@ -273,7 +273,20 @@ function populateTransactionsTable(response, transactionType) {
         transactions = [...response.expenses]; // Show only expenses
     }
 
-    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date)); // Sort by date
+    // ✅ If there are no transactions, show "No Transactions to Display"
+    if (transactions.length === 0) {
+        let row = document.createElement("tr");
+        row.innerHTML = `
+            <td colspan="6" style="text-align: center; padding: 15px; color: #56627a;">
+                No transactions to display
+            </td>
+        `;
+        tableBody.appendChild(row);
+        return;
+    }
+
+    // ✅ Sort transactions by date
+    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
