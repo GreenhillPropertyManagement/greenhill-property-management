@@ -167,32 +167,50 @@ function renderChart(chartType, chartData) {
         chartInstance.destroy();
     }
 
+    let datasetConfig;
+
+    if (chartType === "pie") {
+        // ✅ Ensure payments & expenses are on the same level
+        datasetConfig = [{
+            label: "Transactions",
+            data: [
+                chartData.paymentData.reduce((acc, val) => acc + val, 0), // Total Payments
+                chartData.expenseData.reduce((acc, val) => acc + val, 0)  // Total Expenses
+            ],
+            backgroundColor: ["rgba(75, 192, 192, 0.7)", "rgba(255, 99, 132, 0.7)"], // Payments (Teal), Expenses (Red)
+            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
+            borderWidth: 1
+        }];
+    } else {
+        datasetConfig = [
+            {
+                label: "Payments",
+                data: chartData.paymentData,
+                backgroundColor: "rgba(75, 192, 192, 0.5)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+                yAxisID: "y-axis-payments" // ✅ Assign to primary y-axis
+            },
+            {
+                label: "Expenses",
+                data: chartData.expenseData,
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1,
+                yAxisID: "y-axis-expenses" // ✅ Assign to secondary y-axis
+            }
+        ];
+    }
+
     chartInstance = new Chart(ctx, {
         type: chartType,
         data: {
             labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels,
-            datasets: [
-                {
-                    label: "Payments",
-                    data: chartData.paymentData,
-                    backgroundColor: "rgba(75, 192, 192, 0.5)", // Teal color for Payments
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 1,
-                    yAxisID: "y-axis-payments" // ✅ Assign to primary y-axis
-                },
-                {
-                    label: "Expenses",
-                    data: chartData.expenseData,
-                    backgroundColor: "rgba(255, 99, 132, 0.5)", // Red color for Expenses
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    borderWidth: 1,
-                    yAxisID: "y-axis-expenses" // ✅ Assign to secondary y-axis
-                }
-            ]
+            datasets: datasetConfig
         },
         options: {
-            responsive: true, /* ✅ Ensures chart resizes */
-            maintainAspectRatio: false, /* ✅ Allows full width */
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: true, labels: { usePointStyle: true } },
                 tooltip: {
@@ -215,7 +233,7 @@ function renderChart(chartType, chartData) {
                     position: "right",
                     beginAtZero: true,
                     grid: {
-                        drawOnChartArea: false // ✅ Hide gridlines for secondary axis
+                        drawOnChartArea: false
                     },
                     ticks: {
                         callback: function(value) { return "$" + value.toLocaleString(); }
