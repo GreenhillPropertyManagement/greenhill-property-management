@@ -249,7 +249,7 @@ function renderChart(chartType, chartData) {
     }, 200);
 }
 
-// ✅ Ensure the chart resizes when the window resizes
+// Ensure the chart resizes when the window resizes
 window.addEventListener("resize", function () {
     if (chartInstance) {
         chartInstance.resize();
@@ -257,6 +257,7 @@ window.addEventListener("resize", function () {
 });
 
 function populateTransactionsTable(response, transactionType) {
+
     let tableBody = document.querySelector("#transactionsTable tbody");
 
     if (!tableBody) {
@@ -326,6 +327,7 @@ function populateTransactionsTable(response, transactionType) {
 }
 
 function populateTransactionModal(payment, expenses) {
+
     if (!payment) {
         console.error("Error: Payment data is missing.");
         return;
@@ -362,9 +364,11 @@ function populateTransactionModal(payment, expenses) {
     mgFeeEl.textContent = `$${managementFee.toLocaleString()}`;
     netPaymentEl.textContent = `$${netPayment.toLocaleString()}`;
     balanceAfterPaymentEl.textContent = `$${balanceAfterPayment.toLocaleString()}`;
+
 }
 
 function setupChartTypeListener() {
+
     document.getElementById("graph_type-2").addEventListener("change", function() {
         let selectedChartType = this.value;
 
@@ -379,4 +383,5 @@ function setupChartTypeListener() {
         console.log("Updating chart to:", selectedChartType);
         renderChart(selectedChartType, chartData);
     });
+
 }
