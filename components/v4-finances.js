@@ -318,14 +318,40 @@ function populateTransactionsTable(response, transactionType) {
 }
 
 function populateTransactionModal(payment, expenses) {
+    if (!payment) {
+        console.error("Error: Payment data is missing.");
+        return;
+    }
+
+    console.log("Populating Modal with:", payment);
+    console.log("Expenses Data:", expenses);
+
     let grossPayment = Math.abs(payment.amount);
     let matchingExpense = expenses.find(exp => exp.transaction_id === payment.transaction_id);
     let managementFee = matchingExpense ? Math.abs(matchingExpense.amount) : 0;
     let netPayment = grossPayment - managementFee;
     let balanceAfterPayment = payment.total_running_balance || 0;
 
-    document.querySelector('[data="gross-payment"]').textContent = `$${grossPayment.toLocaleString()}`;
-    document.querySelector('[data="mg-fee"]').textContent = `$${managementFee.toLocaleString()}`;
-    document.querySelector('[data="net-payment"]').textContent = `$${netPayment.toLocaleString()}`;
-    document.querySelector('[data="balance-after-payment"]').textContent = `$${balanceAfterPayment.toLocaleString()}`;
+    console.log("Gross Payment:", grossPayment);
+    console.log("Matching Expense:", matchingExpense);
+    console.log("Management Fee:", managementFee);
+    console.log("Net Payment:", netPayment);
+    console.log("Balance After Payment:", balanceAfterPayment);
+
+    let grossPaymentEl = document.querySelector('[data="gross-payment"]');
+    let mgFeeEl = document.querySelector('[data="mg-fee"]');
+    let netPaymentEl = document.querySelector('[data="net-payment"]');
+    let balanceAfterPaymentEl = document.querySelector('[data="balance-after-payment"]');
+
+    console.log("Modal Elements:", { grossPaymentEl, mgFeeEl, netPaymentEl, balanceAfterPaymentEl });
+
+    if (!grossPaymentEl || !mgFeeEl || !netPaymentEl || !balanceAfterPaymentEl) {
+        console.error("Error: One or more modal elements not found.");
+        return;
+    }
+
+    grossPaymentEl.textContent = `$${grossPayment.toLocaleString()}`;
+    mgFeeEl.textContent = `$${managementFee.toLocaleString()}`;
+    netPaymentEl.textContent = `$${netPayment.toLocaleString()}`;
+    balanceAfterPaymentEl.textContent = `$${balanceAfterPayment.toLocaleString()}`;
 }
