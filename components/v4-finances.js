@@ -68,14 +68,14 @@ function initLandlordFinances() {
     });
 }
 
-// ✅ Allow user to change chart type without re-submitting form
+// Allow user to change chart type without re-submitting form
 function setupChartTypeListener() {
     document.getElementById("graph_type-2").addEventListener("change", function() {
         let selectedChartType = this.value;
 
         if (!latestApiResponse) {
-            console.error("No API response available. Submit the form first.");
-            return;
+            console.warn("No API response available. Submit the form first.");
+            return; // ✅ Prevents error before first API call
         }
 
         let transactionType = document.querySelector('[form-input="transaction_type"]').value || "noi";
