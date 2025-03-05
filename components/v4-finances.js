@@ -275,7 +275,7 @@ function populateTransactionsTable(response, transactionType) {
     if (transactions.length === 0) {
         let row = document.createElement("tr");
         row.innerHTML = `
-            <td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">
+            <td colspan="6" style="text-align: center; padding: 15px; color: #56627a;">
                 No transactions to display
             </td>
         `;
@@ -303,11 +303,17 @@ function populateTransactionsTable(response, transactionType) {
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
             <td>${transactionTypeText}</td>
-            <td>${transaction.description || "N/A"}</td> 
             <td>${formattedAmount}</td>
         `;
 
         tableBody.appendChild(row);
+
+        // ✅ Attach click event to open modal & populate data
+        if (transaction.type === "payment") {
+            row.addEventListener("click", function () {
+                populateTransactionModal(transaction, response.expenses);
+            });
+        }
     });
 }
 
