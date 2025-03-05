@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances();
     setupChartTypeListener(); // Allow users to change chart type dynamically
+    let chartInstance = null; // ✅ Store chart instance globally
 });
 
 function initLandlordFinances() {
@@ -159,99 +160,49 @@ function renderChart(chartType, chartData) {
 
     let ctx = document.getElementById("financeChart").getContext("2d");
 
-    let chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true, // ✅ Keep legend for all chart types
-                labels: {
-                    usePointStyle: true, // ✅ Makes the legend circles match the dataset color
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(tooltipItem) {
-                        let value = tooltipItem.raw;
-                        return `$${value.toLocaleString()}`; // ✅ Adds $ to tooltips
-                    }
-                }
-            }
-        }
-    };
-
-    // **Remove Y-axis if chart type is "pie"**
-    if (chartType !== "pie") {
-        chartOptions.scales = {
-            "y-axis-payments": {
-                type: "linear",
-                position: "left",
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
-                    }
-                }
-            },
-            "y-axis-expenses": {
-                type: "linear",
-                position: "right",
-                beginAtZero: true,
-                grid: {
-                    drawOnChartArea: false // Hide gridlines for secondary axis
-                },
-                ticks: {
-                    callback: function(value) {
-                        return "$" + value.toLocaleString(); // ✅ Adds $ to Y-axis
-                    }
-                }
-            }
-        };
+    // ✅ Destroy previous instance to allow proper resizing
+    if (chartInstance) {
+        chartInstance.destroy();
     }
 
-    // Define correct colors for pie chart and other types
-    let datasetConfig = [
-        {
-            label: "Payments",
-            data: chartData.paymentData,
-            backgroundColor: "rgba(75, 192, 192, 0.5)", // Payments (Teal)
-            borderColor: "rgba(75, 192, 192, 1)",
-            borderWidth: 1,
-            yAxisID: chartType !== "pie" ? "y-axis-payments" : undefined
-        },
-        {
-            label: "Expenses",
-            data: chartData.expenseData,
-            backgroundColor: "rgba(255, 99, 132, 0.5)", // Expenses (Red)
-            borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            yAxisID: chartType !== "pie" ? "y-axis-expenses" : undefined
-        }
-    ];
-
-    // **If it's a pie chart, merge payments and expenses into one dataset**
-    if (chartType === "pie") {
-        datasetConfig = [{
-            label: "Transactions",
-            data: [
-                chartData.paymentData.reduce((acc, val) => acc + val, 0), // Total Payments
-                chartData.expenseData.reduce((acc, val) => acc + val, 0)  // Total Expenses
-            ],
-            backgroundColor: ["rgba(75, 192, 192, 0.5)", "rgba(255, 99, 132, 0.5)"], // Payments (Teal), Expenses (Red)
-            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
-            borderWidth: 1
-        }];
-    }
-
-    new Chart(ctx, {
-        type: chartType, // Dynamic chart type
+    chartInstance = new Chart(ctx, {
+        type: chartType,
         data: {
-            labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels, // ✅ Custom labels for pie chart
-            datasets: datasetConfig
+            labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels,
+            datasets: [
+                { label: "Payments", data: chartData.paymentData, backgroundColor: "rgba(75, 192, 192, 0.5)", borderColor: "rgba(75, 192, 192, 1)", borderWidth: 1 },
+                { label: "Expenses", data: chartData.expenseData, backgroundColor: "rgba(255, 99, 132, 0.5)", borderColor: "rgba(255, 99, 132, 1)", borderWidth: 1 }
+            ]
         },
-        options: chartOptions
+        options: {
+            responsive: true, /* ✅ Ensures chart resizes */
+            maintainAspectRatio: false, /* ✅ Allows full width */
+            plugins: {
+                legend: { display: true, labels: { usePointStyle: true } },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) { return `$${tooltipItem.raw.toLocaleString()}`; }
+                    }
+                }
+            },
+            scales: chartType === "pie" ? {} : {
+                y: { beginAtZero: true, ticks: { callback: function(value) { return "$" + value.toLocaleString(); } } }
+            }
+        }
     });
+
+    // ✅ Force chart resize after a delay
+    setTimeout(() => {
+        chartInstance.resize();
+    }, 200);
 }
+
+// ✅ Ensure the chart resizes when the window resizes
+window.addEventListener("resize", function () {
+    if (chartInstance) {
+        chartInstance.resize();
+    }
+});
 
 function populateTransactionsTable(response, transactionType) {
     let tableBody = document.querySelector("#transactionsTable tbody");
