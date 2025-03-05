@@ -172,8 +172,22 @@ function renderChart(chartType, chartData) {
         data: {
             labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels,
             datasets: [
-                { label: "Payments", data: chartData.paymentData, backgroundColor: "rgba(75, 192, 192, 0.5)", borderColor: "rgba(75, 192, 192, 1)", borderWidth: 1 },
-                { label: "Expenses", data: chartData.expenseData, backgroundColor: "rgba(255, 99, 132, 0.5)", borderColor: "rgba(255, 99, 132, 1)", borderWidth: 1 }
+                {
+                    label: "Payments",
+                    data: chartData.paymentData,
+                    backgroundColor: "rgba(75, 192, 192, 0.5)", // Teal color for Payments
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1,
+                    yAxisID: "y-axis-payments" // ✅ Assign to primary y-axis
+                },
+                {
+                    label: "Expenses",
+                    data: chartData.expenseData,
+                    backgroundColor: "rgba(255, 99, 132, 0.5)", // Red color for Expenses
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 1,
+                    yAxisID: "y-axis-expenses" // ✅ Assign to secondary y-axis
+                }
             ]
         },
         options: {
@@ -188,7 +202,25 @@ function renderChart(chartType, chartData) {
                 }
             },
             scales: chartType === "pie" ? {} : {
-                y: { beginAtZero: true, ticks: { callback: function(value) { return "$" + value.toLocaleString(); } } }
+                "y-axis-payments": {
+                    type: "linear",
+                    position: "left",
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return "$" + value.toLocaleString(); }
+                    }
+                },
+                "y-axis-expenses": {
+                    type: "linear",
+                    position: "right",
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false // ✅ Hide gridlines for secondary axis
+                    },
+                    ticks: {
+                        callback: function(value) { return "$" + value.toLocaleString(); }
+                    }
+                }
             }
         }
     });
