@@ -254,7 +254,6 @@ function renderChart(chartType, chartData) {
 function populateTransactionsTable(response, transactionType) {
     let tableBody = document.querySelector("#transactionsTable tbody");
 
-    // ✅ Check if the table exists before trying to update it
     if (!tableBody) {
         console.error("Error: #transactionsTable not found in the DOM.");
         return;
@@ -266,14 +265,13 @@ function populateTransactionsTable(response, transactionType) {
 
     // Filter transactions based on the selected filter
     if (transactionType === "noi") {
-        transactions = [...response.payments, ...response.expenses]; // Show both payments & expenses
+        transactions = [...response.payments, ...response.expenses];
     } else if (transactionType === "payments") {
-        transactions = [...response.payments]; // Show only payments
+        transactions = [...response.payments];
     } else if (transactionType === "expenses") {
-        transactions = [...response.expenses]; // Show only expenses
+        transactions = [...response.expenses];
     }
 
-    // ✅ If there are no transactions, show "No Transactions to Display"
     if (transactions.length === 0) {
         let row = document.createElement("tr");
         row.innerHTML = `
@@ -285,19 +283,20 @@ function populateTransactionsTable(response, transactionType) {
         return;
     }
 
-    // ✅ Sort transactions by date
     transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
 
-        // Format the amount with a $ sign
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
-
-        // Determine transaction type
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
 
-        // Create table columns
+        // ✅ Only apply modal attributes to Payment rows
+        if (transaction.type === "payment") {
+            row.setAttribute("element", "modal");
+            row.setAttribute("modal", "transaction-detail-modal");
+        }
+
         row.innerHTML = `
             <td>${formatDate(transaction.transaction_date)}</td>
             <td>${transaction.display_name || "N/A"}</td>
@@ -308,5 +307,25 @@ function populateTransactionsTable(response, transactionType) {
         `;
 
         tableBody.appendChild(row);
+
+        // ✅ Attach click event to open modal & populate data
+        if (transaction.type === "payment") {
+            row.addEventListener("click", function () {
+                populateTransactionModal(transaction, response.expenses);
+            });
+        }
     });
+}
+
+function populateTransactionModal(payment, expenses) {
+    let grossPayment = Math.abs(payment.amount);
+    let matchingExpense = expenses.find(exp => exp.transaction_id === payment.transaction_id);
+    let managementFee = matchingExpense ? Math.abs(matchingExpense.amount) : 0;
+    let netPayment = grossPayment - managementFee;
+    let balanceAfterPayment = payment.total_running_balance || 0;
+
+    document.querySelector('[data="gross-payment"]').textContent = `$${grossPayment.toLocaleString()}`;
+    document.querySelector('[data="mg-fee"]').textContent = `$${managementFee.toLocaleString()}`;
+    document.querySelector('[data="net-payment"]').textContent = `$${netPayment.toLocaleString()}`;
+    document.querySelector('[data="balance-after-payment"]').textContent = `$${balanceAfterPayment.toLocaleString()}`;
 }
