@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances();
+    setupChartTypeListener(); // Allow users to change chart type dynamically
 });
 
 function initLandlordFinances() {
@@ -37,6 +38,7 @@ function initLandlordFinances() {
             success: function(response) {
 
                 console.log("API Response:", response);
+                latestApiResponse = response; // Store response globally for quick updates
 
                 // Extract graph_type and transaction_type
                 let graphType = formData.graph_type || "bar"; // Default to bar
@@ -357,4 +359,21 @@ function populateTransactionModal(payment, expenses) {
     mgFeeEl.textContent = `$${managementFee.toLocaleString()}`;
     netPaymentEl.textContent = `$${netPayment.toLocaleString()}`;
     balanceAfterPaymentEl.textContent = `$${balanceAfterPayment.toLocaleString()}`;
+}
+
+function setupChartTypeListener() {
+    document.getElementById("graph_type-2").addEventListener("change", function() {
+        let selectedChartType = this.value;
+
+        if (!latestApiResponse) {
+            console.warn("No API response available. Submit the form first.");
+            return; // ✅ Prevents error before the first API call
+        }
+
+        let transactionType = document.querySelector('[form-input="transaction_type"]').value || "noi";
+        let chartData = extractChartData(latestApiResponse, transactionType);
+        
+        console.log("Updating chart to:", selectedChartType);
+        renderChart(selectedChartType, chartData);
+    });
 }
