@@ -51,7 +51,7 @@ function initLandlordFinances() {
 
                 // Populate Transactions Table
                 populateTransactionsTable(response);
-                
+
             },
             error: function(xhr, status, error) {
                 console.error("API Error:", error, xhr.responseText);
@@ -251,11 +251,27 @@ function renderChart(chartType, chartData) {
     });
 }
 
-function populateTransactionsTable(response) {
+function populateTransactionsTable(response, transactionType) {
     let tableBody = document.querySelector("#transactionsTable tbody");
+
+    // ✅ Check if the table exists before trying to update it
+    if (!tableBody) {
+        console.error("Error: #transactionsTable not found in the DOM.");
+        return;
+    }
+
     tableBody.innerHTML = ""; // Clear previous data
 
-    let transactions = [...response.payments, ...response.expenses]; // Merge payments & expenses
+    let transactions = [];
+
+    // Filter transactions based on the selected filter
+    if (transactionType === "noi") {
+        transactions = [...response.payments, ...response.expenses]; // Show both payments & expenses
+    } else if (transactionType === "payments") {
+        transactions = [...response.payments]; // Show only payments
+    } else if (transactionType === "expenses") {
+        transactions = [...response.expenses]; // Show only expenses
+    }
 
     transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date)); // Sort by date
 
@@ -266,7 +282,7 @@ function populateTransactionsTable(response) {
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
 
         // Determine transaction type
-        let transactionType = transaction.type === "payment" ? "Payment" : "Expense";
+        let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
 
         // Create table columns
         row.innerHTML = `
@@ -274,7 +290,7 @@ function populateTransactionsTable(response) {
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
-            <td>${transactionType}</td>
+            <td>${transactionTypeText}</td>
             <td>${formattedAmount}</td>
         `;
 
