@@ -35,6 +35,7 @@ function initLandlordFinances() {
             contentType: "application/json",
             dataType: "json",
             success: function(response) {
+
                 console.log("API Response:", response);
 
                 // Extract graph_type and transaction_type
@@ -44,8 +45,13 @@ function initLandlordFinances() {
 
                 // Render Chart
                 renderChart(graphType, chartData);
-                // update quick stats
+
+                // Update quick stats
                 updateQuickStats(response);
+
+                // Populate Transactions Table
+                populateTransactionsTable(response);
+                
             },
             error: function(xhr, status, error) {
                 console.error("API Error:", error, xhr.responseText);
@@ -242,5 +248,36 @@ function renderChart(chartType, chartData) {
             datasets: datasetConfig
         },
         options: chartOptions
+    });
+}
+
+function populateTransactionsTable(response) {
+    let tableBody = document.querySelector("#transactionsTable tbody");
+    tableBody.innerHTML = ""; // Clear previous data
+
+    let transactions = [...response.payments, ...response.expenses]; // Merge payments & expenses
+
+    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date)); // Sort by date
+
+    transactions.forEach(transaction => {
+        let row = document.createElement("tr");
+
+        // Format the amount with a $ sign
+        let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
+
+        // Determine transaction type
+        let transactionType = transaction.type === "payment" ? "Payment" : "Expense";
+
+        // Create table columns
+        row.innerHTML = `
+            <td>${formatDate(transaction.transaction_date)}</td>
+            <td>${transaction.display_name || "N/A"}</td>
+            <td>${transaction.street || "N/A"}</td>
+            <td>${transaction.unit_name || "N/A"}</td>
+            <td>${transactionType}</td>
+            <td>${formattedAmount}</td>
+        `;
+
+        tableBody.appendChild(row);
     });
 }
