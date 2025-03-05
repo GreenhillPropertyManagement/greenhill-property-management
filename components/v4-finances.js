@@ -302,8 +302,8 @@ function populateTransactionsTable(response, transactionType) {
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
-            <td>${transactionTypeText}</td> <!-- ✅ Updated Column Name -->
-            <td>${transaction.description || "N/A"}</td> <!-- ✅ Description Column -->
+            <td>${transactionTypeText}</td>
+            <td>${transaction.description || "N/A"}</td> 
             <td>${formattedAmount}</td>
         `;
 
