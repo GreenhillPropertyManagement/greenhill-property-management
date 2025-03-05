@@ -50,7 +50,7 @@ function initLandlordFinances() {
                 updateQuickStats(response);
 
                 // Populate Transactions Table
-                populateTransactionsTable(response);
+                populateTransactionsTable(response, transactionType);
 
             },
             error: function(xhr, status, error) {
