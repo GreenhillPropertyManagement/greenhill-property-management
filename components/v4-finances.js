@@ -291,7 +291,7 @@ function populateTransactionsTable(response, transactionType) {
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
 
-        // ✅ Only apply modal attributes to Payment rows
+        // Only apply modal attributes to Payment rows
         if (transaction.type === "payment") {
             row.setAttribute("element", "modal");
             row.setAttribute("modal", "transaction-detail-modal");
@@ -308,7 +308,7 @@ function populateTransactionsTable(response, transactionType) {
 
         tableBody.appendChild(row);
 
-        // ✅ Attach click event to open modal & populate data
+        // Attach click event to open modal & populate data
         if (transaction.type === "payment") {
             row.addEventListener("click", function () {
                 populateTransactionModal(transaction, response.expenses);
