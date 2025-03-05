@@ -294,10 +294,16 @@ function populateTransactionsTable(response, transactionType) {
         // ✅ Ensure the correct description is used
         let transactionDescription = transaction.description || "N/A";
 
-        // ✅ Only apply modal attributes to Payment rows
+        // ✅ Only apply modal attributes & click event to Payment rows
         if (transaction.type === "payment") {
             row.setAttribute("element", "modal");
             row.setAttribute("modal", "transaction-detail-modal");
+
+            // ✅ Ensure row click event still triggers modal function
+            row.addEventListener("click", function () {
+                console.log("Clicked Payment:", transaction); // Debugging log
+                populateTransactionModal(transaction, response.expenses);
+            });
         }
 
         row.innerHTML = `
