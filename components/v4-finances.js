@@ -1,7 +1,9 @@
+let chartInstance = null; // ✅ Store chart instance globally
+
 document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances();
     setupChartTypeListener(); // Allow users to change chart type dynamically
-    let chartInstance = null; // ✅ Store chart instance globally
+    
 });
 
 function initLandlordFinances() {
