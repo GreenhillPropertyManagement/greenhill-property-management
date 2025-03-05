@@ -275,7 +275,7 @@ function populateTransactionsTable(response, transactionType) {
     if (transactions.length === 0) {
         let row = document.createElement("tr");
         row.innerHTML = `
-            <td colspan="6" style="text-align: center; padding: 15px; color: #56627a;">
+            <td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">
                 No transactions to display
             </td>
         `;
@@ -291,7 +291,7 @@ function populateTransactionsTable(response, transactionType) {
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
 
-        // Only apply modal attributes to Payment rows
+        // ✅ Only apply modal attributes to Payment rows
         if (transaction.type === "payment") {
             row.setAttribute("element", "modal");
             row.setAttribute("modal", "transaction-detail-modal");
@@ -302,18 +302,12 @@ function populateTransactionsTable(response, transactionType) {
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
-            <td>${transactionTypeText}</td>
+            <td>${transactionTypeText}</td> <!-- ✅ Updated Column Name -->
+            <td>${transaction.description || "N/A"}</td> <!-- ✅ Description Column -->
             <td>${formattedAmount}</td>
         `;
 
         tableBody.appendChild(row);
-
-        // Attach click event to open modal & populate data
-        if (transaction.type === "payment") {
-            row.addEventListener("click", function () {
-                populateTransactionModal(transaction, response.expenses);
-            });
-        }
     });
 }
 
