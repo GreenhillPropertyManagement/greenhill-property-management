@@ -231,15 +231,13 @@ function setupEditTransactionHandler() {
         let transactionTitle = $transactionItem.attr("data-title");
         let transactionDescription = $transactionItem.attr("data-description");
         let transactionType = $transactionItem.attr("data-type"); // Get type
-        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense"); // Get linked expense ID
+        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense") || ""; // Get linked expense ID, default to empty
 
         // Populate form fields
         $("#edit-trans-code-number").val(transactionCode);
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
         $("#edit-trans-type").val(transactionType); // Set type
-        $("#edit-trans-linked-expense").val(transactionLinkedExpense); // Set type
-
 
         // Show/hide linked_expense based on type
         toggleLinkedExpenseField(transactionType, "#edit-trans-linked-expense");
@@ -257,28 +255,28 @@ function setupEditTransactionHandler() {
         toggleLinkedExpenseField(selectedType, "#edit-trans-linked-expense");
     });
 
-    // form submission
+    // 🔥 FORM SUBMIT LOGIC GOES HERE
     $("#edit-trans-code-form").submit(function (event) {
         event.preventDefault(); // Prevent default form submission
-    
+
         $('.loader').css('display', 'flex'); // Show loader
-    
+
         let transactionId = $(this).attr("data-transaction-id");
-    
+
         if (!transactionId) {
             console.error("No transaction ID found for editing.");
             return;
         }
-    
+
         let formData = {};
         $(this).find('[data-api-input]').each(function () {
             let key = $(this).attr("data-api-input");
             let value = $(this).val();
             formData[key] = value;
         });
-    
+
         formData["transaction_code_id"] = transactionId; // Ensure ID is included
-    
+
         $.ajax({
             url: localStorage.baseUrl + "api:ehsPQykn/edit_transaction_code",
             type: "POST",
@@ -290,7 +288,7 @@ function setupEditTransactionHandler() {
             success: function (response) {
                 alert("Transaction Code Updated Successfully!");
                 $('.modal__block').hide(); // Hide modal
-    
+
                 // Find and update the UI with new values
                 let $updatedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
                 $updatedItem.attr("data-code", response.code);
@@ -298,11 +296,11 @@ function setupEditTransactionHandler() {
                 $updatedItem.attr("data-description", response.description);
                 $updatedItem.attr("data-type", response.type);
                 $updatedItem.attr("data-linked-expense", response.linked_expense || "");
-    
+
                 $updatedItem.find(".transaction-code-item__code").text(response.code);
                 $updatedItem.find(".transaction-code-item__title").text(response.title);
                 $updatedItem.find(".transaction-code-item__description").text(response.description);
-    
+
                 // Ensure linked_expense is updated correctly
                 if (response.type === "payment" || response.type === "credit") {
                     $("#edit-trans-linked-expense").closest(".form__item").show();
@@ -324,9 +322,9 @@ function setupEditTransactionHandler() {
 // Function to show/hide linked_expense field
 function toggleLinkedExpenseField(type, selector) {
     if (type === "payment" || type === "credit") {
-        $(selector).closest("#edit-trans-linked-expense").show();
+        $(selector).closest(".form__item").show(); // Correct selector
     } else {
-        $(selector).closest("#edit-trans-linked-expense").hide();
+        $(selector).closest(".form__item").hide();
         $(selector).val(""); // Reset value when hidden
     }
 }
@@ -349,11 +347,18 @@ function populateLinkedExpenseSelect(selectedExpenseId) {
         success: function (response) {
             let expenseCodes = response.filter(code => code.type === "expense");
 
+            // Debugging: Log the fetched expenses
+            console.log("Fetched Expense Codes:", expenseCodes);
+
             expenseCodes.forEach(expenseCode => {
-                let isSelected = selectedExpenseId && expenseCode.id === selectedExpenseId ? "selected" : "";
+                // Ensure comparison is done with string values
+                let isSelected = (selectedExpenseId && String(expenseCode.id) === String(selectedExpenseId)) ? "selected" : "";
                 let option = `<option value="${expenseCode.id}" ${isSelected}>${expenseCode.code} - ${expenseCode.title}</option>`;
                 $linkedExpenseSelect.append(option);
             });
+
+            // Debugging: Log the selected option
+            console.log("Pre-selected Expense ID:", selectedExpenseId);
         },
         error: function (error) {
             console.error("Error loading expense codes:", error);
