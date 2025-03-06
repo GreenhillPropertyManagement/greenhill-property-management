@@ -222,6 +222,7 @@ function setupDeleteTransactionHandler() {
 
 // Function to setup the edit transaction handler
 function setupEditTransactionHandler() {
+    //UPDATED!
     $(document).on("click", ".transaction-code-icon.edit", function () {
         let $transactionItem = $(this).closest(".transaction-code-item");
 
@@ -230,10 +231,10 @@ function setupEditTransactionHandler() {
         let transactionCode = $transactionItem.attr("data-code");
         let transactionTitle = $transactionItem.attr("data-title");
         let transactionDescription = $transactionItem.attr("data-description");
-        let transactionType = $transactionItem.attr("data-type"); // Correctly extract type
+        let transactionType = $transactionItem.attr("data") || ""; // FIXED: Use .attr("data") to correctly get type
         let transactionLinkedExpense = $transactionItem.attr("data-linked_expense") || ""; // Correctly extract linked expense
 
-        // Debugging: Log extracted values to check if they are correct
+        // Debugging logs to check if data is being retrieved correctly
         console.log("Editing Transaction:", {
             transactionId,
             transactionCode,
@@ -243,16 +244,19 @@ function setupEditTransactionHandler() {
             transactionLinkedExpense
         });
 
+        // Check if transactionType is empty
+        if (!transactionType) {
+            console.error("⚠️ No transaction type found! Check if .transaction-code-item has the correct data attributes.");
+        }
+
         // Populate form fields using data attributes
         $("#edit-trans-code-number").val(transactionCode);
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
 
-        // Fix: Ensure transaction type dropdown is selected correctly
+        // Ensure the correct type is selected
         if (transactionType) {
             $('[data="type"]').val(transactionType).trigger("change"); // Ensure correct dropdown selection
-        } else {
-            console.warn("No transaction type found.");
         }
 
         // Show/hide linked_expense field based on type
