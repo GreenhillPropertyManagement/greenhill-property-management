@@ -313,6 +313,7 @@ function setupEditTransactionHandler() {
                 $updatedItem.attr("data-linked-expense", response.linked_expense || "");
 
                 $updatedItem.find(".transaction-code-item__code").text(response.code);
+                $updatedItem.find(".transaction-code-item__type").text(response.type);
                 $updatedItem.find(".transaction-code-item__title").text(response.title);
                 $updatedItem.find(".transaction-code-item__description").text(response.description);
 
