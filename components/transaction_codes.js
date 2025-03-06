@@ -238,6 +238,8 @@ function setupEditTransactionHandler() {
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
         $("#edit-trans-type").val(transactionType); // Set type
+        $("#edit-trans-linked-expense").val(transactionLinkedExpense); // Set type
+
 
         // Show/hide linked_expense based on type
         toggleLinkedExpenseField(transactionType, "#edit-trans-linked-expense");
@@ -322,9 +324,9 @@ function setupEditTransactionHandler() {
 // Function to show/hide linked_expense field
 function toggleLinkedExpenseField(type, selector) {
     if (type === "payment" || type === "credit") {
-        $(selector).closest(".form__item").show();
+        $(selector).closest("#edit-trans-linked-expense").show();
     } else {
-        $(selector).closest(".form__item").hide();
+        $(selector).closest("#edit-trans-linked-expense").hide();
         $(selector).val(""); // Reset value when hidden
     }
 }
