@@ -54,28 +54,23 @@ function loadTransactionCodes() {
 
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
-  return $(`
-      <div class="transaction-code-item" 
-          data-id="${codeData.id}" 
-          data-code="${codeData.code}" 
-          data-title="${codeData.title}" 
-          data-description="${codeData.description}">
-          
-          <div class="transaction-code-item__title-wrapper">
-              <div class="transaction-code-item__title-group">
-                  <div class="transaction-code-item__code" data-api-input="code-number">${codeData.code}</div>
-                  <div class="transaction-code-item__title" data-api-input="code-title">${codeData.title}</div>
-              </div>
-              <div class="transaction-code-item__icon-group">
-                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" 
-                      loading="lazy" alt="Edit" element="modal" modal="edit-trans-code" class="transaction-code-icon edit">
-                  <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" 
-                      loading="lazy" alt="Delete" element="modal" modal="delete-transaction-code" class="transaction-code-icon delete">
-              </div>
-          </div>
-          <div class="transaction-code-item__description" data-api-input="code-description">${codeData.description}</div>
-      </div>
-  `);
+    return $(`
+        <div class="transaction-code-item">
+            <div class="transaction-code-item__title-wrapper">
+                <div class="transaction-code-item__title-group">
+                    <div data-api-input="code-number" class="transaction-code-item__code">${codeData.code}</div>
+                    <div data-api-input="type" class="transaction-code-item__code type">${codeData.type}</div>
+                    <div class="text-block-5">-</div>
+                    <div data-api-input="code-title" class="transaction-code-item__title">${codeData.title}</div>
+                </div>
+                <div class="transaction-code-item__icon-group">
+                    <img loading="lazy" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" alt="" class="transaction-code-icon edit">
+                    <img element="modal" modal="delete-transaction-code" alt="" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" loading="lazy" class="transaction-code-icon delete">
+                </div>
+            </div>
+            <div data-api-input="code-description" class="transaction-code-item__description">${codeData.description}</div>
+        </div>
+    `);
 }
 
 // Function to insert new transaction code in sorted order
@@ -222,19 +217,19 @@ function setupDeleteTransactionHandler() {
 
 // Function to setup the edit transaction handler
 function setupEditTransactionHandler() {
-    //UPDATED!
+    //UPDATED NEW!!!
     $(document).on("click", ".transaction-code-icon.edit", function () {
         let $transactionItem = $(this).closest(".transaction-code-item");
 
-        // Extract transaction details using the correct data attributes
+        // Extract transaction details from inside the elements
         let transactionId = $transactionItem.attr("data-id");
-        let transactionCode = $transactionItem.attr("data-code");
-        let transactionTitle = $transactionItem.attr("data-title");
-        let transactionDescription = $transactionItem.attr("data-description");
-        let transactionType = $transactionItem.attr("data") || ""; // FIXED: Use .attr("data") to correctly get type
-        let transactionLinkedExpense = $transactionItem.attr("data-linked_expense") || ""; // Correctly extract linked expense
+        let transactionCode = $transactionItem.find('[data-api-input="code-number"]').text().trim();
+        let transactionTitle = $transactionItem.find('[data-api-input="code-title"]').text().trim();
+        let transactionDescription = $transactionItem.find('[data-api-input="code-description"]').text().trim();
+        let transactionType = $transactionItem.find('[data-api-input="type"]').text().trim(); // Extract type
+        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense") || ""; // Default to empty if missing
 
-        // Debugging logs to check if data is being retrieved correctly
+        // Debugging log
         console.log("Editing Transaction:", {
             transactionId,
             transactionCode,
@@ -244,19 +239,16 @@ function setupEditTransactionHandler() {
             transactionLinkedExpense
         });
 
-        // Check if transactionType is empty
-        if (!transactionType) {
-            console.error("⚠️ No transaction type found! Check if .transaction-code-item has the correct data attributes.");
-        }
-
-        // Populate form fields using data attributes
+        // Populate form fields
         $("#edit-trans-code-number").val(transactionCode);
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
 
         // Ensure the correct type is selected
         if (transactionType) {
-            $('[data="type"]').val(transactionType).trigger("change"); // Ensure correct dropdown selection
+            $('[data="type"]').val(transactionType).trigger("change");
+        } else {
+            console.warn("No transaction type found.");
         }
 
         // Show/hide linked_expense field based on type
@@ -342,11 +334,10 @@ function setupEditTransactionHandler() {
 
 // Function to show/hide linked_expense field
 function toggleLinkedExpenseField(type, selector) {
-    //UPDATED
     console.log("Checking if linked_expense should be shown for type:", type);
 
-    let $linkedExpenseField = $(selector); // Select the linked expense dropdown directly
-    let $linkedExpenseContainer = $linkedExpenseField.closest(".form__item"); // Find its container
+    let $linkedExpenseField = $(selector);
+    let $linkedExpenseContainer = $linkedExpenseField.closest(".form__item");
 
     if (type === "payment" || type === "credit") {
         $linkedExpenseContainer.show(); // Show only the correct container
