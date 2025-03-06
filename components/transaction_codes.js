@@ -11,30 +11,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Function to load and display all transaction codes
 function loadTransactionCodes() {
-  $.ajax({
-      url: localStorage.baseUrl + "api:ehsPQykn/get_transaction_codes",
-      type: "GET",
-      headers: {
-          'Authorization': "Bearer " + localStorage.authToken,
-      },
-      success: function (response) {
-          let $container = $(".transcton-codes-container");
-          $container.empty(); // Clear existing items
+    $.ajax({
+        url: localStorage.baseUrl + "api:ehsPQykn/get_transaction_codes",
+        type: "GET",
+        headers: {
+            'Authorization': "Bearer " + localStorage.authToken,
+        },
+        success: function (response) {
+            let $container = $(".transcton-codes-container");
+            let $linkedExpenseSelect = $("#code-type-2"); // Get the linked_expense select field
 
-          response.sort((a, b) => a.code.localeCompare(b.code)); // Sort by code
+            $container.empty(); // Clear existing items
+            $linkedExpenseSelect.empty(); // Clear existing options
 
-          response.forEach(code => {
-              let $item = createTransactionCodeElement(code);
-              $container.append($item);
-          });
+            response.sort((a, b) => a.code.localeCompare(b.code)); // Sort by code
 
-          // Ensure delete functionality works on loaded items
-          setupDeleteTransactionHandler();
-      },
-      error: function (error) {
-          console.error("Error loading transaction codes:", error);
-      }
-  });
+            // Populate transaction codes in UI
+            response.forEach(code => {
+                let $item = createTransactionCodeElement(code);
+                $container.append($item);
+            });
+
+            // Populate linked_expense dropdown with only expense type transaction codes
+            response
+                .filter(code => code.type === "expense") // Filter only expense transaction codes
+                .forEach(expenseCode => {
+                    let option = `<option value="${expenseCode.id}">${expenseCode.code} - ${expenseCode.title}</option>`;
+                    $linkedExpenseSelect.append(option);
+                });
+
+            // Ensure delete functionality works on loaded items
+            setupDeleteTransactionHandler();
+        },
+        error: function (error) {
+            console.error("Error loading transaction codes:", error);
+        }
+    });
 }
 
 // Function to create a transaction code element dynamically
