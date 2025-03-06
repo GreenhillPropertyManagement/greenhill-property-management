@@ -228,7 +228,8 @@ function setupEditTransactionHandler() {
         let transactionTitle = $transactionItem.find('[data-api-input="code-title"]').text().trim();
         let transactionDescription = $transactionItem.find('[data-api-input="code-description"]').text().trim();
         let transactionType = $transactionItem.find('[data-api-input="type"]').text().trim(); // Extract type
-        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense") || ""; // Default to empty if missing
+        let transactionLinkedExpense = $transactionItem.find('[data-api-input="linked_expense"]').text().trim(); // Extract type
+        
 
         // Debugging log
         console.log("Editing Transaction:", {
