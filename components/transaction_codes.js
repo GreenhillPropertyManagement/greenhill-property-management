@@ -55,7 +55,7 @@ function loadTransactionCodes() {
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
     return $(`
-        <div class="transaction-code-item">
+        <div class="transaction-code-item"data-id="${codeData.id}">
             <div class="transaction-code-item__title-wrapper">
                 <div class="transaction-code-item__title-group">
                     <div data-api-input="code-number" class="transaction-code-item__code">${codeData.code}</div>
