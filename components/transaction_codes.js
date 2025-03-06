@@ -203,8 +203,9 @@ function createTransCode() {
                     $(this).remove();
                 });
 
-                // 🔥 FIX: Also remove it from the linked_expense dropdown
+                // 🔥 FIX: Remove from BOTH linked_expense dropdowns (edit & create forms)
                 $(`[data="linked_expense"] option[value="${transactionId}"]`).remove();
+                $("#code-type-2 option[value='" + transactionId + "']").remove();
             },
             error: function (error) {
                 console.error("Error deleting transaction code:", error);
