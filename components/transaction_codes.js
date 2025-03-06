@@ -222,77 +222,44 @@ function setupDeleteTransactionHandler() {
 
 // Function to setup the edit transaction handler
 function setupEditTransactionHandler() {
-  $(document).on("click", ".transaction-code-icon.edit", function () {
-      let $transactionItem = $(this).closest(".transaction-code-item");
-
-      // Extract transaction details
-      let transactionId = $transactionItem.attr("data-id");
-      let transactionCode = $transactionItem.attr("data-code");
-      let transactionTitle = $transactionItem.attr("data-title");
-      let transactionDescription = $transactionItem.attr("data-description");
-
-      // Populate form fields
-      $("#edit-trans-code-number").val(transactionCode);
-      $("#edit-trans-title").val(transactionTitle);
-      $("#edit-trans-description").val(transactionDescription);
-
-      // Store transaction ID in a hidden attribute for updating
-      $("#edit-trans-code-form").attr("data-transaction-id", transactionId);
-  });
-
-  $("#edit-trans-code-form").submit(function (event) {
-      event.preventDefault(); // Prevent default form submission
-
-      $('.loader').css('display', 'flex'); // Show loader
-
-      let transactionId = $(this).attr("data-transaction-id");
-      let updatedCode = $("#edit-trans-code-number").val();
-      let updatedTitle = $("#edit-trans-title").val();
-      let updatedDescription = $("#edit-trans-description").val();
-
-      if (!transactionId) {
-          console.error("No transaction ID found for editing.");
-          return;
+    $(document).on("click", ".transaction-code-icon.edit", function () {
+        let $transactionItem = $(this).closest(".transaction-code-item");
+  
+        // Extract transaction details
+        let transactionId = $transactionItem.attr("data-id");
+        let transactionCode = $transactionItem.attr("data-code");
+        let transactionTitle = $transactionItem.attr("data-title");
+        let transactionDescription = $transactionItem.attr("data-description");
+        let transactionType = $transactionItem.attr("data-type"); // New: Get type
+        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense"); // New: Get linked_expense
+  
+        // Populate form fields
+        $("#edit-trans-code-number").val(transactionCode);
+        $("#edit-trans-title").val(transactionTitle);
+        $("#edit-trans-description").val(transactionDescription);
+        $("#edit-trans-type").val(transactionType); // Set Type dropdown
+        $("#edit-trans-linked-expense").val(transactionLinkedExpense || ""); // Set Linked Expense (default to empty)
+  
+        // Show or hide linked_expense dropdown based on type
+        toggleLinkedExpenseField(transactionType, "#edit-trans-linked-expense");
+  
+        // Store transaction ID in a hidden attribute for updating
+        $("#edit-trans-code-form").attr("data-transaction-id", transactionId);
+    });
+  
+    // When the type field changes, show/hide linked_expense dynamically
+    $("#edit-trans-type").on("change", function () {
+        let selectedType = $(this).val();
+        toggleLinkedExpenseField(selectedType, "#edit-trans-linked-expense");
+    });
+  }
+  
+  // Function to show/hide linked_expense field
+  function toggleLinkedExpenseField(type, selector) {
+      if (type === "payment" || type === "credit") {
+          $(selector).closest(".form__item").show();
+      } else {
+          $(selector).closest(".form__item").hide();
+          $(selector).val(""); // Reset value when hidden
       }
-
-      let formData = {
-          transaction_code_id: transactionId,
-          number: updatedCode,
-          title: updatedTitle,
-          description: updatedDescription
-      };
-
-      $.ajax({
-          url: localStorage.baseUrl + "api:ehsPQykn/edit_transaction_code",
-          type: "POST",
-          headers: {
-              'Authorization': "Bearer " + localStorage.authToken,
-              'Content-Type': 'application/json'
-          },
-          data: JSON.stringify(formData),
-          success: function (response) {
-              alert("Transaction Code Updated Successfully!");
-              $('.modal__block').hide(); //hide modal
-
-              // Find and update the UI with new values
-              let $updatedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
-              $updatedItem.attr("data-code", updatedCode);
-              $updatedItem.attr("data-title", updatedTitle);
-              $updatedItem.attr("data-description", updatedDescription);
-
-              $updatedItem.find(".transaction-code-item__code").text(updatedCode);
-              $updatedItem.find(".transaction-code-item__title").text(updatedTitle);
-              $updatedItem.find(".transaction-code-item__description").text(updatedDescription);
-          },
-          error: function (error) {
-              console.error("Error updating transaction code:", error);
-              $('.modal__block').hide(); //hide modal
-              alert("Something went wrong. Please try again.");
-              $('.loader').hide(); // Hide loader
-          },
-          complete: function () {
-              $('.loader').hide(); // Hide loader
-          }
-      });
-  });
-}
+  }
