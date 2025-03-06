@@ -64,7 +64,7 @@ function createTransactionCodeElement(codeData) {
                     <div data-api-input="code-title" class="transaction-code-item__title">${codeData.title}</div>
                 </div>
                 <div class="transaction-code-item__icon-group">
-                    <img loading="lazy" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" alt="" class="transaction-code-icon edit">
+                    <img element="modal" modal="edit-trans-code"loading="lazy" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4d9f827e41bde48f874_pen-to-square-solid.svg" alt="" class="transaction-code-icon edit">
                     <img element="modal" modal="delete-transaction-code" alt="" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" loading="lazy" class="transaction-code-icon delete">
                 </div>
             </div>
