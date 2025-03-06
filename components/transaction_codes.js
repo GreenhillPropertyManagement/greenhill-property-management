@@ -284,7 +284,7 @@ function setupEditTransactionHandler() {
         }
 
         let formData = {};
-        $(this).find('[data-api-input]').each(function () {
+        $(this).find('[data]').each(function () {
             let key = $(this).attr("data");
             let value = $(this).val();
             formData[key] = value;
