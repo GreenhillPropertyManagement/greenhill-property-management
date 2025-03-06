@@ -237,9 +237,9 @@ function setupEditTransactionHandler() {
         $("#edit-trans-code-number").val(transactionCode);
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
-        $("#edit-trans-type").val(transactionType); // Set type
+        $("#edit-trans-type").val(transactionType); // Set type dropdown correctly
 
-        // Show/hide linked_expense based on type
+        // Ensure the linked_expense dropdown is visible for "payment" or "credit"
         toggleLinkedExpenseField(transactionType, "#edit-trans-linked-expense");
 
         // Populate linked_expense select field
@@ -322,7 +322,7 @@ function setupEditTransactionHandler() {
 // Function to show/hide linked_expense field
 function toggleLinkedExpenseField(type, selector) {
     if (type === "payment" || type === "credit") {
-        $(selector).closest(".form__item").show(); // Correct selector
+        $(selector).closest(".form__item").show(); // Ensure the parent div is visible
     } else {
         $(selector).closest(".form__item").hide();
         $(selector).val(""); // Reset value when hidden
