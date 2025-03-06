@@ -224,28 +224,35 @@ function setupDeleteTransactionHandler() {
 function setupEditTransactionHandler() {
     $(document).on("click", ".transaction-code-icon.edit", function () {
         let $transactionItem = $(this).closest(".transaction-code-item");
-
+    
         // Extract transaction details
         let transactionId = $transactionItem.attr("data-id");
         let transactionCode = $transactionItem.attr("data-code");
         let transactionTitle = $transactionItem.attr("data-title");
         let transactionDescription = $transactionItem.attr("data-description");
         let transactionType = $transactionItem.attr("data-type"); // Get type
-        let transactionLinkedExpense = $transactionItem.attr("data-linked_expense") || ""; // Get linked expense ID, default to empty
+        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense") || ""; // Get linked expense ID, default to empty
 
+    
         // Populate form fields
         $("#edit-trans-code-number").val(transactionCode);
         $("#edit-trans-title").val(transactionTitle);
         $("#edit-trans-description").val(transactionDescription);
-        $("#edit-trans-type").val(transactionType); // Set type dropdown correctly
-
-        // Ensure the linked_expense dropdown is visible for "payment" or "credit"
+    
+        // Fix: Ensure transaction type dropdown is selected correctly
+        if (transactionType) {
+            $("#edit-trans-type").val(transactionType).trigger("change"); // Trigger change event to ensure visibility logic applies
+        } else {
+            console.warn("No transaction type found.");
+        }
+    
+        // Show/hide linked_expense field based on type
         toggleLinkedExpenseField(transactionType, "#edit-trans-linked-expense");
-
-        // Populate linked_expense select field
+    
+        // Populate linked_expense dropdown & preselect the correct option
         populateLinkedExpenseSelect(transactionLinkedExpense);
-
-        // Store transaction ID in a hidden attribute for updating
+    
+        // Store transaction ID for updating
         $("#edit-trans-code-form").attr("data-transaction-id", transactionId);
     });
 
