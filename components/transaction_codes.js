@@ -32,13 +32,16 @@ function loadTransactionCodes() {
                 $container.append($item);
             });
 
-            // Populate linked_expense dropdown with only expense type transaction codes
-            response
-                .filter(code => code.type === "expense") // Filter only expense transaction codes
-                .forEach(expenseCode => {
-                    let option = `<option value="${expenseCode.id}">${expenseCode.code} - ${expenseCode.title}</option>`;
-                    $linkedExpenseSelect.append(option);
-                });
+            // Always add a default option to the linked_expense dropdown
+            $linkedExpenseSelect.append(`<option value="">Select Expense</option>`);
+
+            // Filter and add only expense-type transaction codes
+            let expenseCodes = response.filter(code => code.type === "expense");
+
+            expenseCodes.forEach(expenseCode => {
+                let option = `<option value="${expenseCode.id}">${expenseCode.code} - ${expenseCode.title}</option>`;
+                $linkedExpenseSelect.append(option);
+            });
 
             // Ensure delete functionality works on loaded items
             setupDeleteTransactionHandler();
