@@ -153,17 +153,17 @@ function createTransCode() {
     });
   }
 
-function setupDeleteTransactionHandler() {
+  function setupDeleteTransactionHandler() {
     // Remove previous click event to prevent duplicates
     $(document).off("click", ".transaction-code-icon.delete").on("click", ".transaction-code-icon.delete", function () {
         let $transactionItem = $(this).closest(".transaction-code-item");
 
         // Extract transaction details
         let transactionId = $transactionItem.attr("data-id");
-        let transactionCode = $transactionItem.attr("data-code");
-        let transactionTitle = $transactionItem.attr("data-title");
 
         // Update the popup text with "code - title"
+        let transactionCode = $transactionItem.attr("data-code");
+        let transactionTitle = $transactionItem.attr("data-title");
         let transactionDisplay = `${transactionCode} - ${transactionTitle}`;
         $('[data=transaction-code]').text(transactionDisplay);
 
@@ -173,7 +173,7 @@ function setupDeleteTransactionHandler() {
 
     // Ensure the delete button only sends one request
     $(document).off("click", '[data-api-button="delete-trans-code"]').on("click", '[data-api-button="delete-trans-code"]', function () {
-        $('.loader').css('display','flex');
+        $('.loader').css('display', 'flex');
         let transactionId = $(this).attr("data-transaction-id");
 
         if (!transactionId) {
@@ -198,9 +198,13 @@ function setupDeleteTransactionHandler() {
                 $('.loader').hide();
 
                 // Remove the deleted transaction from the list
-                $(`.transaction-code-item[data-id="${transactionId}"]`).fadeOut(300, function () {
+                let $deletedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
+                $deletedItem.fadeOut(300, function () {
                     $(this).remove();
                 });
+
+                // 🔥 FIX: Also remove it from the linked_expense dropdown
+                $(`[data="linked_expense"] option[value="${transactionId}"]`).remove();
             },
             error: function (error) {
                 console.error("Error deleting transaction code:", error);
