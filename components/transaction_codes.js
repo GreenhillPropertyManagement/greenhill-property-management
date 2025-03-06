@@ -98,57 +98,64 @@ function insertSortedTransactionCode($newItem) {
   }
 }
 
-// Function to create a transaction code via AJAX
+// Funciton to create new transaction code
 function createTransCode() {
-  $("#code-transaction-form").submit(function (event) {
-      event.preventDefault(); // Prevent default form submission
-
-      $('.loader').css('display', 'flex'); // Show loader
-
-      let formData = {};
-      $(this).find('[data-api-input]').each(function () {
-          let key = $(this).attr("data-api-input");
-          let value = $(this).val();
-          formData[key] = value;
-      });
-
-      $.ajax({
-          url: localStorage.baseUrl + "api:ehsPQykn/create_transaction_code",
-          type: "POST",
-          headers: {
-              'Authorization': "Bearer " + localStorage.authToken,
-              'Content-Type': 'application/json'
-          },
-          data: JSON.stringify(formData),
-          success: function (response) {
-              alert('Success! Transaction Code Created.');
-
-              // Create new item
-              let $newItem = createTransactionCodeElement(response);
-
-              // Ensure sorting
-              if (typeof insertSortedTransactionCode === "function") {
-                  insertSortedTransactionCode($newItem);
-              } else {
-                  $(".transcton-codes-container").append($newItem); // Default append if sorting fails
-              }
-
-              // Reinitialize delete functionality for new items
-              setupDeleteTransactionHandler();
-
-              // Clear form fields
-              $("#code-transaction-form").trigger("reset");
-          },
-          error: function (error) {
-              console.error("Error creating transaction code:", error);
-              alert('Something Went Wrong. Please Try Again.');
-          },
-          complete: function () {
-              $('.loader').hide(); // Hide loader
-          }
-      });
-  });
-}
+    $("#code-transaction-form").submit(function (event) {
+        event.preventDefault(); // Prevent default form submission
+  
+        $('.loader').css('display', 'flex'); // Show loader
+  
+        let formData = {};
+        $(this).find('[data-api-input]').each(function () {
+            let key = $(this).attr("data-api-input");
+            let value = $(this).val();
+            formData[key] = value;
+        });
+  
+        $.ajax({
+            url: localStorage.baseUrl + "api:ehsPQykn/create_transaction_code",
+            type: "POST",
+            headers: {
+                'Authorization': "Bearer " + localStorage.authToken,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(formData),
+            success: function (response) {
+                alert('Success! Transaction Code Created.');
+  
+                // Create new item
+                let $newItem = createTransactionCodeElement(response);
+  
+                // Ensure sorting
+                if (typeof insertSortedTransactionCode === "function") {
+                    insertSortedTransactionCode($newItem);
+                } else {
+                    $(".transcton-codes-container").append($newItem); // Default append if sorting fails
+                }
+  
+                // Reinitialize delete functionality for new items
+                setupDeleteTransactionHandler();
+  
+                // If the newly created transaction is an expense, add it to the linked_expense select field
+                if (response.type === "expense") {
+                    let $linkedExpenseSelect = $("#code-type-2");
+                    let newOption = `<option value="${response.id}">${response.code} - ${response.title}</option>`;
+                    $linkedExpenseSelect.append(newOption);
+                }
+  
+                // Clear form fields
+                $("#code-transaction-form").trigger("reset");
+            },
+            error: function (error) {
+                console.error("Error creating transaction code:", error);
+                alert('Something Went Wrong. Please Try Again.');
+            },
+            complete: function () {
+                $('.loader').hide(); // Hide loader
+            }
+        });
+    });
+  }
 
 function setupDeleteTransactionHandler() {
     // Remove previous click event to prevent duplicates
