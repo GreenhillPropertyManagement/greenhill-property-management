@@ -231,7 +231,7 @@ function setupEditTransactionHandler() {
         let transactionTitle = $transactionItem.attr("data-title");
         let transactionDescription = $transactionItem.attr("data-description");
         let transactionType = $transactionItem.attr("data-type"); // Get type
-        let transactionLinkedExpense = $transactionItem.attr("data-linked-expense") || ""; // Get linked expense ID, default to empty
+        let transactionLinkedExpense = $transactionItem.attr("data-linked_expense") || ""; // Get linked expense ID, default to empty
 
         // Populate form fields
         $("#edit-trans-code-number").val(transactionCode);
