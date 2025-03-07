@@ -1,8 +1,9 @@
-let chartInstance = null; // ✅ Store chart instance globally
+let chartInstance = null; // Store chart instance globally
 
 document.addEventListener("DOMContentLoaded", function() {
-    initLandlordFinances();
+    initLandlordFinances(); // init finance component
     setupChartTypeListener(); // Allow users to change chart type dynamically
+    loadRecentPayments(); // load in the recent payments
     
 });
 
@@ -385,3 +386,50 @@ function setupChartTypeListener() {
     });
 
 }
+
+function loadRecentPayments() {
+    $.ajax({
+        url: localStorage.baseUrl + "api:rpDXPv3x/v4_recent_payments",
+        method: "GET",
+        dataType: "json",
+        success: function(response) {
+            let container = $(".recent-payments-container");
+            container.empty(); // Clear previous content
+
+            response.forEach(payment => {
+                let formattedAmount = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(Math.abs(payment.amount)); // Convert to positive and format as currency
+                
+                let paymentItem = `
+                    <div class="recent-payment-item">
+                        <div class="recent-payment-row top">
+                            <div data="display_name">${payment.display_name}</div>
+                            <div data="amount" class="recent-payment-amount">${formattedAmount}</div>
+                        </div>
+                        <div class="recent-payment-row bottom">
+                            <div class="recent-payment-property-info">
+                                <div data="street">${payment.street}</div>
+                                <div data="unit_name">${payment.unit_name}</div>
+                            </div>
+                            <div data="transaction_date" class="recent-payment-amount">${formatDate(payment.transaction_date)}</div>
+                        </div>
+                    </div>
+                `;
+
+                container.append(paymentItem);
+            });
+        },
+        error: function(error) {
+            console.error("Error fetching recent payments:", error);
+        }
+    });
+}
+
+function formatDate(dateString) {
+    let date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+}
+
+
