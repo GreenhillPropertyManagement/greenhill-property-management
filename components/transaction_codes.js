@@ -55,18 +55,22 @@ function loadTransactionCodes() {
 // Function to create a transaction code element dynamically
 function createTransactionCodeElement(codeData) {
     return $(`
-        <div class="transaction-code-item"data-id="${codeData.id}">
+        <div class="transaction-code-item" data-id="${codeData.id}">
             <div class="transaction-code-item__title-wrapper">
                 <div class="transaction-code-item__title-group">
                     <div data-api-input="code-number" class="transaction-code-item__code">${codeData.code}</div>
                     <div data-api-input="linked_expense" style="display: none;" class="transaction-code-item__code">${codeData.linked_expense}</div>
-                    <div data-api-input="type" class="transaction-code-item__type">[${codeData.type}]</div>
+                    <div data-api-input="type" class="transaction-code-item__type" data-raw-type="${codeData.type}">[${codeData.type}]</div> 
                     <div class="text-block-5">-</div>
                     <div data-api-input="code-title" class="transaction-code-item__title">${codeData.title}</div>
                 </div>
                 <div class="transaction-code-item__icon-group">
-                    <img element="modal" modal="edit-trans-code"loading="lazy" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67ca5504729368bf381a120b_pen-to-square-solid-grey.svg" alt="" class="transaction-code-icon edit">
-                    <img element="modal" modal="delete-transaction-code" alt="" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67ca54be35dbb6ca9cebe9fc_trash-solid-grey.svg" loading="lazy" class="transaction-code-icon delete">
+                    <img element="modal" modal="edit-trans-code" loading="lazy" 
+                         src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67ca5504729368bf381a120b_pen-to-square-solid-grey.svg" 
+                         alt="" class="transaction-code-icon edit">
+                    <img element="modal" modal="delete-transaction-code" alt="" 
+                         src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67ca54be35dbb6ca9cebe9fc_trash-solid-grey.svg" 
+                         loading="lazy" class="transaction-code-icon delete">
                 </div>
             </div>
         </div>
@@ -222,7 +226,6 @@ function createTransCode() {
 
 // Function to setup the edit transaction handler
 function setupEditTransactionHandler() {
-    //UPDATED NEW!!!
     $(document).on("click", ".transaction-code-icon.edit", function () {
         let $transactionItem = $(this).closest(".transaction-code-item");
 
@@ -231,9 +234,8 @@ function setupEditTransactionHandler() {
         let transactionCode = $transactionItem.find('[data-api-input="code-number"]').text().trim();
         let transactionTitle = $transactionItem.find('[data-api-input="code-title"]').text().trim();
         let transactionDescription = $transactionItem.find('[data-api-input="code-description"]').text().trim();
-        let transactionType = $transactionItem.find('[data-api-input="type"]').text().trim(); //
-        let transactionLinkedExpense = $transactionItem.find('[data-api-input="linked_expense"]').text().trim(); // Extract type
-        
+        let transactionType = $transactionItem.find('[data-api-input="type"]').attr("data-raw-type").trim(); // 🔥 FIX: Get raw type
+        let transactionLinkedExpense = $transactionItem.find('[data-api-input="linked_expense"]').text().trim();
 
         // Debugging log
         console.log("Editing Transaction:", {
@@ -284,6 +286,8 @@ function setupEditTransactionHandler() {
 
         if (!transactionId) {
             console.error("No transaction ID found for editing.");
+            alert("Error: No transaction ID found.");
+            $('.loader').hide();
             return;
         }
 
@@ -317,7 +321,7 @@ function setupEditTransactionHandler() {
                 $updatedItem.attr("data-linked-expense", response.linked_expense || "");
 
                 $updatedItem.find(".transaction-code-item__code").text(response.code);
-                $updatedItem.find(".transaction-code-item__type").text(response.type);
+                $updatedItem.find(".transaction-code-item__type").text(`[${response.type}]`); // 🔥 FIX: Re-wrap type in brackets
                 $updatedItem.find(".transaction-code-item__title").text(response.title);
                 $updatedItem.find(".transaction-code-item__description").text(response.description);
 
