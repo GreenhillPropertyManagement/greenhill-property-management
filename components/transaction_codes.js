@@ -231,7 +231,7 @@ function setupEditTransactionHandler() {
         let transactionCode = $transactionItem.find('[data-api-input="code-number"]').text().trim();
         let transactionTitle = $transactionItem.find('[data-api-input="code-title"]').text().trim();
         let transactionDescription = $transactionItem.find('[data-api-input="code-description"]').text().trim();
-        let transactionType = $transactionItem.find('[data-api-input="type"]').text().trim(); // Extract type
+        let transactionType = $transactionItem.find('[data-api-input="type"]').text().trim(); //
         let transactionLinkedExpense = $transactionItem.find('[data-api-input="linked_expense"]').text().trim(); // Extract type
         
 
