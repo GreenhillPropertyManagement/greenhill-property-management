@@ -69,7 +69,6 @@ function createTransactionCodeElement(codeData) {
                     <img element="modal" modal="delete-transaction-code" alt="" src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67c5c4fd947da59ed5ba6096_trash-solid.svg" loading="lazy" class="transaction-code-icon delete">
                 </div>
             </div>
-            <div data-api-input="code-description" class="transaction-code-item__description">${codeData.description}</div>
         </div>
     `);
 }
