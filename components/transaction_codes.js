@@ -58,7 +58,7 @@ function createTransactionCodeElement(codeData) {
         <div class="transaction-code-item"data-id="${codeData.id}">
             <div class="transaction-code-item__title-wrapper">
                 <div class="transaction-code-item__title-group">
-                    <div data-api-input="code-number" class="transaction-code-item__code">"${codeData.code}</div>
+                    <div data-api-input="code-number" class="transaction-code-item__code">${codeData.code}</div>
                     <div data-api-input="linked_expense" style="display: none;" class="transaction-code-item__code">${codeData.linked_expense}</div>
                     <div data-api-input="type" class="transaction-code-item__type">[${codeData.type}]</div>
                     <div class="text-block-5">-</div>
