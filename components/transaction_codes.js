@@ -79,22 +79,22 @@ function createTransactionCodeElement(codeData) {
 
 // Function to insert new transaction code in sorted order
 function insertSortedTransactionCode($newItem) {
-  let $container = $(".transcton-codes-container");
-  let inserted = false;
-  let newCode = $newItem.find(".transaction-code-item__code").text();
+    let $container = $(".transcton-codes-container");
+    let inserted = false;
+    let newCode = parseInt($newItem.find('[data-api-input="code-number"]').text().trim(), 10); // Ensure number sorting
 
-  $container.children(".transaction-code-item").each(function () {
-      let existingCode = $(this).find(".transaction-code-item__code").text();
-      if (newCode < existingCode) {
-          $(this).before($newItem);
-          inserted = true;
-          return false; // Break loop
-      }
-  });
+    $container.children(".transaction-code-item").each(function () {
+        let existingCode = parseInt($(this).find('[data-api-input="code-number"]').text().trim(), 10);
+        if (newCode < existingCode) {
+            $(this).before($newItem);
+            inserted = true;
+            return false; // Break loop
+        }
+    });
 
-  if (!inserted) {
-      $container.append($newItem); // Append if it's the highest number
-  }
+    if (!inserted) {
+        $container.append($newItem); // Append if it's the highest number
+    }
 }
 
 // Funciton to create new transaction code
@@ -234,7 +234,7 @@ function setupEditTransactionHandler() {
         let transactionCode = $transactionItem.find('[data-api-input="code-number"]').text().trim();
         let transactionTitle = $transactionItem.find('[data-api-input="code-title"]').text().trim();
         let transactionDescription = $transactionItem.find('[data-api-input="code-description"]').text().trim();
-        let transactionType = $transactionItem.find('[data-api-input="type"]').attr("data-raw-type").trim(); // 🔥 FIX: Get raw type
+        let transactionType = $transactionItem.find('[data-api-input="type"]').attr("data-raw-type").trim();
         let transactionLinkedExpense = $transactionItem.find('[data-api-input="linked_expense"]').text().trim();
 
         // Debugging log
@@ -312,18 +312,15 @@ function setupEditTransactionHandler() {
                 alert("Transaction Code Updated Successfully!");
                 $('.modal__block').hide(); // Hide modal
 
-                // Find and update the UI with new values
+                // Remove the old transaction from the list
                 let $updatedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
-                $updatedItem.attr("data-code", response.code);
-                $updatedItem.attr("data-title", response.title);
-                $updatedItem.attr("data-description", response.description);
-                $updatedItem.attr("data-type", response.type);
-                $updatedItem.attr("data-linked-expense", response.linked_expense || "");
+                $updatedItem.remove();
 
-                $updatedItem.find(".transaction-code-item__code").text(response.code);
-                $updatedItem.find(".transaction-code-item__type").text(`[${response.type}]`); // 🔥 FIX: Re-wrap type in brackets
-                $updatedItem.find(".transaction-code-item__title").text(response.title);
-                $updatedItem.find(".transaction-code-item__description").text(response.description);
+                // Create new updated item
+                let $newItem = createTransactionCodeElement(response);
+
+                // 🔥 Insert in the correct sorted position
+                insertSortedTransactionCode($newItem);
 
                 // Ensure linked_expense is updated correctly
                 if (response.type === "payment" || response.type === "credit") {
