@@ -226,3 +226,60 @@ function setupFinanceChartTypeListener() {
         renderFinanceChart(selectedChartType, chartData);
     });
 }
+
+function populateFinanceTransactionsTable(response, transactionType) {
+    let tableBody = document.querySelector("#transactionsTable tbody");
+
+    if (!tableBody) {
+        console.error("Error: #transactionsTable not found in the DOM.");
+        return;
+    }
+
+    tableBody.innerHTML = ""; // Clear previous data
+
+    let transactions = [];
+
+    // Filter transactions based on the selected filter
+    if (transactionType === "noi") {
+        transactions = [...response.payments, ...response.expenses];
+    } else if (transactionType === "payments") {
+        transactions = [...response.payments];
+    } else if (transactionType === "expenses") {
+        transactions = [...response.expenses];
+    }
+
+    if (transactions.length === 0) {
+        let row = document.createElement("tr");
+        row.innerHTML = `
+            <td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">
+                No transactions to display
+            </td>
+        `;
+        tableBody.appendChild(row);
+        return;
+    }
+
+    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+
+    transactions.forEach(transaction => {
+        let row = document.createElement("tr");
+
+        let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
+        let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
+
+        // ✅ Ensure the correct description is used
+        let transactionDescription = transaction.description || "N/A";
+
+        row.innerHTML = `
+            <td>${formatFinanceDate(transaction.transaction_date)}</td>
+            <td>${transaction.display_name || "N/A"}</td>
+            <td>${transaction.street || "N/A"}</td>
+            <td>${transaction.unit_name || "N/A"}</td>
+            <td>${transactionTypeText}</td>
+            <td>${transactionDescription}</td> 
+            <td>${formattedAmount}</td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+}
