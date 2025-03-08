@@ -1,3 +1,4 @@
+//UPDATE
 let chartInstance = null; // Store chart instance globally
 
 document.addEventListener("DOMContentLoaded", function() {
