@@ -1,4 +1,4 @@
-//UPDATE
+//UPDATE FORMAT DATE
 let chartInstance = null; // Store chart instance globally
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -84,7 +84,7 @@ function updateQuickStats(response) {
 }
 
 // Function to format date to M/D/YY
-function formatDate(dateString) {
+function financeFormatDate(dateString) {
     let dateParts = dateString.split("-");
     let date = new Date(Date.UTC(
         parseInt(dateParts[0]), // Year
@@ -316,7 +316,7 @@ function populateTransactionsTable(response, transactionType) {
         }
 
         row.innerHTML = `
-            <td>${formatDate(transaction.transaction_date)}</td>
+            <td>${financeFormatDate(transaction.transaction_date)}</td>
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
