@@ -64,11 +64,12 @@ function fetchTransactions(type, target) {
 }
 
 function parseDateInEasternTime(input) {
-  if (input === null) return null;
-  // Append 'T00:00:00' to ensure it's treated as midnight in Eastern Time
-  // and add the Eastern Time Zone abbreviation (EST or EDT)
-  const easternTimeDateStr = input + 'T00:00:00-05:00'; // EST is UTC-5, EDT is UTC-4
-  return new Date(easternTimeDateStr);
+  if (!input) return null;
+  
+  // Interpret the date string as being in Eastern Time
+  const date = new Date(input + "T00:00:00Z"); // Treat as UTC to avoid shifting
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset()); // Normalize for UTC
+  return date;
 }
 
 function formatDate(input) {
