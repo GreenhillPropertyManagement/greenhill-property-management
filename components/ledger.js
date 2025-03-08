@@ -65,19 +65,35 @@ function fetchTransactions(type, target) {
 
 function parseDateInEasternTime(input) {
   if (!input) return null;
+
+  // Create a date object assuming it's in UTC
+  let date = new Date(input + "T00:00:00Z");
+
+  // Convert to Eastern Time manually
+  let estOffset = -5 * 60; // EST (UTC-5), adjust for EDT if necessary
+  let edtOffset = -4 * 60; // EDT (UTC-4) for daylight saving time
+
+  let isDST = new Date().getMonth() >= 2 && new Date().getMonth() <= 10; // Approximate DST months (March-Nov)
+  let offset = isDST ? edtOffset : estOffset;
+
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + offset);
   
-  // Interpret the date string as being in Eastern Time
-  const date = new Date(input + "T00:00:00Z"); // Treat as UTC to avoid shifting
-  date.setMinutes(date.getMinutes() + date.getTimezoneOffset()); // Normalize for UTC
   return date;
 }
 
-function formatDate(input) {
-  const date = parseDateInEasternTime(input);
+function formatDate(input, isRentCharge = false) {
+  let date = parseDateInEasternTime(input);
   if (!date) return "";
+
+  // Fix rent charges that were shifted to the last day of the previous month
+  if (isRentCharge && date.getDate() >= 28) {
+    date.setDate(1); // Move them to the first of the correct month
+  }
+
   const day = ("0" + date.getDate()).slice(-2);
   const month = ("0" + (date.getMonth() + 1)).slice(-2);
   const year = date.getFullYear().toString().substr(2, 2);
+  
   return `${month}/${day}/${year}`;
 }
 
@@ -105,14 +121,13 @@ function updateTable(data) {
   let previousYear = null;
 
   function formatCurrency(amount) {
-  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-}
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
 
-  // Function to add end-of-month balance row
   function addEndOfMonthRow(month, year, balance) {
     const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
     ];
 
     const displayMonth = monthNames[month];
@@ -133,12 +148,12 @@ function updateTable(data) {
   }
 
   data.forEach((item, index) => {
-    const itemDate = new Date(item.transaction_date + 'T00:00:00-05:00'); // EST timezone
-    const itemMonth = itemDate.getMonth();
-    const itemYear = itemDate.getFullYear();
+    const isRentCharge = item.type === "charge" && /monthly rent/i.test(item.description);
+    let formattedDate = formatDate(item.transaction_date, isRentCharge);
+
     runningBalance += item.amount;
 
-    if (previousMonth !== null && isNewMonth(previousMonth, itemDate)) {
+    if (previousMonth !== null && isNewMonth(previousMonth, new Date(formattedDate))) {
       addEndOfMonthRow(previousMonth, previousYear, runningBalance - item.amount);
     }
 
@@ -147,7 +162,7 @@ function updateTable(data) {
     const newRow = `
       <tr class="${chargeClass}" data-file-url="${fileUrl}">
         <td>${formatBillingPeriod(item.billing_period)}</td>
-        <td>${formatDate(item.transaction_date)}</td>
+        <td>${formattedDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description}</td>
         <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
@@ -157,12 +172,12 @@ function updateTable(data) {
     `;
     $(".styled-table tbody").append(newRow);
 
-    previousMonth = itemMonth;
-    previousYear = itemYear;
+    previousMonth = new Date(formattedDate).getMonth();
+    previousYear = new Date(formattedDate).getFullYear();
 
     const isLastItem = index === data.length - 1;
     if (isLastItem) {
-      addEndOfMonthRow(itemMonth, itemYear, runningBalance);
+      addEndOfMonthRow(previousMonth, previousYear, runningBalance);
     }
   });
 
@@ -174,7 +189,6 @@ function updateTable(data) {
     }
   });
 
-  // Add cursor style for charge rows
   $(".charge-row").css("cursor", "pointer");
 }
 
