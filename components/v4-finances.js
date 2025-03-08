@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initLandlordFinances(); // init finance component
     setupChartTypeListener(); // Allow users to change chart type dynamically
     loadRecentPayments(); // load in the recent payments
+    fetchStatements(); // fetch user's statements
     
 });
 
@@ -430,6 +431,41 @@ function loadRecentPayments() {
 function formatDate(dateString) {
     let date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+}
+
+function fetchStatements() {
+    $.ajax({
+
+        url: localStorage.baseUrl + "api:rpDXPv3x/v4_fetch_statements",
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        dataType: "json",
+        success: function (data) {
+            let container = $(".statements-container");
+            container.empty(); // Clear existing statements
+
+            data.forEach(statement => {
+                let statementItem = $(`
+                    <div class="statement-item" style="cursor: pointer;">
+                        <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67cbcd7bc256682d3525afb0_document.svg" loading="lazy" alt="" class="statement_icon">
+                        <div data="statement_title">${statement.statement_title}</div>
+                    </div>
+                `);
+
+                // Add click event to open the statement URL
+                statementItem.on("click", function () {
+                    window.open(statement.statment_url, "_blank");
+                });
+
+                container.append(statementItem);
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching statements:", error);
+        }
+    });
 }
 
 
