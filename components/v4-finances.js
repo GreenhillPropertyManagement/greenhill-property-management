@@ -1,4 +1,4 @@
-// UPDATED AXIS
+// UPDATED AXIS LINE AND BAR
 let chartFinanceInstance = null; // Store finance chart instance globally
 let latestFinanceApiResponse = null; // Store the latest API response
 
