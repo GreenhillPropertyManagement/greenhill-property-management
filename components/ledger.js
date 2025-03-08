@@ -66,29 +66,27 @@ function fetchTransactions(type, target) {
 function parseDateInEasternTime(input) {
   if (!input) return null;
 
-  // Create a date object assuming it's in UTC
-  let date = new Date(input + "T00:00:00Z");
+  // Create a date object assuming it's in local time (prevents shifting)
+  let date = new Date(input + "T00:00:00");
 
   // Convert to Eastern Time manually
-  let estOffset = -5 * 60; // EST (UTC-5), adjust for EDT if necessary
-  let edtOffset = -4 * 60; // EDT (UTC-4) for daylight saving time
+  let estOffset = -5 * 60; // EST (UTC-5)
+  let edtOffset = -4 * 60; // EDT (UTC-4, during daylight saving)
 
-  let isDST = new Date().getMonth() >= 2 && new Date().getMonth() <= 10; // Approximate DST months (March-Nov)
+  let jan = new Date(date.getFullYear(), 0, 1);
+  let jul = new Date(date.getFullYear(), 6, 1);
+  let dstOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+  let isDST = date.getTimezoneOffset() < dstOffset;
+
   let offset = isDST ? edtOffset : estOffset;
-
   date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + offset);
-  
+
   return date;
 }
 
-function formatDate(input, isRentCharge = false) {
-  let date = parseDateInEasternTime(input);
+function formatDate(input) {
+  const date = parseDateInEasternTime(input);
   if (!date) return "";
-
-  // Fix rent charges that were shifted to the last day of the previous month
-  if (isRentCharge && date.getDate() >= 28) {
-    date.setDate(1); // Move them to the first of the correct month
-  }
 
   const day = ("0" + date.getDate()).slice(-2);
   const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -129,7 +127,6 @@ function updateTable(data) {
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
-
     const displayMonth = monthNames[month];
     const displayYear = year;
 
@@ -148,8 +145,7 @@ function updateTable(data) {
   }
 
   data.forEach((item, index) => {
-    const isRentCharge = item.type === "charge" && /monthly rent/i.test(item.description);
-    let formattedDate = formatDate(item.transaction_date, isRentCharge);
+    let formattedDate = formatDate(item.transaction_date);
 
     runningBalance += item.amount;
 
@@ -181,7 +177,6 @@ function updateTable(data) {
     }
   });
 
-  // Add click event listener for charge rows
   $(".charge-row").on("click", function () {
     const fileUrl = $(this).data("file-url");
     if (fileUrl) {
