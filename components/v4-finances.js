@@ -1,3 +1,4 @@
+// UPDATED AXIS
 let chartFinanceInstance = null; // Store finance chart instance globally
 let latestFinanceApiResponse = null; // Store the latest API response
 
@@ -80,22 +81,12 @@ function updateFinanceQuickStats(response) {
     $('[data-api="noi"]').text(`$${noi.toLocaleString()}`);
 }
 
-function formatFinanceDate(dateString) {
-    let dateParts = dateString.split("-");
-    let date = new Date(Date.UTC(
-        parseInt(dateParts[0]), 
-        parseInt(dateParts[1]) - 1, 
-        parseInt(dateParts[2]) 
-    ));
-
-    if (isNaN(date)) return "";
-    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear().toString().slice(-2)}`;
-}
-
 function extractFinanceChartData(response, transactionType) {
     let labels = [];
     let paymentData = {};
     let expenseData = {};
+    let totalPayments = 0;
+    let totalExpenses = 0;
 
     let transactions = (transactionType === "noi") 
         ? [...response.payments, ...response.expenses] 
@@ -106,7 +97,7 @@ function extractFinanceChartData(response, transactionType) {
     transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
     transactions.forEach(item => {
-        let formattedDate = formatFinanceDate(item.transaction_date);
+        let formattedDate = item.transaction_date;
 
         if (!labels.includes(formattedDate)) {
             labels.push(formattedDate);
@@ -116,12 +107,20 @@ function extractFinanceChartData(response, transactionType) {
 
         if (item.type === "payment") {
             paymentData[formattedDate] += Math.abs(item.amount);
+            totalPayments += Math.abs(item.amount);
         } else {
-            expenseData[formattedDate] += item.amount;
+            expenseData[formattedDate] += Math.abs(item.amount);
+            totalExpenses += Math.abs(item.amount);
         }
     });
 
-    return { labels, paymentData: labels.map(date => paymentData[date] || 0), expenseData: labels.map(date => expenseData[date] || 0) };
+    return { 
+        labels, 
+        paymentData: labels.map(date => paymentData[date] || 0), 
+        expenseData: labels.map(date => expenseData[date] || 0),
+        totalPayments,
+        totalExpenses
+    };
 }
 
 function renderFinanceChart(chartType, chartData) {
@@ -134,67 +133,71 @@ function renderFinanceChart(chartType, chartData) {
         chartFinanceInstance.destroy();
     }
 
-    let datasetConfig = [
-        {
-            label: "Payments",
-            data: chartData.paymentData,
-            backgroundColor: "rgba(75, 192, 192, 0.5)",
-            borderColor: "rgba(75, 192, 192, 1)",
-            borderWidth: 1,
-            yAxisID: "y-axis-payments"
-        },
-        {
-            label: "Expenses",
-            data: chartData.expenseData,
-            backgroundColor: "rgba(255, 99, 132, 0.5)",
-            borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            yAxisID: chartType === "pie" ? "y-axis-payments" : "y-axis-expenses"
-        }
-    ];
+    let datasetConfig, optionsConfig;
 
-    let optionsConfig = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                labels: {
-                    usePointStyle: true
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(tooltipItem) {
-                        return `$${tooltipItem.raw.toLocaleString()}`;
+    if (chartType === "pie") {
+        datasetConfig = [{
+            label: "Transactions",
+            data: [chartData.totalPayments, chartData.totalExpenses],
+            backgroundColor: ["rgba(75, 192, 192, 0.7)", "rgba(255, 99, 132, 0.7)"],
+            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
+            borderWidth: 1
+        }];
+        optionsConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        generateLabels: function(chart) {
+                            return [
+                                { text: "Payments", fillStyle: "rgba(75, 192, 192, 0.7)" },
+                                { text: "Expenses", fillStyle: "rgba(255, 99, 132, 0.7)" }
+                            ];
+                        }
                     }
                 }
             }
-        }
-    };
-
-    if (chartType !== "pie") {
-        optionsConfig.scales = {
-            "y-axis-payments": {
-                type: "linear",
-                position: "left",
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return "$" + value.toLocaleString();
-                    }
-                }
+        };
+    } else {
+        datasetConfig = [
+            {
+                label: "Payments",
+                data: chartData.paymentData,
+                backgroundColor: "rgba(75, 192, 192, 0.5)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+                yAxisID: "y-axis-payments"
             },
-            "y-axis-expenses": {
-                type: "linear",
-                position: "right",
-                beginAtZero: true,
-                grid: {
-                    drawOnChartArea: false
+            {
+                label: "Expenses",
+                data: chartData.expenseData,
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1,
+                yAxisID: "y-axis-expenses"
+            }
+        ];
+        optionsConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                "y-axis-payments": {
+                    type: "linear",
+                    position: "left",
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return "$" + value.toLocaleString(); }
+                    }
                 },
-                ticks: {
-                    callback: function(value) {
-                        return "$" + value.toLocaleString();
+                "y-axis-expenses": {
+                    type: "linear",
+                    position: "right",
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                        callback: function(value) { return "$" + value.toLocaleString(); }
                     }
                 }
             }
@@ -215,10 +218,7 @@ function setupFinanceChartTypeListener() {
     document.getElementById("graph_type-2").addEventListener("change", function() {
         let selectedChartType = this.value;
 
-        if (!latestFinanceApiResponse) {
-            console.warn("No API response available. Submit the form first.");
-            return;
-        }
+        if (!latestFinanceApiResponse) return;
 
         let transactionType = document.querySelector('[form-input="transaction_type"]').value || "noi";
         let chartData = extractFinanceChartData(latestFinanceApiResponse, transactionType);
