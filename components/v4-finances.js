@@ -1,4 +1,5 @@
-// UPDATED AXIS LINE AND BAR AND PIE
+// UPDATED CODE
+
 let chartFinanceInstance = null; // Store finance chart instance globally
 let latestFinanceApiResponse = null; // Store the latest API response
 
@@ -43,20 +44,14 @@ function initFinanceComponent() {
             dataType: "json",
             success: function(response) {
                 console.log("Finance API Response:", response);
-                latestFinanceApiResponse = response; // Store response globally for quick updates
+                latestFinanceApiResponse = response;
 
-                // Extract graph_type and transaction_type
-                let graphType = formData.graph_type || "bar"; // Default to bar
-                let transactionType = formData.transaction_type || "noi"; // Default to NOI
+                let graphType = formData.graph_type || "bar"; 
+                let transactionType = formData.transaction_type || "noi";
                 let chartData = extractFinanceChartData(response, transactionType);
 
-                // Render Chart
                 renderFinanceChart(graphType, chartData);
-
-                // Update quick stats
                 updateFinanceQuickStats(response);
-
-                // Populate Transactions Table
                 populateFinanceTransactionsTable(response, transactionType);
             },
             error: function(xhr, status, error) {
@@ -64,63 +59,11 @@ function initFinanceComponent() {
                 alert('Something went wrong, please try again.');
             },
             complete: function() {
-                loader.hide(); // Hide loader
-                submitButton.prop("disabled", false); // Re-enable submit button
+                loader.hide(); 
+                submitButton.prop("disabled", false);
             }
         });
     });
-}
-
-function updateFinanceQuickStats(response) {
-    const totalRentCollected = response.total_rent_collected || 0;
-    const totalExpenses = response.total_expenses || 0;
-    const noi = response.noi || 0;
-
-    $('[data-api="total_rent_collected"]').text(`$${totalRentCollected.toLocaleString()}`);
-    $('[data-api="total_expenses"]').text(`$${totalExpenses.toLocaleString()}`);
-    $('[data-api="noi"]').text(`$${noi.toLocaleString()}`);
-}
-
-function extractFinanceChartData(response, transactionType) {
-    let labels = [];
-    let paymentData = {};
-    let expenseData = {};
-    let totalPayments = 0;
-    let totalExpenses = 0;
-
-    let transactions = (transactionType === "noi") 
-        ? [...response.payments, ...response.expenses] 
-        : (transactionType === "payments") 
-        ? response.payments 
-        : response.expenses;
-
-    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
-
-    transactions.forEach(item => {
-        let formattedDate = item.transaction_date;
-
-        if (!labels.includes(formattedDate)) {
-            labels.push(formattedDate);
-            paymentData[formattedDate] = 0;
-            expenseData[formattedDate] = 0;
-        }
-
-        if (item.type === "payment") {
-            paymentData[formattedDate] += Math.abs(item.amount);
-            totalPayments += Math.abs(item.amount);
-        } else {
-            expenseData[formattedDate] += Math.abs(item.amount);
-            totalExpenses += Math.abs(item.amount);
-        }
-    });
-
-    return { 
-        labels, 
-        paymentData: labels.map(date => paymentData[date] || 0), 
-        expenseData: labels.map(date => expenseData[date] || 0),
-        totalPayments,
-        totalExpenses
-    };
 }
 
 function renderFinanceChart(chartType, chartData) {
@@ -133,42 +76,25 @@ function renderFinanceChart(chartType, chartData) {
         chartFinanceInstance.destroy();
     }
 
-    let datasetConfig, optionsConfig;
-
+    let datasets = [];
     if (chartType === "pie") {
-        datasetConfig = [{
-            label: "Transactions",
-            data: [chartData.totalPayments, chartData.totalExpenses],
-            backgroundColor: ["rgba(75, 192, 192, 0.7)", "rgba(255, 99, 132, 0.7)"],
-            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
-            borderWidth: 1
-        }];
-        optionsConfig = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        generateLabels: function(chart) {
-                            return [
-                                { text: "Payments", fillStyle: "rgba(75, 192, 192, 0.7)" },
-                                { text: "Expenses", fillStyle: "rgba(255, 99, 132, 0.7)" }
-                            ];
-                        }
-                    }
-                }
-            }
-        };
+        datasets.push({
+            data: [
+                chartData.paymentData.reduce((sum, val) => sum + val, 0), 
+                chartData.expenseData.reduce((sum, val) => sum + val, 0)
+            ],
+            backgroundColor: ["rgba(75, 192, 192, 0.5)", "rgba(255, 99, 132, 0.5)"],
+            borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"]
+        });
     } else {
-        datasetConfig = [
+        datasets.push(
             {
                 label: "Payments",
                 data: chartData.paymentData,
                 backgroundColor: "rgba(75, 192, 192, 0.5)",
                 borderColor: "rgba(75, 192, 192, 1)",
                 borderWidth: 1,
-                yAxisID: "y-axis-payments"
+                yAxisID: "y"
             },
             {
                 label: "Expenses",
@@ -176,70 +102,46 @@ function renderFinanceChart(chartType, chartData) {
                 backgroundColor: "rgba(255, 99, 132, 0.5)",
                 borderColor: "rgba(255, 99, 132, 1)",
                 borderWidth: 1,
-                yAxisID: "y-axis-expenses"
+                yAxisID: "y1"
             }
-        ];
-        optionsConfig = {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                "y-axis-payments": {
-                    type: "linear",
-                    position: "left",
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) { return "$" + value.toLocaleString(); }
-                    }
-                },
-                "y-axis-expenses": {
-                    type: "linear",
-                    position: "right",
-                    beginAtZero: true,
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                        callback: function(value) { return "$" + value.toLocaleString(); }
-                    }
-                }
-            }
-        };
+        );
     }
 
     chartFinanceInstance = new Chart(ctx, {
         type: chartType,
         data: {
             labels: chartType === "pie" ? ["Payments", "Expenses"] : chartData.labels,
-            datasets: datasetConfig
+            datasets: datasets
         },
-        options: optionsConfig
-    });
-}
-
-function setupFinanceChartTypeListener() {
-    document.getElementById("graph_type-2").addEventListener("change", function() {
-        let selectedChartType = this.value;
-
-        if (!latestFinanceApiResponse) return;
-
-        let transactionType = document.querySelector('[form-input="transaction_type"]').value || "noi";
-        let chartData = extractFinanceChartData(latestFinanceApiResponse, transactionType);
-
-        renderFinanceChart(selectedChartType, chartData);
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: chartType === "pie" ? {} : {
+                y: {
+                    type: "linear",
+                    position: "left",
+                },
+                y1: {
+                    type: "linear",
+                    position: "right",
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
     });
 }
 
 function populateFinanceTransactionsTable(response, transactionType) {
     let tableBody = document.querySelector("#transactionsTable tbody");
-
     if (!tableBody) {
         console.error("Error: #transactionsTable not found in the DOM.");
         return;
     }
-
-    tableBody.innerHTML = ""; // Clear previous data
+    tableBody.innerHTML = "";
 
     let transactions = [];
-
-    // Filter transactions based on the selected filter
     if (transactionType === "noi") {
         transactions = [...response.payments, ...response.expenses];
     } else if (transactionType === "payments") {
@@ -250,36 +152,24 @@ function populateFinanceTransactionsTable(response, transactionType) {
 
     if (transactions.length === 0) {
         let row = document.createElement("tr");
-        row.innerHTML = `
-            <td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">
-                No transactions to display
-            </td>
-        `;
+        row.innerHTML = `<td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">No transactions to display</td>`;
         tableBody.appendChild(row);
         return;
     }
 
     transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
-
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
-
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
-
-        // ✅ Ensure the correct description is used
         let transactionDescription = transaction.description || "N/A";
-
-        row.innerHTML = `
-            <td>${formatFinanceDate(transaction.transaction_date)}</td>
-            <td>${transaction.display_name || "N/A"}</td>
-            <td>${transaction.street || "N/A"}</td>
-            <td>${transaction.unit_name || "N/A"}</td>
-            <td>${transactionTypeText}</td>
-            <td>${transactionDescription}</td> 
-            <td>${formattedAmount}</td>
-        `;
-
+        row.innerHTML = `<td>${formatFinanceDate(transaction.transaction_date)}</td>
+                         <td>${transaction.display_name || "N/A"}</td>
+                         <td>${transaction.street || "N/A"}</td>
+                         <td>${transaction.unit_name || "N/A"}</td>
+                         <td>${transactionTypeText}</td>
+                         <td>${transactionDescription}</td>
+                         <td>${formattedAmount}</td>`;
         tableBody.appendChild(row);
     });
 }
