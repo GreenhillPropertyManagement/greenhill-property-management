@@ -523,6 +523,7 @@ function generateCustomReport() {
         url: localStorage.baseUrl +  'api:rpDXPv3x/v4_generate_report',
         type: 'POST',
         dataType: "json",
+        contentType: 'application/json',
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
         },
