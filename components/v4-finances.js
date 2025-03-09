@@ -451,7 +451,7 @@ function fetchStatements() {
                 let statementItem = $(`
                     <div class="statement-item" style="cursor: pointer;">
                         <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/67cbcd7bc256682d3525afb0_document.svg" loading="lazy" alt="" class="statement_icon">
-                        <div data="statement_title">${statement.statement_title}</div>
+                        <div data="statement_title">${statement.display_title}</div>
                     </div>
                 `);
 
