@@ -513,16 +513,19 @@ function generateCustomReport() {
         fileName = `${dateRange}_report`;
     }
 
+    // Explicitly structured payload
+    const payload = {
+        transactions: transactions,
+        file_name: fileName
+    };
+
     $.ajax({
         url: localStorage.baseUrl +  'api:rpDXPv3x/v4_generate_report',
         type: 'POST',
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
         },
-        data: JSON.stringify({
-            transactions: transactions,
-            file_name: fileName
-        }),
+        data: JSON.stringify(payload),
         success: function(response) {
             console.log('Report successfully generated:', response);
             alert('Report generated successfully!');
