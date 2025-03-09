@@ -2,10 +2,16 @@
 let chartInstance = null; // Store chart instance globally
 
 document.addEventListener("DOMContentLoaded", function() {
+
     initLandlordFinances(); // init finance component
     setupChartTypeListener(); // Allow users to change chart type dynamically
     loadRecentPayments(); // load in the recent payments
     fetchStatements(); // fetch user's statements
+
+    // Event listener to trigger report generation
+    $('#download-report').off('click').on('click', function() {
+    generateCustomReport();
+    });
     
 });
 
@@ -465,6 +471,63 @@ function fetchStatements() {
         },
         error: function (xhr, status, error) {
             console.error("Error fetching statements:", error);
+        }
+    });
+}
+
+function generateCustomReport() {
+    let transactions = [];
+
+    $('#transactionsTable tbody tr').each(function() {
+        const cols = $(this).find('td');
+
+        let transaction = {
+            transaction_date: cols.eq(0).text(),
+            display_name: cols.eq(1).text(),
+            street: cols.eq(2).text(),
+            unit_name: cols.eq(3).text(),
+            type: cols.eq(4).text().toLowerCase(),
+            description: cols.eq(5).text(),
+            amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
+        };
+
+        transactions.push(transaction);
+    });
+
+    let dateRange = $('#date_range').val();
+    let fileName = '';
+
+    if (dateRange === 'custom') {
+        let startDate = $('#start_date').val();
+        let endDate = $('#end_date').val();
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            return;
+        }
+
+        fileName = `${startDate}_${endDate}_report`;
+    } else {
+        fileName = `${dateRange}_report`;
+    }
+
+    $.ajax({
+        url: localStorage.baseUrl +  'api:rpDXPv3x/v4_generate_report',
+        type: 'POST',
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: JSON.stringify({
+            transactions: transactions,
+            file_name: fileName
+        }),
+        success: function(response) {
+            console.log('Report successfully generated:', response);
+            alert('Report generated successfully!');
+        },
+        error: function(xhr, status, error) {
+            console.error('Error generating report:', error);
+            alert('Error generating report. Please try again.');
         }
     });
 }
