@@ -522,6 +522,7 @@ function generateCustomReport() {
     $.ajax({
         url: localStorage.baseUrl +  'api:rpDXPv3x/v4_generate_report',
         type: 'POST',
+        dataType: "json",
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
         },
