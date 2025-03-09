@@ -509,12 +509,12 @@ function generateCustomReport() {
         }
 
         fileName = `${startDate}_${endDate}_report`;
-    } else {
+        } else {
         fileName = `${dateRange}_report`;
     }
 
     // Explicitly structured payload
-    const payload = {
+    let requestData = {
         transactions: transactions,
         file_name: fileName
     };
@@ -526,10 +526,7 @@ function generateCustomReport() {
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
         },
-        data: JSON.stringify({
-            transactions: transactions,  // explicitly declared
-            file_name: fileName          // explicitly declared
-        }),
+        data: JSON.stringify(requestData),
         success: function(response) {
             console.log('Report successfully generated:', response);
             alert('Report generated successfully!');
