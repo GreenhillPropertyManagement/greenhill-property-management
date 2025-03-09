@@ -476,6 +476,8 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
+
+    $('.loader').css('display','flex'); //show loader
     let transactions = [];
 
     $('#transactionsTable tbody tr').each(function() {
@@ -524,6 +526,7 @@ function generateCustomReport() {
         success: function(response) {
             console.log('Report successfully generated:', response);
             alert('Report generated successfully!');
+            $('.loader').hide();
         },
         error: function(xhr, status, error) {
             console.error('Error generating report:', error);
