@@ -525,7 +525,10 @@ function generateCustomReport() {
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
         },
-        data: JSON.stringify(payload),
+        data: JSON.stringify({
+            transactions: transactions,  // explicitly declared
+            file_name: fileName          // explicitly declared
+        }),
         success: function(response) {
             console.log('Report successfully generated:', response);
             alert('Report generated successfully!');
