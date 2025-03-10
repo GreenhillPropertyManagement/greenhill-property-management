@@ -477,11 +477,11 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
-
-    $('.loader').css('display','flex'); //show loader
+    
+    $('.loader').css('display', 'flex'); // Show loader
     let transactions = [];
 
-    $('#transactionsTable tbody tr').each(function() {
+    $('#transactionsTable tbody tr').each(function () {
         const cols = $(this).find('td');
 
         let transaction = {
@@ -497,6 +497,13 @@ function generateCustomReport() {
         transactions.push(transaction);
     });
 
+    // Extract the first and last transaction dates
+    let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
+    let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
+
+    // Get the selected sector text instead of the value
+    let sector = $('#sector option:selected').text().trim() || 'Report';
+
     let dateRange = $('#date_range').val();
     let fileName = '';
 
@@ -506,12 +513,17 @@ function generateCustomReport() {
 
         if (!startDate || !endDate) {
             alert('Please select both start and end dates.');
+            $('.loader').hide();
             return;
         }
 
-        fileName = `${startDate}_${endDate}_report`;
+        fileName = `Custom ${startDate}-${endDate}`;
+    } else {
+        if (firstDate && lastDate) {
+            fileName = `${sector}: ${firstDate}-${lastDate}`;
         } else {
-        fileName = `${dateRange}_report`;
+            fileName = `${sector} Report`;
+        }
     }
 
     // Explicitly structured payload
@@ -521,7 +533,7 @@ function generateCustomReport() {
     };
 
     $.ajax({
-        url: localStorage.baseUrl +  'api:rpDXPv3x/v4_generate_report',
+        url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
         type: 'POST',
         dataType: "json",
         contentType: 'application/json',
@@ -529,15 +541,12 @@ function generateCustomReport() {
             "Authorization": "Bearer " + localStorage.authToken
         },
         data: JSON.stringify(requestData),
-        success: function(response) {
-
-            let statement_id = response.statement_id; //store the statement id
-            alert("Generating your report. Please do not refresh the page. ")
+        success: function (response) {
+            let statement_id = response.statement_id; // Store the statement ID
+            alert("Generating your report. Please do not refresh the page.");
             fetchCustomReport(statement_id);
-            
         },
-        error: function(xhr, status, error) {
-
+        error: function (xhr, status, error) {
             console.error('Error generating report:', error);
             alert('Error generating report. Please try again.');
             $('.loader').hide();
