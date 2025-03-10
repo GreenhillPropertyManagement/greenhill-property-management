@@ -529,13 +529,43 @@ function generateCustomReport() {
         },
         data: JSON.stringify(requestData),
         success: function(response) {
-            console.log('Report successfully generated:', response);
-            alert('Report generated successfully!');
-            $('.loader').hide();
+
+            let statement_id = response.statement_id; //store the statement id
+            fetchCustomReport(statement_id);
+            
         },
         error: function(xhr, status, error) {
+
             console.error('Error generating report:', error);
             alert('Error generating report. Please try again.');
+            $('.loader').hide();
         }
     });
+}
+
+function fetchCustomReport(statementId) {
+
+    let interval = setInterval(() => {
+        $.ajax({
+            url: localStorage.baseUrl + "api:rpDXPv3x/v4_get_custom_report",
+            type: 'GET',
+            headers: {
+                "Authorization": "Bearer " + localStorage.authToken
+            },
+            data: {
+                statement_id: statementId
+            },
+            success: function(response) {
+                if (response.status === 'ready') {
+                    clearInterval(interval);
+                    window.open(response.statement_url, '_blank'); // automatic download
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error checking report status:', error);
+                $('.loader').hide();
+            }
+        });
+    }, 5000); // Poll every 5 seconds
+    
 }
