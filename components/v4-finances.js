@@ -571,6 +571,6 @@ function fetchCustomReport(statementId) {
                 $('.loader').hide();
             }
         });
-    }, 5000); // Poll every 5 seconds
+    }, 3000); // Poll every 5 seconds
 
 }
