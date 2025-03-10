@@ -477,7 +477,6 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
-    
     $('.loader').css('display', 'flex'); // Show loader
     let transactions = [];
 
@@ -501,13 +500,18 @@ function generateCustomReport() {
     let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
     let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
 
-    // Get the selected sector text instead of the value
+    // Get the selected sector text
     let sector = $('#sector option:selected').text().trim() || 'Report';
 
-    let dateRange = $('#date_range').val();
+    // Get the selected report type text (NOI, Payments, Expenses)
+    let reportType = $('#type option:selected').text().trim() || 'General';
+
+    // Get the selected date range text (Last 3 months, Quarter to date, etc.)
+    let dateRangeText = $('#date_range option:selected').text().trim() || 'Custom';
+
     let fileName = '';
 
-    if (dateRange === 'custom') {
+    if (dateRangeText.toLowerCase() === 'custom') {
         let startDate = $('#start_date').val();
         let endDate = $('#end_date').val();
 
@@ -520,7 +524,7 @@ function generateCustomReport() {
         fileName = `Custom ${startDate}-${endDate}`;
     } else {
         if (firstDate && lastDate) {
-            fileName = `${sector}: ${firstDate}-${lastDate}`;
+            fileName = `${sector} ${dateRangeText}: ${firstDate}-${lastDate}`;
         } else {
             fileName = `${sector} Report`;
         }
@@ -529,7 +533,8 @@ function generateCustomReport() {
     // Explicitly structured payload
     let requestData = {
         transactions: transactions,
-        file_name: fileName
+        file_name: fileName,
+        report_type: reportType // ✅ Uses the selected text (NOI, Payments, Expenses)
     };
 
     $.ajax({
