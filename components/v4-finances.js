@@ -1,5 +1,6 @@
 
 let chartInstance = null; // Store chart instance globally
+let latestApiResponse = null; // Declare it globally before using
 
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -567,5 +568,5 @@ function fetchCustomReport(statementId) {
             }
         });
     }, 5000); // Poll every 5 seconds
-    
+
 }
