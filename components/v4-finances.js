@@ -562,7 +562,7 @@ function fetchCustomReport(statementId) {
                 if (response.download_url !== null) {
 
                     clearInterval(interval);
-                    window.open(response.download_url, '_blank'); // automatic download
+                    window.open(response, '_blank'); // automatic download
                     $('.loader').hide(); // hide loader
                 }
             },
