@@ -464,7 +464,7 @@ function fetchStatements() {
 
                 // Add click event to open the statement URL
                 statementItem.on("click", function () {
-                    window.open(statement.statment_url, "_blank");
+                    window.open(statement.download_url, "_blank");
                 });
 
                 container.append(statementItem);
@@ -558,9 +558,9 @@ function fetchCustomReport(statementId) {
                 statement_id: statementId
             },
             success: function(response) {
-                if (response.status === 'ready') {
+                if (response.download_url !== "pending") {
                     clearInterval(interval);
-                    window.open(response.statement_url, '_blank'); // automatic download
+                    window.open(response.download_url, '_blank'); // automatic download
                 }
             },
             error: function(xhr, status, error) {
