@@ -526,7 +526,7 @@ function generateCustomReport() {
         if (firstDate && lastDate) {
             fileName = `${sector} ${dateRangeText}: ${firstDate}-${lastDate}`;
         } else {
-            fileName = `${sector} Report`;
+            fileName = `${sector} ${dateRangeText}`;
         }
     }
 
