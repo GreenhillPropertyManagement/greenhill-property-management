@@ -532,7 +532,7 @@ function generateCustomReport() {
         success: function(response) {
 
             let statement_id = response.statement_id; //store the statement id
-            alert("Generating your report. You will be redirected shortly.")
+            alert("Generating your report. Your download will start shortly.")
             fetchCustomReport(statement_id);
             
         },
@@ -547,7 +547,17 @@ function generateCustomReport() {
 
 function fetchCustomReport(statementId) {
 
+    let attempts = 0; // Track the number of attempts
+    let maxAttempts = 5; // Maximum retries
+
     let interval = setInterval(() => {
+        if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            $('.loader').hide(); // Hide loader
+            alert("Report generation is taking longer than expected. Please try again later.");
+            return;
+        }
+        
         $.ajax({
             url: localStorage.baseUrl + "api:rpDXPv3x/v4_get_custom_report",
             type: 'GET',
@@ -567,7 +577,8 @@ function fetchCustomReport(statementId) {
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error checking report status:', error);
+                clearInterval(interval);
+                alert("An error occurred while fetching the report. Please try again.");
                 $('.loader').hide();
             }
         });
