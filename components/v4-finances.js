@@ -559,7 +559,7 @@ function fetchCustomReport(statementId) {
             },
             success: function(response) {
 
-                if (response.download_url !== null) {
+                if (response !== null) {
 
                     clearInterval(interval);
                     window.open(response, '_blank'); // automatic download
