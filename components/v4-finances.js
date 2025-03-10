@@ -532,6 +532,7 @@ function generateCustomReport() {
         success: function(response) {
 
             let statement_id = response.statement_id; //store the statement id
+            alert("Generating your report. You will be redirected shortly.")
             fetchCustomReport(statement_id);
             
         },
