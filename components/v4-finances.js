@@ -532,7 +532,7 @@ function generateCustomReport() {
         success: function(response) {
 
             let statement_id = response.statement_id; //store the statement id
-            alert("Generating your report. Your download will start shortly.")
+            alert("Generating your report. Please do not refresh the page. ")
             fetchCustomReport(statement_id);
             
         },
@@ -574,6 +574,8 @@ function fetchCustomReport(statementId) {
                     clearInterval(interval);
                     window.open(response, '_blank'); // automatic download
                     $('.loader').hide(); // hide loader
+                } else {
+                    attempts++; // Increment attempts only when the response is not ready
                 }
             },
             error: function(xhr, status, error) {
