@@ -501,13 +501,13 @@ function generateCustomReport() {
     let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
 
     // Get the selected sector text
-    let sector = $('#sector option:selected').text().trim() || 'Report';
+    let sector = $('#sector option:selected').text().trim();
 
     // Get the selected report type text (NOI, Payments, Expenses)
-    let reportType = $('#type option:selected').text().trim() || 'General';
+    let reportType = $('#type option:selected').text().trim();
 
     // Get the selected date range text (Last 3 months, Quarter to date, etc.)
-    let dateRangeText = $('#date_range option:selected').text().trim() || 'Custom';
+    let dateRangeText = $('#date_range option:selected').text().trim();
 
     let fileName = '';
 
@@ -521,20 +521,18 @@ function generateCustomReport() {
             return;
         }
 
-        fileName = `Custom ${startDate}-${endDate}`;
+        fileName = `Custom ${startDate} - ${endDate}`;
     } else {
-        if (firstDate && lastDate) {
-            fileName = `${sector} ${dateRangeText}: ${firstDate}-${lastDate}`;
-        } else {
-            fileName = `${sector} ${dateRangeText}`;
-        }
+        fileName = firstDate && lastDate
+            ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
+            : `${sector} ${dateRangeText}`;
     }
 
     // Explicitly structured payload
     let requestData = {
         transactions: transactions,
         file_name: fileName,
-        report_type: reportType // ✅ Uses the selected text (NOI, Payments, Expenses)
+        report_type: reportType // Uses the selected text (NOI, Payments, Expenses)
     };
 
     $.ajax({
