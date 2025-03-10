@@ -559,8 +559,8 @@ function fetchCustomReport(statementId) {
             },
             success: function(response) {
 
-                if (response.download_url !== "pending") {
-                    
+                if (response.download_url.trim() !== "pending") {
+
                     clearInterval(interval);
                     window.open(response.download_url, '_blank'); // automatic download
                     $('.loader').hide(); // hide loader
