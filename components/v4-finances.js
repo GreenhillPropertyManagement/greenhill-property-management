@@ -558,8 +558,9 @@ function fetchCustomReport(statementId) {
                 statement_id: statementId
             },
             success: function(response) {
-                
+
                 if (response.download_url !== "pending") {
+                    
                     clearInterval(interval);
                     window.open(response.download_url, '_blank'); // automatic download
                     $('.loader').hide(); // hide loader
