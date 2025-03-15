@@ -437,8 +437,15 @@ function loadRecentPayments() {
 }
 
 function formatTransDate(dateString) {
-    let date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    let dateParts = dateString.split("-");
+    let date = new Date(Date.UTC(
+        parseInt(dateParts[0]), // Year
+        parseInt(dateParts[1]) - 1, // Month (0-based)
+        parseInt(dateParts[2]) // Day
+    ));
+
+    if (isNaN(date)) return ""; // Ensure date is valid
+    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear().toString().slice(-2)}`;
 }
 
 function fetchStatements() {
