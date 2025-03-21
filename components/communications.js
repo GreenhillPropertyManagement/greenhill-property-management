@@ -114,7 +114,21 @@ function loadConvos(targetUser, type) {
 
                   /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
                   if (convo.attributes.convo_type === "peer_to_peer") {
-                      convoItem.find("[data-convo='recipient-info']").text(convo.attributes.recipient_display_name);
+                    
+                      
+                    const participants = convo.attributes.convo_participants;
+                    const myUserId = localStorage.userId;
+                    
+                    let recipientInfo = "[Unknown]";
+                    if (participants && Array.isArray(participants)) {
+                      const recipient = participants.find((p) => p.id.toString() !== myUserId.toString());
+                      if (recipient) {
+                        recipientInfo = recipient.info;
+                      }
+                    }
+                    
+                    convoItem.find("[data-convo='recipient-info']").text(recipientInfo);
+
                       if (loadType === "self" && convo.attributes.convo_status === "updated" && lastMessageSender !== activeUserId) {
                           convoItem.find("[data-convo='new-message-badge']").show();
                           convoItem.addClass("new-message");
