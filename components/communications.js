@@ -114,6 +114,7 @@ function loadConvos(targetUser, type) {
 
                   /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
                   if (convo.attributes.convo_type === "peer_to_peer") {
+                      convoItem.find("[data-convo='recipient-info']").text(convo.attributes.recipient_display_name);
                       if (loadType === "self" && convo.attributes.convo_status === "updated" && lastMessageSender !== activeUserId) {
                           convoItem.find("[data-convo='new-message-badge']").show();
                           convoItem.addClass("new-message");
