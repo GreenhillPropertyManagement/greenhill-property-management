@@ -85,137 +85,134 @@ function loadConvos(targetUser, type) {
   $(".loader").css("display", "flex");
 
   $.ajax({
-      url: localStorage.baseUrl + "api:LEAuXkTc/fetch_user_conversations",
-      method: "GET",
-      dataType: "json",
-      headers: {
-          Authorization: "Bearer " + localStorage.authToken,
-      },
-      data: { user_uuid: targetUser },
-      success: function (response) {
-          console.log("Loading conversations for:", targetUser);
+    url: localStorage.baseUrl + "api:LEAuXkTc/fetch_user_conversations",
+    method: "GET",
+    dataType: "json",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: { user_uuid: targetUser },
+    success: function (response) {
+      console.log("Loading conversations for:", targetUser);
 
-          let seenConvos = new Set();
-          let sampleConvo = $(".convo-item-sample-wrapper").find("[comm-sample-item='convo-item']");
+      let seenConvos = new Set();
+      let sampleConvo = $(".convo-item-sample-wrapper").find("[comm-sample-item='convo-item']");
 
-          response.forEach((convo) => {
-              if (!seenConvos.has(convo.conversation_sid)) {
-                  seenConvos.add(convo.conversation_sid);
+      response.forEach((convo) => {
+        if (!seenConvos.has(convo.conversation_sid)) {
+          seenConvos.add(convo.conversation_sid);
 
-                  let convoItem = $(sampleConvo).clone().appendTo(convosContainer);
-                  convoItem.attr("id", convo.conversation_sid);
-                  convoItem.find("[data-convo='convo-title']").text(convo.friendly_name);
-                  convoItem.find("[data-convo='timestamp']").text(formatDateToCustomFormat(convo.attributes.last_updated));
+          let convoItem = $(sampleConvo).clone().appendTo(convosContainer);
+          convoItem.attr("id", convo.conversation_sid);
+          convoItem.find("[data-convo='convo-title']").text(convo.friendly_name);
+          convoItem.find("[data-convo='timestamp']").text(formatDateToCustomFormat(convo.attributes.last_updated));
 
-                  const lastMessageSender = convo.attributes.last_message_sender ? convo.attributes.last_message_sender.toString() : "";
-                  let activeUserId = targetUser;
+          const lastMessageSender = convo.attributes.last_message_sender ? convo.attributes.last_message_sender.toString() : "";
+          let activeUserId = targetUser;
 
-                  convoItem.removeClass("new-message");
+          convoItem.removeClass("new-message");
 
-                  /* ---------- Logic for Peer-to-Peer Convo Types -------------*/
-                  if (convo.attributes.convo_type === "peer_to_peer") {
-                    
-                      
-                    const participants = convo.attributes.convo_participants;
-                    const myUserId = localStorage.userId;
-                    
-                    let recipientInfo = "[Unknown]";
-                    if (participants && Array.isArray(participants)) {
-                      const recipient = participants.find((p) => p.id.toString() !== myUserId.toString());
-                      if (recipient) {
-                        recipientInfo = recipient.info;
-                      }
-                    }
-                    
-                    convoItem.find("[data-convo='recipient-info']").text(recipientInfo);
+          /* ---------- Peer-to-Peer Conversation ---------- */
+          if (convo.attributes.convo_type === "peer_to_peer") {
+            const participants = convo.attributes.convo_participants;
+            let recipientInfo = "[Unknown]";
 
-                      if (loadType === "self" && convo.attributes.convo_status === "updated" && lastMessageSender !== activeUserId) {
-                          convoItem.find("[data-convo='new-message-badge']").show();
-                          convoItem.addClass("new-message");
-                      } else {
-                          convoItem.find("[data-convo='new-message-badge']").hide();
-                      }
-
-                      convoItem.click(function () {
-                          $('.chat__messages-wrapper').show();
-                          let convoSid = $(this).attr("id");
-                          localStorage.setItem("activeConvo", convoSid);
-
-                          $("[data-convo='chat-container']").empty();
-                          $(".loader").css("display", "flex");
-                          loadConvoMessages(convoSid);
-                          $(".chat__input-wrapper").css("display", "flex");
-
-                          // ✅ Update convo status and remove new-message
-                          if (convo.attributes.last_message_sender !== activeUserId && loadType === "self") {
-                              updateConvoStatus(convoSid);
-                              convoItem.removeClass("new-message");
-                              convoItem.find("[data-convo='new-message-badge']").hide();
-                              updateConvoCounter(); // ✅ Re-run counter update
-                          }
-                      });
-                  }
-
-                  /* ------------- Logic for Property Blast Convo Types ---------------*/
-                  if (convo.attributes.convo_type === "blast") {
-                      convoItem.find("[data-convo='recipient-info']").text("Broadcast: " + convo.attributes.property);
-                      convoItem.find("[data-convo='blast-icon']").show();
-
-                      if (loadType === "self" && activeUserId !== convo.attributes.last_message_sender) {
-                          const participants = convo.attributes.convo_participants;
-                          let hasUnreadMessage = participants.some(participant => participant.user === activeUserId && !participant.message_seen);
-
-                          if (hasUnreadMessage) {
-                              convoItem.find("[data-convo='new-message-badge']").show();
-                              convoItem.addClass("new-message");
-                          } else {
-                              convoItem.find("[data-convo='new-message-badge']").hide();
-                          }
-                      } else {
-                          convoItem.find("[data-convo='new-message-badge']").hide();
-                      }
-
-                      convoItem.click(function () {
-                          $('.chat__messages-wrapper').show();
-                          let convoSid = $(this).attr("id");
-                          localStorage.setItem("activeConvo", convoSid);
-
-                          if (localStorage.userRole !== "Admin") {
-                              $(".chat__input-wrapper").hide();
-                          } else {
-                              $(".chat__input-wrapper").css("display", "flex");
-                          }
-
-                          $("[data-convo='chat-container']").empty();
-                          $(".loader").css("display", "flex");
-                          loadConvoMessages(convoSid);
-                          convoItem.removeClass("new-message");
-                          convoItem.find("[data-convo='new-message-badge']").hide();
-                          updateConvoCounter(); // ✅ Update counter after clicking
-
-                          if (loadType === "self" && activeUserId !== convo.attributes.last_message_sender) {
-                              updateBroadcastMessageViewers(convoSid, activeUserId);
-                          }
-                      });
-                  } else {
-                      convoItem.find("[data-convo='blast-icon']").hide();
-                  }
+            if (participants && Array.isArray(participants)) {
+              // Show the person they were chatting with (not themselves)
+              const recipient = participants.find((p) => p.id.toString() !== targetUser.toString());
+              if (recipient) {
+                recipientInfo = recipient.info;
               }
-          });
+            }
 
-          console.log("Conversations Loaded. Running Counter...");
-      },
-      complete: function () {
-          console.log("AJAX completed, conversations should be loaded.");
-          $(".loader").hide();
-          $('.back-convo-button').click(function () {
-              $('.chat__messages-wrapper').hide();
-          });
-          updateConvoCounter(); // ✅ Ensure counter updates after conversations load
-      },
-      error: function (error) {
-          console.error("Error fetching conversations:", error);
-      },
+            convoItem.find("[data-convo='recipient-info']").text(recipientInfo);
+
+            if (loadType === "self" && convo.attributes.convo_status === "updated" && lastMessageSender !== activeUserId) {
+              convoItem.find("[data-convo='new-message-badge']").show();
+              convoItem.addClass("new-message");
+            } else {
+              convoItem.find("[data-convo='new-message-badge']").hide();
+            }
+
+            convoItem.click(function () {
+              $('.chat__messages-wrapper').show();
+              let convoSid = $(this).attr("id");
+              localStorage.setItem("activeConvo", convoSid);
+
+              $("[data-convo='chat-container']").empty();
+              $(".loader").css("display", "flex");
+              loadConvoMessages(convoSid);
+              $(".chat__input-wrapper").css("display", "flex");
+
+              if (convo.attributes.last_message_sender !== activeUserId && loadType === "self") {
+                updateConvoStatus(convoSid);
+                convoItem.removeClass("new-message");
+                convoItem.find("[data-convo='new-message-badge']").hide();
+                updateConvoCounter();
+              }
+            });
+          }
+
+          /* ---------- Property Blast Conversation ---------- */
+          if (convo.attributes.convo_type === "blast") {
+            convoItem.find("[data-convo='recipient-info']").text("Broadcast: " + convo.attributes.property);
+            convoItem.find("[data-convo='blast-icon']").show();
+
+            if (loadType === "self" && activeUserId !== convo.attributes.last_message_sender) {
+              const participants = convo.attributes.convo_participants;
+              let hasUnreadMessage = participants.some(participant => participant.user === activeUserId && !participant.message_seen);
+
+              if (hasUnreadMessage) {
+                convoItem.find("[data-convo='new-message-badge']").show();
+                convoItem.addClass("new-message");
+              } else {
+                convoItem.find("[data-convo='new-message-badge']").hide();
+              }
+            } else {
+              convoItem.find("[data-convo='new-message-badge']").hide();
+            }
+
+            convoItem.click(function () {
+              $('.chat__messages-wrapper').show();
+              let convoSid = $(this).attr("id");
+              localStorage.setItem("activeConvo", convoSid);
+
+              if (localStorage.userRole !== "Admin") {
+                $(".chat__input-wrapper").hide();
+              } else {
+                $(".chat__input-wrapper").css("display", "flex");
+              }
+
+              $("[data-convo='chat-container']").empty();
+              $(".loader").css("display", "flex");
+              loadConvoMessages(convoSid);
+              convoItem.removeClass("new-message");
+              convoItem.find("[data-convo='new-message-badge']").hide();
+              updateConvoCounter();
+
+              if (loadType === "self" && activeUserId !== convo.attributes.last_message_sender) {
+                updateBroadcastMessageViewers(convoSid, activeUserId);
+              }
+            });
+          } else {
+            convoItem.find("[data-convo='blast-icon']").hide();
+          }
+        }
+      });
+
+      console.log("Conversations Loaded. Running Counter...");
+    },
+    complete: function () {
+      console.log("AJAX completed, conversations should be loaded.");
+      $(".loader").hide();
+      $('.back-convo-button').click(function () {
+        $('.chat__messages-wrapper').hide();
+      });
+      updateConvoCounter();
+    },
+    error: function (error) {
+      console.error("Error fetching conversations:", error);
+    },
   });
 }
 
