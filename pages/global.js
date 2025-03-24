@@ -6,6 +6,15 @@ document.addEventListener("DOMContentLoaded", function() {
     window.location.href = "/app/login";
   } else {
     authUser();
+    // ✅ Show "You're all caught up!" message ONLY when the dropdown is opened and there are no notifications
+    document.getElementById("notification-toggle").addEventListener("click", function () {
+      let $wrapper = document.getElementById("notification-list");
+      let hasNotifications = document.querySelectorAll(".notification__item-wrapper").length > 0;
+
+      if (!hasNotifications) {
+          $wrapper.innerHTML = `<div class="notification__empty-message">You're all caught up!</div>`;
+      }
+    });
   }
 
 });
@@ -645,16 +654,6 @@ function updateNotifications(notifications) {
       $maintenanceCounter.style.setProperty("display", "flex", "important");
   }
 }
-
-// ✅ Show "You're all caught up!" message ONLY when the dropdown is opened and there are no notifications
-document.getElementById("notification-toggle").addEventListener("click", function () {
-  let $wrapper = document.getElementById("notification-list");
-  let hasNotifications = document.querySelectorAll(".notification__item-wrapper").length > 0;
-
-  if (!hasNotifications) {
-      $wrapper.innerHTML = `<div class="notification__empty-message">You're all caught up!</div>`;
-  }
-});
 
 function markNotificationAsSeen(notificationId) {
   $.ajax({
