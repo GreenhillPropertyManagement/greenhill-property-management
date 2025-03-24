@@ -267,7 +267,7 @@ function editCategory(categoryId, categoryTitle){
 function createWorkOrder () {
 
   // Form Submission API Call
-  $('#new-work-order-form').submit(function (event) {
+  $('#new-work-order-form').off('submit').on('submit', function (event) {
     // Prevent the default form submission behavior
     event.preventDefault();
 
