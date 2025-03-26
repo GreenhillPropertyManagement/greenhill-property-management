@@ -18,6 +18,7 @@ function authUser() {
       },
       success: function (data) {
         manualBankLink();
+        editBankManualBankLink();
       },
       error: function (error) {
         //run code if they are not logged in
