@@ -457,48 +457,50 @@ function managePropertyUsers(injectContainer, userType) {
       usersContainer.empty();
 
       response.users.forEach((user) => {
-        if (
-          user.id !== response.default_landlord &&
-          user.user_role !== "Tenant"
-        ) {
-          // clone the sample card for the user and append to users container
-          let userItem = $(sampleUser).clone().appendTo(usersContainer);
+        if (user.user_role === "Tenant") {
+          return; // Skip tenants
+        }
 
-          // bind the user's data to the cloned card
-          userItem.attr("id", user.id);
-          if (user.profile_img) {
-            userItem
-              .find(".users__dyn-item__img")
-              .attr("src", user.profile_img);
-          }
-          userItem
-            .find("[data-property-user='name']")
-            .text(user.display_name);
-          userItem
-            .find("[data-property-user='user_role']")
-            .text(user.user_role);
+        // clone the sample card for the user and append to users container
+        let userItem = $(sampleUser).clone().appendTo(usersContainer);
 
-          // click handler to add/remove users to the 'selected users' array
+        // bind the user's data to the cloned card
+        userItem.attr("id", user.id);
+        if (user.profile_img) {
+          userItem
+            .find(".users__dyn-item__img")
+            .attr("src", user.profile_img);
+        }
+
+        let displayName = user.display_name;
+        if (user.id === response.default_landlord) {
+          displayName += " (Default Landlord)";
+          userItem.addClass("default-landlord");
+        }
+
+        userItem
+          .find("[data-property-user='name']")
+          .text(displayName);
+
+        userItem
+          .find("[data-property-user='user_role']")
+          .text(user.user_role);
+
+        // Only add click handler if not the default landlord
+        if (user.id !== response.default_landlord) {
           userItem.click(function () {
             if (userType === "assigned_users") {
-              // Toggle the class 'selected-for-removal'
               userItem.toggleClass("selected-for-removal");
 
-              // Get the user's ID from the clicked userItem
               var userId = user.id;
-
-              // Check if the user is already in the selectedUserIds array
               var index = selectedUserIds.indexOf(userId);
 
               if (index === -1) {
-                // User not found, add to the array
                 selectedUserIds.push(userId);
               } else {
-                // User found, remove from the array
                 selectedUserIds.splice(index, 1);
               }
 
-              // Update the user counter element based on the selectedUserIds array length
               if (selectedUserIds.length > 0) {
                 userCounterElement.text(selectedUserIds.length);
                 userCounterElement.show();
@@ -508,24 +510,17 @@ function managePropertyUsers(injectContainer, userType) {
             }
 
             if (userType === "employees" || userType === "landlords") {
-              // Toggle the class 'selected-for-removal'
               userItem.toggleClass("selected-add-user");
 
-              // Get the user's ID from the clicked userItem
               var userId = user.id;
-
-              // Check if the user is already in the selectedUserIds array
               var index = selectedUserIds.indexOf(userId);
 
               if (index === -1) {
-                // User not found, add to the array
                 selectedUserIds.push(userId);
               } else {
-                // User found, remove from the array
                 selectedUserIds.splice(index, 1);
               }
 
-              // Update the user counter element based on the selectedUserIds array length
               if (selectedUserIds.length > 0) {
                 userCounterElement.text(selectedUserIds.length);
                 userCounterElement.show();
@@ -539,8 +534,6 @@ function managePropertyUsers(injectContainer, userType) {
     },
     complete: function () {
       $(".loader").hide();
-
-      /* Initiate click handlers for api call to update the properties users */
 
       // remove users button clicked
       $("[api-button='remove_users_button']")
