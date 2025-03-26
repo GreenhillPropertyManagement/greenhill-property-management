@@ -451,42 +451,59 @@ function managePropertyUsers(injectContainer, userType) {
       selectedUserIds.splice(0); // clear the selected user array
 
       var sampleUser = $(".user-item-sample-wrapper").find(
-        "[data-property-user='dyn-item']",
+        "[data-property-user='dyn-item']"
       );
 
       usersContainer.empty();
 
-      response.users.forEach((user) => {
-        if (user.user_role === "Tenant") {
-          return; // Skip tenants
-        }
+      // Separate users
+      const defaultLandlordUser = response.users.find(
+        (u) => u.id === response.default_landlord
+      );
 
-        // clone the sample card for the user and append to users container
+      const otherUsers = response.users.filter(
+        (u) => u.user_role !== "Tenant" && u.id !== response.default_landlord
+      );
+
+      const orderedUsers = [];
+      if (defaultLandlordUser) orderedUsers.push(defaultLandlordUser);
+      orderedUsers.push(...otherUsers);
+
+      orderedUsers.forEach((user) => {
+        // Clone the sample card for the user and append to users container
         let userItem = $(sampleUser).clone().appendTo(usersContainer);
 
-        // bind the user's data to the cloned card
+        // Set user ID
         userItem.attr("id", user.id);
+
+        // Profile image
         if (user.profile_img) {
           userItem
             .find(".users__dyn-item__img")
             .attr("src", user.profile_img);
         }
 
-        let displayName = user.display_name;
-        if (user.id === response.default_landlord) {
-          displayName += " (Default Landlord)";
-          userItem.addClass("default-landlord");
-        }
-
+        // Name (leave as-is to keep truncating intact)
         userItem
           .find("[data-property-user='name']")
-          .text(displayName);
+          .text(user.display_name);
+
+        // Role (add "Default" prefix if this is the default landlord)
+        const roleText =
+          user.id === response.default_landlord
+            ? "Default " + user.user_role
+            : user.user_role;
 
         userItem
           .find("[data-property-user='user_role']")
-          .text(user.user_role);
+          .text(roleText);
 
-        // Only add click handler if not the default landlord
+        // Add class to visually mark the default landlord (optional styling)
+        if (user.id === response.default_landlord) {
+          userItem.addClass("default-landlord");
+        }
+
+        // Only bind click for non-default landlords
         if (user.id !== response.default_landlord) {
           userItem.click(function () {
             if (userType === "assigned_users") {
@@ -535,21 +552,18 @@ function managePropertyUsers(injectContainer, userType) {
     complete: function () {
       $(".loader").hide();
 
-      // remove users button clicked
       $("[api-button='remove_users_button']")
         .off("click")
         .on("click", function () {
           updateAssignedUsers(selectedUserIds, "assigned_users");
         });
 
-      // add employees button clicked
       $("[api-button='add_employees_button']")
         .off("click")
         .on("click", function () {
           updateAssignedUsers(selectedUserIds, "employees");
         });
 
-      // add landlords button clicked
       $("[api-button='add_landlords_button']")
         .off("click")
         .on("click", function () {
