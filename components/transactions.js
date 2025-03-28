@@ -88,18 +88,25 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Create Transaction
-  $("[api-form='user-transaction']")
-    .off("submit")
-    .submit(function (event) {
-      let actionForm = $(this);
-      // Prevent the default form submission behavior
+  // Create Transaction - Bind individually to each user-transaction form
+  $("[api-form='user-transaction']").each(function () {
+    const form = $(this);
+
+    form.off("submit").on("submit", function (event) {
       event.preventDefault();
+
+      // Prevent double-clicks
+      form.find("button[type='submit']").prop("disabled", true);
+
+      console.log("Submitting transaction for form:", form);
+
       if (localStorage.pageId === "unit") {
-        createUserTransaction("unit", actionForm);
+        createUserTransaction("unit", form);
       } else if (localStorage.pageId === "profile") {
-        createUserTransaction("profile", actionForm);
+        createUserTransaction("profile", form);
       }
     });
+  });
 
   // 'past trans' tab button clicked (Property Transactions)
   $("[api-button='all-prop-trans']").click(function () {
