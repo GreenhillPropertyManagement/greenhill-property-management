@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Create Transaction
-  $("[api-form='user-transaction']")
+  $("[api-form='user-transaction']:visible")
     .off("submit")
     .submit(function (event) {
       let actionForm = $(this);
