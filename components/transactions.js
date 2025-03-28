@@ -88,22 +88,19 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Create Transaction
-  // Delegated submit handler for all user-transaction forms
-  $(document).on("submit", "form[api-form='user-transaction']", function (event) {
-    event.preventDefault();
-    const actionForm = $(this);
+  $("[api-form='user-transaction']")
+    .off("submit")
+    .submit(function (event) {
+      let actionForm = $(this);
+      // Prevent the default form submission behavior
+      event.preventDefault();
+      if (localStorage.pageId === "unit") {
+        createUserTransaction("unit", actionForm);
+      } else if (localStorage.pageId === "profile") {
+        createUserTransaction("profile", actionForm);
+      }
+    });
 
-    // Prevent double submission by disabling the submit button
-    actionForm.find("button[type='submit']").prop("disabled", true);
-
-    console.log("Submitting transaction for form:", this);
-
-    if (localStorage.pageId === "unit") {
-      createUserTransaction("unit", actionForm);
-    } else if (localStorage.pageId === "profile") {
-      createUserTransaction("profile", actionForm);
-    }
-  });
   // 'past trans' tab button clicked (Property Transactions)
   $("[api-button='all-prop-trans']").click(function () {
     loadPropertyTransactions("all");
