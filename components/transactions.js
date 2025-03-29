@@ -479,7 +479,7 @@ function createUserTransaction(view, form) {
 
   // Make an AJAX POST request
   $.ajax({
-    url: localStorage.baseUrl + " api:rpDXPv3x/create_user_transaction_updated",
+    url: localStorage.baseUrl + "api:rpDXPv3x/create_user_transaction_updated",
     type: "POST",
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
