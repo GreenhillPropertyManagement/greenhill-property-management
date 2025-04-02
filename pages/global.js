@@ -243,6 +243,13 @@ function initializeApp() {
   } else {
     $('[dynamic-visibility=test-mode]').remove();
   }
+
+  /* Tasks Functionality V4 */
+  $(document).off('click', '[data-api-button="new-task"]')
+  .on('click', '[data-api-button="new-task"]', function (e) {
+    e.preventDefault();
+    createTask();
+  });
       
 }
 /* Utlity Functions */
@@ -683,4 +690,43 @@ function updateNotificationCounter(change) {
   } else {
       $counter.hide();
   }
+}
+
+function createTask() {
+
+  // get the page
+  var page = localStorage.getItem('pageId');
+
+  if (page === "unit") {
+
+    // Load users to assign the task to
+    const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+
+    $.ajax({
+      url:  localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
+      method: 'GET',
+      success: function (response) {
+        const select = $('#assigned_to_user');
+
+        response.forEach(function (user) {
+          const isTenant = user.user_role === 'Tenant';
+          const isAllowedTenant = user.user_id === activeTenantUserId;
+
+          if (!isTenant || isAllowedTenant) {
+            const option = $('<option>', {
+              value: user.id,
+              text: user.display_name
+            });
+            select.append(option);
+          }
+        });
+      },
+      error: function (err) {
+        console.error('Failed to load users:', err);
+      }
+    });
+
+  }
+
+
 }
