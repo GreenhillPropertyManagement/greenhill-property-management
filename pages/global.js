@@ -714,29 +714,40 @@ function createTask() {
     success: function (response) {
       const select = $('#assigned_to_user');
       select.empty();
-      select.append('<option value="" disabled selected>Select a User..</option>');
-
-      // Normalize response to an array if it's just one user
+    
+      // Normalize to array in case of single object
       const users = Array.isArray(response) ? response : [response];
-
+    
+      // Check if it's the profile page and only one user
+      const isProfilePage = page === "profile";
+      const isSingleUser = users.length === 1;
+    
+      if (!isProfilePage || !isSingleUser) {
+        // Add default placeholder if multiple choices are expected
+        select.append('<option value="" disabled selected>Select a User..</option>');
+      }
+    
       users.forEach(function (user) {
-        if (page === "profile") {
-          // Profile page — add the single user directly
-          const option = $('<option>', {
-            value: user.id,
-            text: user.display_name
-          });
-          select.append(option);
+        // Create the option
+        const option = $('<option>', {
+          value: user.id,
+          text: user.display_name
+        });
+    
+        // If profile page and one user, pre-select it
+        if (isProfilePage && isSingleUser) {
+          option.prop('selected', true);
+        }
+    
+        // Add the option
+        if (isProfilePage) {
+          select.append(option); // Always append if profile page
         } else {
-          // Unit page — apply filtering
+          // Filter tenants unless activeTenant
           const isTenant = user.user_role === 'Tenant';
           const isActiveTenant = user.id.toString() === activeTenantUserId;
-
+    
           if (!isTenant || isActiveTenant) {
-            const option = $('<option>', {
-              value: user.id,
-              text: user.display_name
-            });
             select.append(option);
           }
         }
