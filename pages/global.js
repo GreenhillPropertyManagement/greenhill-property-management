@@ -697,6 +697,8 @@ function createTask() {
   var page = localStorage.getItem('pageId');
 
   if (page === "unit") {
+
+    // load users to assign the task to
     const activeTenantUserId = localStorage.getItem('activeTenantUserId');
     const unitRecId = localStorage.getItem('unitRecId');
 
