@@ -794,6 +794,8 @@ function createTask() {
   
     if (page === "unit") {
       payload.unit_rec_id = unitRecId;
+    } else {
+      payload.unit_rec_id = null;
     }
   
     // Submit the task to Xano
