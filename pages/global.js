@@ -245,8 +245,8 @@ function initializeApp() {
   }
 
   /* Tasks Functionality V4 */
-  $(document).off('click', '[data-api-button="new-task"]')
-  .on('click', '[data-api-button="new-task"]', function (e) {
+  $(document).off('click', '[api-button="new-task"]')
+  .on('click', '[api-button="new-task"]', function (e) {
     e.preventDefault();
     createTask();
   });
