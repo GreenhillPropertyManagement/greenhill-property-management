@@ -705,6 +705,9 @@ function createTask() {
     $.ajax({
       url:  localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
       method: 'GET',
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
       success: function (response) {
         const select = $('#assigned_to_user');
 
