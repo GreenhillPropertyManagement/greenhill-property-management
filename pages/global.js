@@ -710,7 +710,8 @@ function createTask() {
       },
       dataType: 'json',
       data: {
-        unit_rec_id: unitRecId
+        unit_rec_id: unitRecId,
+        page: page
       },
       success: function (response) {
         
