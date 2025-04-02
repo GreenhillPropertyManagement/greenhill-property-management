@@ -765,6 +765,8 @@ function createTask() {
 
   $(document).off('submit', '[data-api-form="new-task"]').on('submit', '[data-api-form="new-task"]', function (e) {
     e.preventDefault();
+
+    $('.loader').css('display','flex'); //show loader
   
     const page = localStorage.getItem('pageId');
     const unitRecId = localStorage.getItem('unitRecId');
@@ -808,11 +810,13 @@ function createTask() {
       contentType: 'application/json',
       data: JSON.stringify(payload),
       success: function (res) {
-        console.log('Task created successfully:', res);
-        // Optional: reset form, close modal, show success message
+        alert('Task Successfully Created!');
+        $('.loader').hide();
+
       },
       error: function (err) {
-        console.error('Failed to create task:', err);
+        alert('An Unexpected Error Occured.');
+        $('.loader').hide();
       }
     });
   });
