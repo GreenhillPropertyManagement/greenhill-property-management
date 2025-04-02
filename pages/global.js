@@ -694,19 +694,21 @@ function updateNotificationCounter(change) {
 
 function createTask() {
 
-  // get the page
   var page = localStorage.getItem('pageId');
 
   if (page === "unit") {
-
-    // Load users to assign the task to
     const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+    const unitRecId = localStorage.getItem('unitRecId');
 
     $.ajax({
-      url:  localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
+      url: localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
       method: 'GET',
       headers: {
         Authorization: "Bearer " + localStorage.authToken,
+      },
+      dataType: 'json',
+      data: {
+        unit_rec_id: unitRecId
       },
       success: function (response) {
         const select = $('#assigned_to_user');
@@ -728,8 +730,6 @@ function createTask() {
         console.error('Failed to load users:', err);
       }
     });
-
   }
-
-
+  
 }
