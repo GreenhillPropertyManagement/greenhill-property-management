@@ -701,6 +701,7 @@ function createTask() {
     // load users to assign the task to
     const activeTenantUserId = localStorage.getItem('activeTenantUserId');
     const unitRecId = localStorage.getItem('unitRecId');
+  }
 
     $.ajax({
       url: localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
@@ -711,7 +712,8 @@ function createTask() {
       dataType: 'json',
       data: {
         unit_rec_id: unitRecId,
-        page: page
+        page: page,
+        tenant: localStorage.userProfileRecId
       },
       success: function (response) {
         
@@ -740,6 +742,6 @@ function createTask() {
         console.error('Failed to load users:', err);
       }
     });
-  }
+  
 
 }
