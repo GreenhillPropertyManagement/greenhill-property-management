@@ -811,12 +811,17 @@ function createTask() {
       data: JSON.stringify(payload),
       success: function (res) {
         alert('Task Successfully Created!');
+        $('[data-api-form="new-task"]')[0].reset();
+        $('.modal__block').hide(); // Hide modal
         $('.loader').hide();
 
       },
       error: function (err) {
         alert('An Unexpected Error Occured.');
+        $('[data-api-form="new-task"]')[0].reset();
+        $('.modal__block').hide(); // Hide modal
         $('.loader').hide();
+
       }
     });
   });
