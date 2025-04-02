@@ -694,6 +694,8 @@ function updateNotificationCounter(change) {
 
 function createTask() {
 
+  // load user to assign task to 
+
   const page = localStorage.getItem('pageId');
   const activeTenantUserId = localStorage.getItem('activeTenantUserId');
   const unitRecId = localStorage.getItem('unitRecId');
@@ -757,4 +759,60 @@ function createTask() {
       console.error('Failed to load users:', err);
     }
   });
+
+
+  // Create New Task on Form Submit
+
+  $(document).off('submit', '[data-api-form="new-task"]').on('submit', '[data-api-form="new-task"]', function (e) {
+    e.preventDefault();
+  
+    const page = localStorage.getItem('pageId');
+    const unitRecId = localStorage.getItem('unitRecId');
+    const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+  
+    // Dynamically get form inputs using their data-api-input attributes
+    const calendarDate = $('[data-api-input="calendar_date"]').val();
+    const assignedUserId = $('[data-api-input="assigned_to_user"]').val();
+    const taskMessage = $('[data-api-input="task_message"]').val();
+  
+    // Get the user role from the global list if available
+    let assignedUserRole = null;
+    const lastFetchedUsers = window.lastAssignUsers || [];
+  
+    const assignedUser = lastFetchedUsers.find(user => user.id.toString() === assignedUserId);
+    if (assignedUser) {
+      assignedUserRole = assignedUser.user_role;
+    }
+  
+    // Build payload
+    const payload = {
+      calendar_date: calendarDate,
+      assigned_to_user: assignedUserId,
+      task_message: taskMessage,
+      user_role: assignedUserRole
+    };
+  
+    if (page === "unit") {
+      payload.unit_rec_id = unitRecId;
+    }
+  
+    // Submit the task to Xano
+    $.ajax({
+      url: localStorage.baseUrl + 'api:RqXDqOO9/create_task',
+      method: 'POST',
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      contentType: 'application/json',
+      data: JSON.stringify(payload),
+      success: function (res) {
+        console.log('Task created successfully:', res);
+        // Optional: reset form, close modal, show success message
+      },
+      error: function (err) {
+        console.error('Failed to create task:', err);
+      }
+    });
+  });
+
 }
