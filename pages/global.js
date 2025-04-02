@@ -712,11 +712,10 @@ function createTask() {
       },
       success: function (response) {
         const select = $('#assigned_to_user');
-        const activeTenantUserId = localStorage.getItem('activeTenantUserId');
       
         response.forEach(function (user) {
           const isTenant = user.user_role === 'Tenant';
-          const isActiveTenant = user.id === activeTenantUserId;
+          const isActiveTenant = user.id == activeTenantUserId;
       
           if (!isTenant || isActiveTenant) {
             const option = $('<option>', {
