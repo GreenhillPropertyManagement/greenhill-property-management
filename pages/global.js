@@ -713,8 +713,14 @@ function createTask() {
         unit_rec_id: unitRecId
       },
       success: function (response) {
+        
         const select = $('#assigned_to_user');
         const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+      
+        select.empty(); // Clear existing options
+      
+        // Optional: Add default placeholder back
+        select.append('<option value="" disabled selected>Select a User..</option>');
       
         response.forEach(function (user) {
           const isTenant = user.user_role === 'Tenant';
