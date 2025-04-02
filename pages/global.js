@@ -693,42 +693,42 @@ function updateNotificationCounter(change) {
 }
 
 function createTask() {
+  
+  const page = localStorage.getItem('pageId');
+  const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+  const unitRecId = localStorage.getItem('unitRecId');
+  const tenant = localStorage.getItem('userProfileRecId');
 
-  var page = localStorage.getItem('pageId');
+  $.ajax({
+    url: localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
+    method: 'GET',
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    dataType: 'json',
+    data: {
+      unit_rec_id: unitRecId,
+      page: page,
+      tenant: tenant
+    },
+    success: function (response) {
+      const select = $('#assigned_to_user');
+      select.empty();
+      select.append('<option value="" disabled selected>Select a User..</option>');
 
-  if (page === "unit") {
-
-    // load users to assign the task to
-    const activeTenantUserId = localStorage.getItem('activeTenantUserId');
-    const unitRecId = localStorage.getItem('unitRecId');
-  }
-
-    $.ajax({
-      url: localStorage.baseUrl + 'api:RqXDqOO9/load_assign_users',
-      method: 'GET',
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      dataType: 'json',
-      data: {
-        unit_rec_id: unitRecId,
-        page: page,
-        tenant: localStorage.userProfileRecId
-      },
-      success: function (response) {
-        
-        const select = $('#assigned_to_user');
-        const activeTenantUserId = localStorage.getItem('activeTenantUserId');
-      
-        select.empty(); // Clear existing options
-      
-        // Optional: Add default placeholder back
-        select.append('<option value="" disabled selected>Select a User..</option>');
-      
-        response.forEach(function (user) {
+      response.forEach(function (user) {
+        if (page === "profile") {
+          // Only one user — just add them
+          const option = $('<option>', {
+            value: user.id,
+            text: user.display_name
+          });
+          select.append(option);
+        } else {
+          // Filter out tenants unless activeTenant
           const isTenant = user.user_role === 'Tenant';
           const isActiveTenant = user.id.toString() === activeTenantUserId;
-      
+
           if (!isTenant || isActiveTenant) {
             const option = $('<option>', {
               value: user.id,
@@ -736,12 +736,11 @@ function createTask() {
             });
             select.append(option);
           }
-        });
-      },
-      error: function (err) {
-        console.error('Failed to load users:', err);
-      }
-    });
-  
-
+        }
+      });
+    },
+    error: function (err) {
+      console.error('Failed to load users:', err);
+    }
+  });
 }
