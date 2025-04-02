@@ -776,6 +776,7 @@ function createTask() {
     const calendarDate = $('[data-api-input="calendar_date"]').val();
     const assignedUserId = $('[data-api-input="assigned_to_user"]').val();
     const taskMessage = $('[data-api-input="task_message"]').val();
+    const taskTitle = $('[data-api-input="task_title"]').val();
   
     // Get the user role from the global list if available
     let assignedUserRole = null;
