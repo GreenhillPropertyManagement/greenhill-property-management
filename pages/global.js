@@ -712,12 +712,13 @@ function createTask() {
       },
       success: function (response) {
         const select = $('#assigned_to_user');
-
+        const activeTenantUserId = localStorage.getItem('activeTenantUserId');
+      
         response.forEach(function (user) {
           const isTenant = user.user_role === 'Tenant';
-          const isAllowedTenant = user.user_id === activeTenantUserId;
-
-          if (!isTenant || isAllowedTenant) {
+          const isActiveTenant = user.user_id === activeTenantUserId;
+      
+          if (!isTenant || isActiveTenant) {
             const option = $('<option>', {
               value: user.id,
               text: user.display_name
@@ -731,5 +732,5 @@ function createTask() {
       }
     });
   }
-  
+
 }
