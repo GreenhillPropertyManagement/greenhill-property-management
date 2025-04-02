@@ -75,6 +75,7 @@ function calendarInit() {
             if (event.is_task) {
                 eventTemplate = document.querySelector('.calendar-event-sample-wrapper [data-dyn-item="task-event"]').cloneNode(true);
               
+                // attr
                 eventTemplate.setAttribute('element', 'modal');
                 eventTemplate.setAttribute('modal', 'new-task');
               
