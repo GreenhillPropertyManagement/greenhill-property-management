@@ -693,7 +693,7 @@ function updateNotificationCounter(change) {
 }
 
 function createTask() {
-  
+
   const page = localStorage.getItem('pageId');
   const activeTenantUserId = localStorage.getItem('activeTenantUserId');
   const unitRecId = localStorage.getItem('unitRecId');
@@ -716,16 +716,19 @@ function createTask() {
       select.empty();
       select.append('<option value="" disabled selected>Select a User..</option>');
 
-      response.forEach(function (user) {
+      // Normalize response to an array if it's just one user
+      const users = Array.isArray(response) ? response : [response];
+
+      users.forEach(function (user) {
         if (page === "profile") {
-          // Only one user — just add them
+          // Profile page — add the single user directly
           const option = $('<option>', {
             value: user.id,
             text: user.display_name
           });
           select.append(option);
         } else {
-          // Filter out tenants unless activeTenant
+          // Unit page — apply filtering
           const isTenant = user.user_role === 'Tenant';
           const isActiveTenant = user.id.toString() === activeTenantUserId;
 
