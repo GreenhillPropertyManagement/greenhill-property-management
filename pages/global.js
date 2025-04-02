@@ -792,7 +792,8 @@ function createTask() {
       calendar_date: calendarDate,
       assigned_to_user: assignedUserId,
       task_message: taskMessage,
-      user_role: assignedUserRole
+      user_role: assignedUserRole,
+      task_title: taskTitle
     };
   
     if (page === "unit") {
