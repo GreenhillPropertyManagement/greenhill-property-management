@@ -716,7 +716,7 @@ function createTask() {
       
         response.forEach(function (user) {
           const isTenant = user.user_role === 'Tenant';
-          const isActiveTenant = user.user_id === activeTenantUserId;
+          const isActiveTenant = user.id === activeTenantUserId;
       
           if (!isTenant || isActiveTenant) {
             const option = $('<option>', {
