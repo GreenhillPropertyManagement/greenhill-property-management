@@ -318,7 +318,7 @@ function populateTransactionsTable(response, transactionType) {
             // ✅ Ensure row click event still triggers modal function
             row.addEventListener("click", function () {
                 console.log("Clicked Payment:", transaction); // Debugging log
-                populateTransactionModal(transaction, response.expenses);
+                populateTransactionModal(transaction);
             });
         }
 
@@ -336,7 +336,7 @@ function populateTransactionsTable(response, transactionType) {
     });
 }
 
-function populateTransactionModal(payment, expenses) {
+function populateTransactionModal(payment) {
 
     if (!payment) {
         console.error("Error: Payment data is missing.");
@@ -344,18 +344,15 @@ function populateTransactionModal(payment, expenses) {
     }
 
     console.log("Populating Modal with:", payment);
-    console.log("Expenses Data:", expenses);
 
     let grossPayment = Math.abs(payment.amount);
-    let matchingExpense = expenses.find(exp => exp.transaction_id === payment.transaction_id);
-    let managementFee = matchingExpense ? Math.abs(matchingExpense.amount) : 0;
-    let netPayment = grossPayment - managementFee;
+    let netPayment = parseFloat(payment.landlords_net_payment) || 0;
+    let managementFee = grossPayment - netPayment;
     let balanceAfterPayment = payment.total_running_balance || 0;
 
     console.log("Gross Payment:", grossPayment);
-    console.log("Matching Expense:", matchingExpense);
+    console.log("Landlord Net Payment:", netPayment);
     console.log("Management Fee:", managementFee);
-    console.log("Net Payment:", netPayment);
     console.log("Balance After Payment:", balanceAfterPayment);
 
     let grossPaymentEl = document.querySelector('[data="gross-payment"]');
@@ -374,7 +371,6 @@ function populateTransactionModal(payment, expenses) {
     mgFeeEl.textContent = `$${managementFee.toLocaleString()}`;
     netPaymentEl.textContent = `$${netPayment.toLocaleString()}`;
     balanceAfterPaymentEl.textContent = `$${balanceAfterPayment.toLocaleString()}`;
-
 }
 
 function setupChartTypeListener() {
