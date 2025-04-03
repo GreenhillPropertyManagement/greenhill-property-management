@@ -110,6 +110,10 @@ function extractChartData(response, transactionType) {
 
     if (transactionType === "noi") {
         let transactions = [...response.payments, ...response.expenses];
+
+        // ✅ Sort transactions newest to oldest
+        transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+
         transactions.forEach(item => {
             let formattedDate = formatTransDate(item.transaction_date);
 
