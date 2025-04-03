@@ -110,7 +110,6 @@ function extractChartData(response, transactionType) {
 
     if (transactionType === "noi") {
         let transactions = [...response.payments, ...response.expenses];
-        transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
         transactions.forEach(item => {
             let formattedDate = formatTransDate(item.transaction_date);
 
@@ -297,8 +296,6 @@ function populateTransactionsTable(response, transactionType) {
         tableBody.appendChild(row);
         return;
     }
-
-    transactions.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
