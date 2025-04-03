@@ -347,9 +347,8 @@ function populateTransactionModal(payment, expenses) {
     console.log("Expenses Data:", expenses);
 
     let grossPayment = Math.abs(payment.amount);
-    let matchingExpense = expenses.find(exp => exp.transaction_id === payment.transaction_id);
-    let managementFee = matchingExpense ? Math.abs(matchingExpense.amount) : 0;
-    let netPayment = grossPayment - managementFee;
+    let netPayment = Math.abs(payment.landlords_net_payment || 0);
+    let managementFee = grossPayment - netPayment;
     let balanceAfterPayment = payment.total_running_balance || 0;
 
     console.log("Gross Payment:", grossPayment);
