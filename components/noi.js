@@ -300,7 +300,7 @@ function populateTransactionDetails(transactionId) {
     $('[data=gross-payment]').text(formatCurrency(Math.abs(clickedTransaction.amount))); // Make amount positive
 
     if (clickedTransaction.balance_after_payment !== null) {
-      $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.balance_after_payment)); // Keep balance after payment as is
+      $('[data=balance-after-payment]').text(formatCurrency(clickedTransaction.total_running_balance)); // Keep balance after payment as is
     } else {
       $('[data=balance-after-payment]').text('N/A');
     }
