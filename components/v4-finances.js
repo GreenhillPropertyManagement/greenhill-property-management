@@ -269,7 +269,6 @@ window.addEventListener("resize", function () {
 });
 
 function populateTransactionsTable(response, transactionType) {
-
     let tableBody = document.querySelector("#transactionsTable tbody");
 
     if (!tableBody) {
@@ -281,7 +280,7 @@ function populateTransactionsTable(response, transactionType) {
 
     let transactions = [];
 
-    // Filter transactions based on the selected filter
+    //  Merge payments and expenses if NOI, otherwise keep it filtered
     if (transactionType === "noi") {
         transactions = [...response.payments, ...response.expenses];
     } else if (transactionType === "payments") {
@@ -289,6 +288,9 @@ function populateTransactionsTable(response, transactionType) {
     } else if (transactionType === "expenses") {
         transactions = [...response.expenses];
     }
+
+    // Sort all transactions by date DESC (newest to oldest)
+    transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
 
     if (transactions.length === 0) {
         let row = document.createElement("tr");
@@ -301,23 +303,20 @@ function populateTransactionsTable(response, transactionType) {
         return;
     }
 
+    // Render all transactions regardless of type
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
 
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
-
-        // ✅ Ensure the correct description is used
         let transactionDescription = transaction.description || "N/A";
 
-        // ✅ Only apply modal attributes & click event to Payment rows
         if (transaction.type === "payment") {
             row.setAttribute("element", "modal");
             row.setAttribute("modal", "transaction-detail-modal");
 
-            // ✅ Ensure row click event still triggers modal function
             row.addEventListener("click", function () {
-                console.log("Clicked Payment:", transaction); // Debugging log
+                console.log("Clicked Payment:", transaction);
                 populateTransactionModal(transaction);
             });
         }
@@ -328,7 +327,7 @@ function populateTransactionsTable(response, transactionType) {
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
             <td>${transactionTypeText}</td>
-            <td>${transactionDescription}</td> <!-- ✅ Correctly populated -->
+            <td>${transactionDescription}</td>
             <td>${formattedAmount}</td>
         `;
 
