@@ -769,10 +769,10 @@ function loadAssociatedTasks() {
         const $task = $(`
           <div modal="new-task" element="modal" class="profile-task-item" id="${task.id}">
             <div data-task="date" class="system-text__small"></div>
-            <div data-task="title" class="system-text__main"></div>
+            <div data-task="title" class="system-text__main task"></div>
             <div class="profile-task__created-by">
               <div class="system-text__small">Created By:</div>
-              <div data-task="created-by" class="system-text__small margin-left"></div>
+              <div data-task="created-by" class="system-text__small margin-left less"></div>
             </div>
           </div>
         `);
