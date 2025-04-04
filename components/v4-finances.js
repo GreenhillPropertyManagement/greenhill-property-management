@@ -13,6 +13,13 @@ document.addEventListener("DOMContentLoaded", function() {
     $('#download-report').off('click').on('click', function() {
     generateCustomReport();
     });
+
+    // Ensure the chart resizes when the window resizes
+    window.addEventListener("resize", function () {
+        if (chartInstance) {
+            chartInstance.resize();
+        }
+    });
     
 });
 
@@ -260,13 +267,6 @@ function renderChart(chartType, chartData) {
         chartInstance.resize();
     }, 200);
 }
-
-// Ensure the chart resizes when the window resizes
-window.addEventListener("resize", function () {
-    if (chartInstance) {
-        chartInstance.resize();
-    }
-});
 
 function populateTransactionsTable(response, transactionType) {
     let tableBody = document.querySelector("#transactionsTable tbody");
