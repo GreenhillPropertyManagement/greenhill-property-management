@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let user_id = urlParams.get("id");
       loadUserProfile(user_id);
+      loadAssociatedTasks(); // load tasks associated with user
 
       $('#edit_permissions').change(function() {
 
@@ -740,4 +741,51 @@ function mandateBankAccount(user){
 
 }
 
+function loadAssociatedTasks() {
 
+  const userRecId = localStorage.getItem('userProfileRecId');
+
+  if (!userRecId) {
+    console.error('userProfileRecId not found in localStorage');
+    return;
+  }
+
+  $.ajax({
+    url:  localStorage.baseUrl + 'api:RqXDqOO9/get_tasks_associated_users',
+    type: 'GET',
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      user_rec_id: userRecId
+    },
+    success: function(response) {
+      const $container = $('.profile-tasks-container');
+      $container.empty(); // Clear the container
+
+      const tasks = Array.isArray(response) ? response : [response];
+
+      tasks.forEach(task => {
+        const $task = $(`
+          <div modal="new-task" element="modal" class="profile-task-item" id="${task.id}">
+            <div data-task="date" class="system-text__small"></div>
+            <div data-task="title" class="system-text__main"></div>
+            <div class="profile-task__created-by">
+              <div class="system-text__small">Created By:</div>
+              <div data-task="created-by" class="system-text__small margin-left"></div>
+            </div>
+          </div>
+        `);
+
+        $task.find('[data-task="date"]').text(task.calendar_date || '');
+        $task.find('[data-task="title"]').text(task.task_title || '');
+        $task.find('[data-task="created-by"]').text(task.created_by || '');
+
+        $container.append($task);
+      });
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching tasks:', error);
+    }
+  });
+}
