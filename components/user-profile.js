@@ -777,9 +777,12 @@ function loadAssociatedTasks() {
           </div>
         `);
 
-        $task.find('[data-task="date"]').text(task.calendar_date || '');
+        // Format and bind the data
+        const formattedDate = task.calendar_date ? formatDateNoTime(task.calendar_date) : '';
+
+        $task.find('[data-task="date"]').text(formattedDate);
         $task.find('[data-task="title"]').text(task.task_title || '');
-        $task.find('[data-task="created-by"]').text(task.created_by || '');
+        $task.find('[data-task="created-by"]').text(task.display_name || '');
 
         $container.append($task);
       });
