@@ -19,6 +19,12 @@ function calendarInit() {
     return window.innerWidth <= 768;
   }
 
+  // ✅ Local date parser to fix timezone issues
+  function parseLocalDate(dateStr) {
+    const parts = dateStr.split('T')[0].split('-'); // [YYYY, MM, DD]
+    return new Date(parts[0], parts[1] - 1, parts[2]); // Month is 0-indexed
+  }
+
   function loadCalendarEvents() {
     $('.loader').css('display', 'flex');
     $.ajax({
@@ -63,7 +69,7 @@ function calendarInit() {
 
     if (isMobileDevice()) {
       const filteredEvents = events.filter(event => {
-        const eventDate = new Date(event.calendar_date.split('T')[0]);
+        const eventDate = parseLocalDate(event.calendar_date);
         return eventDate.getFullYear() === currentDate.getFullYear() &&
           eventDate.getMonth() === currentDate.getMonth();
       });
@@ -81,7 +87,6 @@ function calendarInit() {
           eventTemplate.querySelector('[data-task="user"]').textContent = event.assigned_user_name.display_name;
           eventTemplate.querySelector('[data-task="date"]').textContent = formatDateNoTime(event.calendar_date);
 
-          // Store task data
           $(eventTemplate).data('task', {
             id: event.id,
             calendar_date: event.calendar_date,
@@ -91,7 +96,6 @@ function calendarInit() {
             display_name: event.assigned_user_name.display_name
           });
 
-          // Click to open modal and populate form
           $(eventTemplate).on('click', function () {
             const task = $(this).data('task');
             const $form = $('[data-api-form="update-task"]');
@@ -138,7 +142,7 @@ function calendarInit() {
         dayNumber.textContent = date.getDate();
 
         const eventsForDay = events.filter(event => {
-          const eventDate = new Date(event.calendar_date.split('T')[0]);
+          const eventDate = parseLocalDate(event.calendar_date);
           return eventDate.getFullYear() === date.getFullYear() &&
             eventDate.getMonth() === date.getMonth() &&
             eventDate.getDate() === date.getDate();
