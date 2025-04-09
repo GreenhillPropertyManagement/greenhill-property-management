@@ -823,10 +823,10 @@ function loadAssociatedTasks() {
 
         const formData = {
           task_id: selectedTaskId,
-          calendar_date: $('#calendar_date').val(),
-          task_title: $('#task_title').val(),
-          task_message: $('[name="field"]').val(),
-          assigned_to_user: $('#assigned_to_user').val()
+          calendar_date: $('[data-api-input="calendar_date"]').val(),
+          task_title: $('[data-api-input="task_title"]').val(),
+          task_message: $('[data-api-input="task_message"]').val(),
+          assigned_to_user: $('[data-api-input="assigned_to_user"]').val()
         };
 
         $.ajax({
