@@ -799,6 +799,8 @@ function loadAssociatedTasks() {
       $('[data-api-form="update-task"]').off('submit').on('submit', function (e) {
         e.preventDefault();
 
+        $('.loader').css('display','flex');
+
         if (!selectedTaskId) return alert("No task selected");
 
         const formData = {
@@ -835,6 +837,7 @@ function loadAssociatedTasks() {
       // Attach delete handler
       $('[api-button="delete-task"]').off('click').on('click', function (e) {
         e.preventDefault();
+        $('.loader').css('display','flex');
 
         if (!selectedTaskId) return alert("No task selected");
 
