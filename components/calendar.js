@@ -77,7 +77,7 @@ function calendarInit() {
 
       filteredEvents.forEach(event => {
         // Skip task events not created by this user
-        if (event.is_task && event.created_by !== userRecId) return;
+        if (event.is_task && String(event.created_by) !== String(userRecId)) return;
 
         let eventTemplate;
 
@@ -154,7 +154,7 @@ function calendarInit() {
 
         for (const event of eventsForDay) {
           // Skip task events not created by this user
-          if (event.is_task && event.created_by !== userRecId) continue;
+          if (event.is_task && String(event.created_by) !== String(userRecId)) continue;
 
           let eventTemplate;
 
