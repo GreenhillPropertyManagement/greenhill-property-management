@@ -742,7 +742,6 @@ function mandateBankAccount(user){
 }
 
 function loadAssociatedTasks() {
-
   const userRecId = localStorage.getItem('userProfileRecId');
 
   if (!userRecId) {
@@ -750,8 +749,10 @@ function loadAssociatedTasks() {
     return;
   }
 
+  let selectedTaskId = null;
+
   $.ajax({
-    url:  localStorage.baseUrl + 'api:RqXDqOO9/get_tasks_associated_users',
+    url: localStorage.baseUrl + 'api:RqXDqOO9/get_tasks_associated_users',
     type: 'GET',
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
@@ -759,35 +760,111 @@ function loadAssociatedTasks() {
     data: {
       user_rec_id: userRecId
     },
-    success: function(response) {
+    success: function (response) {
       const $container = $('.profile-tasks-container');
       $container.empty(); // Clear the container
 
       const tasks = Array.isArray(response) ? response : [response];
 
       tasks.forEach(task => {
+        const formattedDate = task.calendar_date ? formatDateNoTime(task.calendar_date) : '';
+
         const $task = $(`
           <div modal="update-task" element="modal" class="profile-task-item" id="${task.id}">
-            <div data-task="date" class="system-text__small"></div>
-            <div data-task="title" class="system-text__main task"></div>
+            <div data-task="date" class="system-text__small">${formattedDate}</div>
+            <div data-task="title" class="system-text__main task">${task.task_title || ''}</div>
             <div class="profile-task__created-by">
               <div class="system-text__small">Created By:</div>
-              <div data-task="created-by" class="system-text__small margin-left less"></div>
+              <div data-task="created-by" class="system-text__small margin-left less">${task.display_name || ''}</div>
             </div>
           </div>
         `);
 
-        // Format and bind the data
-        const formattedDate = task.calendar_date ? formatDateNoTime(task.calendar_date) : '';
+        $task.data('task', task);
 
-        $task.find('[data-task="date"]').text(formattedDate);
-        $task.find('[data-task="title"]').text(task.task_title || '');
-        $task.find('[data-task="created-by"]').text(task.display_name || '');
+        // Attach click handler for this task item
+        $task.on('click', function () {
+          selectedTaskId = task.id;
+
+          $('#calendar_date').val(task.calendar_date || '');
+          $('#task_title').val(task.task_title || '');
+          $('#assigned_to_user').val(task.assigned_to_user || '');
+          $('[name="field"]').val(task.task_message || '');
+        });
 
         $container.append($task);
       });
+
+      // Attach submit handler for edit
+      $('[data-api-form="update-task"]').off('submit').on('submit', function (e) {
+        e.preventDefault();
+
+        if (!selectedTaskId) return alert("No task selected");
+
+        const formData = {
+          task_id: selectedTaskId,
+          calendar_date: $('#calendar_date').val(),
+          task_title: $('#task_title').val(),
+          task_message: $('[name="field"]').val(),
+          assigned_to_user: $('#assigned_to_user').val()
+        };
+
+        $.ajax({
+          url: localStorage.baseUrl + 'api:RqXDqOO9/edit_task',
+          type: 'POST',
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+          },
+          data: formData,
+          success: function () {
+            alert('Task updated!');
+            selectedTaskId = null;
+            loadAssociatedTasks();
+            $('.modal__block').hide();
+            $('.loader').hide();
+          },
+          error: function (xhr, status, error) {
+            alert('An unexpected Error Occured');
+            $('.modal__block').hide();
+            $('.loader').hide();
+
+          }
+        });
+      });
+
+      // Attach delete handler
+      $('[api-button="delete-task"]').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!selectedTaskId) return alert("No task selected");
+
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        $.ajax({
+          url: localStorage.baseUrl + 'api:RqXDqOO9/delete_task',
+          type: 'POST',
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+          },
+          data: {
+            task_id: selectedTaskId
+          },
+          success: function () {
+            alert('Task deleted!');
+            selectedTaskId = null;
+            loadAssociatedTasks();
+            $('.modal__block').hide();
+            $('.loader').hide();
+          },
+          error: function (xhr, status, error) {
+            alert('We ran into an error deleting this task');
+            $('.modal__block').hide();
+            $('.loader').hide();
+          }
+        });
+      });
     },
-    error: function(xhr, status, error) {
+    error: function (xhr, status, error) {
       console.error('Error fetching tasks:', error);
     }
   });
