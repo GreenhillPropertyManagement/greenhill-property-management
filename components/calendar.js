@@ -77,7 +77,7 @@ function calendarInit() {
               
                 // attr
                 eventTemplate.setAttribute('element', 'modal');
-                eventTemplate.setAttribute('modal', 'new-task');
+                eventTemplate.setAttribute('modal', 'update-task');
               
             
                 eventTemplate.querySelector('[data-task="title"]').textContent = event.task_title;
