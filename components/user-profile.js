@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
       let user_id = urlParams.get("id");
       loadUserProfile(user_id);
-     //loadAssociatedTasks(); // load tasks associated with user
+      loadAssociatedTasks(); // load tasks associated with user
 
       $('#edit_permissions').change(function() {
 
