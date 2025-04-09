@@ -19,10 +19,9 @@ function calendarInit() {
     return window.innerWidth <= 768;
   }
 
-  // ✅ Local date parser to fix timezone issues
   function parseLocalDate(dateStr) {
-    const parts = dateStr.split('T')[0].split('-'); // [YYYY, MM, DD]
-    return new Date(parts[0], parts[1] - 1, parts[2]); // Month is 0-indexed
+    const parts = dateStr.split('T')[0].split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
   }
 
   function loadCalendarEvents() {
@@ -67,6 +66,8 @@ function calendarInit() {
       dates.push(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i));
     }
 
+    const userRecId = localStorage.getItem('userRecId');
+
     if (isMobileDevice()) {
       const filteredEvents = events.filter(event => {
         const eventDate = parseLocalDate(event.calendar_date);
@@ -75,6 +76,9 @@ function calendarInit() {
       });
 
       filteredEvents.forEach(event => {
+        // Skip task events not created by this user
+        if (event.is_task && event.created_by !== userRecId) return;
+
         let eventTemplate;
 
         if (event.is_task) {
@@ -126,11 +130,11 @@ function calendarInit() {
           eventTemplate.querySelector('[data-calendar="property_name"]').textContent = event.street;
           eventTemplate.querySelector('[data-calendar="unit_name"]').textContent = event.unit_name;
           eventTemplate.querySelector('[data-calendar="date"]').textContent = formatDateNoTime(event.calendar_date);
-        }
 
-        $(eventTemplate).on('click', function () {
-          $(this).find('.calendar__event__info-wrapper').toggle();
-        });
+          $(eventTemplate).on('click', function () {
+            $(this).find('.calendar__event__info-wrapper').toggle();
+          });
+        }
 
         calendarBody.appendChild(eventTemplate);
       });
@@ -149,6 +153,9 @@ function calendarInit() {
         });
 
         for (const event of eventsForDay) {
+          // Skip task events not created by this user
+          if (event.is_task && event.created_by !== userRecId) continue;
+
           let eventTemplate;
 
           if (event.is_task) {
@@ -199,11 +206,11 @@ function calendarInit() {
             eventTemplate.querySelector('[data-calendar="tenant_name"]').textContent = event.display_name;
             eventTemplate.querySelector('[data-calendar="property_name"]').textContent = event.street;
             eventTemplate.querySelector('[data-calendar="unit_name"]').textContent = event.unit_name;
-          }
 
-          $(eventTemplate).on('click', function () {
-            $(this).find('.calendar__event__info-wrapper').toggle();
-          });
+            $(eventTemplate).on('click', function () {
+              $(this).find('.calendar__event__info-wrapper').toggle();
+            });
+          }
 
           if (date.getMonth() !== currentDate.getMonth()) {
             dayDiv.classList.add('inactive');
