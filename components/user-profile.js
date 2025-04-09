@@ -788,15 +788,14 @@ function loadAssociatedTasks() {
         
           selectedTaskId = clickedTask.id;
         
-          // Target inputs by data-api-input attributes
-          $('[data-api-input="calendar_date"]').val(clickedTask.calendar_date || '');
-          $('[data-api-input="task_title"]').val(clickedTask.task_title || '');
-          $('[data-api-input="task_message"]').val(clickedTask.task_message || '');
-          const $userSelect = $('[data-api-input="assigned_to_user"]');
+          const $form = $('[data-api-form="update-task"]');
 
-          // First, check if the option exists
+          $form.find('[data-api-input="calendar_date"]').val(clickedTask.calendar_date || '');
+          $form.find('[data-api-input="task_title"]').val(clickedTask.task_title || '');
+          $form.find('[data-api-input="task_message"]').val(clickedTask.task_message || '');
+          
+          const $userSelect = $form.find('[data-api-input="assigned_to_user"]');
           if ($userSelect.find(`option[value="${clickedTask.assigned_to_user}"]`).length === 0) {
-            // If not, append it
             $userSelect.append(
               $('<option>', {
                 value: clickedTask.assigned_to_user,
@@ -805,7 +804,6 @@ function loadAssociatedTasks() {
               })
             );
           } else {
-            // If it exists, just select it
             $userSelect.val(clickedTask.assigned_to_user);
           }
         });
@@ -821,12 +819,14 @@ function loadAssociatedTasks() {
 
         if (!selectedTaskId) return alert("No task selected");
 
+        const $form = $('[data-api-form="update-task"]');
+
         const formData = {
           task_id: selectedTaskId,
-          calendar_date: $('[data-api-input="calendar_date"]').val(),
-          task_title: $('[data-api-input="task_title"]').val(),
-          task_message: $('[data-api-input="task_message"]').val(),
-          assigned_to_user: $('[data-api-input="assigned_to_user"]').val()
+          calendar_date: $form.find('[data-api-input="calendar_date"]').val(),
+          task_title: $form.find('[data-api-input="task_title"]').val(),
+          task_message: $form.find('[data-api-input="task_message"]').val(),
+          assigned_to_user: $form.find('[data-api-input="assigned_to_user"]').val()
         };
 
         $.ajax({
