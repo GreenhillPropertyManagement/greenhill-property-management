@@ -767,7 +767,7 @@ function loadAssociatedTasks() {
 
       tasks.forEach(task => {
         const $task = $(`
-          <div modal="new-task" element="modal" class="profile-task-item" id="${task.id}">
+          <div modal="update-task" element="modal" class="profile-task-item" id="${task.id}">
             <div data-task="date" class="system-text__small"></div>
             <div data-task="title" class="system-text__main task"></div>
             <div class="profile-task__created-by">
