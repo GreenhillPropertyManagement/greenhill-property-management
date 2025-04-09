@@ -1,12 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() { 
-
   $('#calendar').click(function(){
     calendarInit();
   });
-  
-
 });
-
 
 function calendarInit() {
   const calendarTitle = document.querySelector('.calendar__title');
@@ -76,7 +72,6 @@ function calendarInit() {
       });
 
       filteredEvents.forEach(event => {
-        // Skip task events not created by this user
         if (event.is_task && String(event.created_by) !== String(userRecId)) return;
 
         let eventTemplate;
@@ -153,7 +148,6 @@ function calendarInit() {
         });
 
         for (const event of eventsForDay) {
-          // Skip task events not created by this user
           if (event.is_task && String(event.created_by) !== String(userRecId)) continue;
 
           let eventTemplate;
@@ -236,3 +230,81 @@ function calendarInit() {
     loadCalendarEvents();
   });
 }
+
+// ✅ Global update + delete handlers
+$(document).on('submit', '[data-api-form="update-task"]', function (e) {
+  e.preventDefault();
+
+  if (!window.selectedTaskId) {
+    alert('No task selected to update.');
+    return;
+  }
+
+  $('.loader').css('display', 'flex');
+
+  const $form = $('[data-api-form="update-task"]');
+  const formData = {
+    task_id: window.selectedTaskId,
+    calendar_date: $form.find('[data-api-input="calendar_date"]').val(),
+    task_title: $form.find('[data-api-input="task_title"]').val(),
+    task_message: $form.find('[data-api-input="task_message"]').val(),
+    assigned_to_user: $form.find('[data-api-input="assigned_to_user"]').val()
+  };
+
+  $.ajax({
+    url: localStorage.baseUrl + 'api:RqXDqOO9/edit_task',
+    type: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + localStorage.authToken
+    },
+    data: formData,
+    success: function () {
+      alert('Task updated!');
+      $('.modal__block').hide();
+      $('.loader').hide();
+      window.selectedTaskId = null;
+      calendarInit(); // refresh calendar
+    },
+    error: function () {
+      alert('An error occurred while updating the task.');
+      $('.modal__block').hide();
+      $('.loader').hide();
+    }
+  });
+});
+
+$(document).on('click', '[api-button="delete-task"]', function (e) {
+  e.preventDefault();
+
+  if (!window.selectedTaskId) {
+    alert('No task selected to delete.');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to delete this task?')) return;
+
+  $('.loader').css('display', 'flex');
+
+  $.ajax({
+    url: localStorage.baseUrl + 'api:RqXDqOO9/delete_task',
+    type: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + localStorage.authToken
+    },
+    data: {
+      task_id: window.selectedTaskId
+    },
+    success: function () {
+      alert('Task deleted!');
+      $('.modal__block').hide();
+      $('.loader').hide();
+      window.selectedTaskId = null;
+      calendarInit();
+    },
+    error: function () {
+      alert('An error occurred while deleting the task.');
+      $('.modal__block').hide();
+      $('.loader').hide();
+    }
+  });
+});
