@@ -791,8 +791,23 @@ function loadAssociatedTasks() {
           // Target inputs by data-api-input attributes
           $('[data-api-input="calendar_date"]').val(clickedTask.calendar_date || '');
           $('[data-api-input="task_title"]').val(clickedTask.task_title || '');
-          $('[data-api-input="assigned_to_user"]').val(clickedTask.assigned_to_user || '');
           $('[data-api-input="task_message"]').val(clickedTask.task_message || '');
+          const $userSelect = $('[data-api-input="assigned_to_user"]');
+
+          // First, check if the option exists
+          if ($userSelect.find(`option[value="${clickedTask.assigned_to_user}"]`).length === 0) {
+            // If not, append it
+            $userSelect.append(
+              $('<option>', {
+                value: clickedTask.assigned_to_user,
+                text: clickedTask.display_name,
+                selected: true
+              })
+            );
+          } else {
+            // If it exists, just select it
+            $userSelect.val(clickedTask.assigned_to_user);
+          }
         });
 
         $container.append($task);
