@@ -784,14 +784,15 @@ function loadAssociatedTasks() {
 
         // Attach click handler for this task item
         $task.on('click', function () {
-          const clickedTask = $(this).data('task'); 
+          const clickedTask = $(this).data('task');
         
           selectedTaskId = clickedTask.id;
         
-          $('#calendar_date').val(clickedTask.calendar_date || '');
-          $('#task_title').val(clickedTask.task_title || '');
-          $('#assigned_to_user').val(clickedTask.assigned_to_user || '');
-          $('[name="field"]').val(clickedTask.task_message || '');
+          // Target inputs by data-api-input attributes
+          $('[data-api-input="calendar_date"]').val(clickedTask.calendar_date || '');
+          $('[data-api-input="task_title"]').val(clickedTask.task_title || '');
+          $('[data-api-input="assigned_to_user"]').val(clickedTask.assigned_to_user || '');
+          $('[data-api-input="task_message"]').val(clickedTask.task_message || '');
         });
 
         $container.append($task);
