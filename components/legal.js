@@ -90,8 +90,7 @@ function getLegalCase() {
   $(".loader").css("display", "flex");
 
   $.ajax({
-    url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_cases",
-    type: "GET",
+    url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
     },
