@@ -144,8 +144,8 @@ function getLegalCase() {
       user_id: parseInt(userId)
     },
     success: function (response) {
-      if (response.notes) {
-        quillLegal.setContents(response.notes);
+      if (response.legal_case.notes) {
+        quillLegal.setContents(response.legal_case.notes);
       } else {
         console.warn("No legal notes found for this user.");
         quillLegal.setContents([]); // or leave empty
@@ -183,7 +183,7 @@ function getLegalCase() {
           }
         });
       }
-      updateLegalStatusUI(response.status);
+      updateLegalStatusUI(response.legal_case.status);
 
     },
     complete: function () {
@@ -195,3 +195,5 @@ function getLegalCase() {
     }
   });
 }
+
+
