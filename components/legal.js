@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("file_name", file.name);
     formData.append("user_id", parseInt(userId)); 
 
     $(".loader").css("display", "flex");
