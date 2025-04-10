@@ -1,6 +1,13 @@
 var quillLegal;
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  // when legal tab is clicked
+  $(document).on("click", '[api-button="get-legal-case"]', function () {
+    getLegalCase();
+  });
+
+
  // Initialize Quill directly on the .legal__quill-wrapper element
  quillLegal = new Quill(".legal__quill-wrapper", {
     theme: "snow",
@@ -71,3 +78,41 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+function getLegalCase() {
+  const userId = localStorage.userProfileRecId;
+
+  if (!userId) {
+    console.error("User ID not found in localStorage.");
+    return;
+  }
+
+  $(".loader").css("display", "flex");
+
+  $.ajax({
+    url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_cases",
+    type: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      user_id: parseInt(userId)
+    },
+    success: function (response) {
+      if (response.notes) {
+        quillLegal.setContents(response.notes);
+      } else {
+        console.warn("No legal notes found for this user.");
+        quillLegal.setContents([]); // or leave empty
+      }
+    },
+    complete: function () {
+      $(".loader").hide();
+    },
+    error: function (xhr, status, error) {
+      console.error("Error fetching legal notes:", error);
+      alert("There was an error loading the notes.");
+    }
+  });
+}
+
