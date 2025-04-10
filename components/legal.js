@@ -30,37 +30,44 @@ document.addEventListener("DOMContentLoaded", function () {
   // Save button handler
   $(".quill__save-wrapper .cta-button").click(function (e) {
     e.preventDefault();
-
+  
+    // Get content from the legal Quill instance
     const content = JSON.stringify(quillLegal.getContents());
-
-    if (!legalCaseId) {
-      alert("No legal case ID found in the URL.");
+  
+    // Grab user ID from localStorage
+    const userId = localStorage.userProfileRecId;
+  
+    // Quick validation
+    if (!userId) {
+      alert("User ID not found in localStorage.");
       return;
     }
-
+  
+    // Optional loader
     $(".loader").css("display", "flex");
-
+  
+    // AJAX request
     $.ajax({
-      url: localStorage.baseUrl + "/api:_jc-29NR/save_legal_case_notes",
+      url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       type: "POST",
       contentType: "application/json",
       headers: {
-        Authorization: "Bearer " + localStorage.authToken,
+        Authorization: "Bearer " + localStorage.authToken, // include auth if needed
       },
       data: JSON.stringify({
-        case_id: legalCaseId,
-        notes: content,
+        legal_quill_content: content,
+        user_id: parseInt(userId)
       }),
-      success: function () {
-        alert("Legal notes saved!");
+      success: function (response) {
+        alert("Legal notes saved successfully!");
       },
       complete: function () {
         $(".loader").hide();
       },
-      error: function (err) {
-        console.error("Save error:", err);
-        alert("Error saving notes.");
-      },
+      error: function (xhr, status, error) {
+        console.error("Error saving legal notes:", error);
+        alert("There was an error saving the notes.");
+      }
     });
   });
 });
