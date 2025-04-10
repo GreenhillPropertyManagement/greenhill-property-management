@@ -40,7 +40,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Save button handler
+  // Upload File 
+  $("#legal-file-input").on("change", function () {
+    const file = this.files[0];
+    const userId = localStorage.userProfileRecId;
+
+    if (!file || !userId) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("user_id", parseInt(userId)); 
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc", 
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      success: function (res) {
+        alert("File uploaded successfully!");
+        // TODO: Re-render files list here
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function (xhr, status, err) {
+        console.error("Upload failed:", err);
+        alert("There was an error uploading the file.");
+      }
+    });
+  });
+
+
+  // Save Notes Button Handler
   $(".quill__save-wrapper .cta-button").click(function (e) {
     e.preventDefault();
   
@@ -85,42 +122,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-  // Upload File 
-
-  $("#legal-file-input").on("change", function () {
-    const file = this.files[0];
-    const userId = localStorage.userProfileRecId;
-
-    if (!file || !userId) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("user_id", parseInt(userId)); 
-
-    $(".loader").css("display", "flex");
-
-    $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc", 
-      type: "POST",
-      data: formData,
-      processData: false,
-      contentType: false,
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      success: function (res) {
-        alert("File uploaded successfully!");
-        // TODO: Re-render files list here
-      },
-      complete: function () {
-        $(".loader").hide();
-      },
-      error: function (xhr, status, err) {
-        console.error("Upload failed:", err);
-        alert("There was an error uploading the file.");
-      }
-    });
-  });
 
 function getLegalCase() {
   const userId = localStorage.userProfileRecId;
