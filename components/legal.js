@@ -104,6 +104,41 @@ function getLegalCase() {
         console.warn("No legal notes found for this user.");
         quillLegal.setContents([]); // or leave empty
       }
+
+      const legalStatusStages = [
+        "Case Opened",
+        "Notice of Default Sent",
+        "Initiation of Case",
+        "Litigation",
+        "Judgement Obtained",
+        "Eviction"
+      ];
+      
+      function updateLegalStatusUI(currentStatus) {
+        // If status is "Inactive", remove all active classes and exit
+        if (currentStatus === "Inactive") {
+          $(".legal__status-fill-bar").removeClass("active");
+          return;
+        }
+      
+        let found = false;
+      
+        $(".legal__status-block").each(function () {
+          const statusText = $(this).find(".system-text__small.legal").text().trim();
+      
+          if (!found) {
+            $(this).find(".legal__status-fill-bar").addClass("active");
+          } else {
+            $(this).find(".legal__status-fill-bar").removeClass("active");
+          }
+      
+          if (statusText === currentStatus) {
+            found = true;
+          }
+        });
+      }
+      updateLegalStatusUI(response.status);
+      
     },
     complete: function () {
       $(".loader").hide();
@@ -114,4 +149,3 @@ function getLegalCase() {
     }
   });
 }
-
