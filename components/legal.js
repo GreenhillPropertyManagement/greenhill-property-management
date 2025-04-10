@@ -78,29 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Render legal files
-  const $container = $(".legal__files-container");
-  const $template = $container.find(".legal_file_item").first().clone();
-
-  // Clear current list
-  $container.empty();
-
-  // Loop through legal files
-  response.legal_files.forEach((file) => {
-    const $item = $template.clone();
-
-    // Update the text with file title
-    $item.find(".system-text__small").text(file.title || "Untitled Document");
-
-    // Add click handler to open in new tab
-    $item.css("cursor", "pointer").on("click", function () {
-      window.open(file.path_url, "_blank");
-    });
-
-    // Append to container
-    $container.append($item);
-  });
-
 
   // Save Notes Button Handler
   $(".quill__save-wrapper .cta-button").click(function (e) {
@@ -167,6 +144,8 @@ function getLegalCase() {
       user_id: parseInt(userId)
     },
     success: function (response) {
+
+      // render legal notes
       if (response.legal_case.notes) {
         quillLegal.setContents(response.legal_case.notes);
       } else {
@@ -183,6 +162,7 @@ function getLegalCase() {
         "Eviction"
       ];
       
+      // update status progress bar
       function updateLegalStatusUI(currentStatus) {
         // If status is "Inactive", remove all active classes and exit
         if (currentStatus === "Inactive") {
@@ -207,6 +187,30 @@ function getLegalCase() {
         });
       }
       updateLegalStatusUI(response.legal_case.status);
+
+      // Render legal files
+      const $container = $(".legal__files-container");
+      const $template = $container.find(".legal_file_item").first().clone();
+
+      // Clear current list
+      $container.empty();
+
+      // Loop through legal files
+      response.legal_files.forEach((file) => {
+        const $item = $template.clone();
+
+        // Update the text with file title
+        $item.find(".system-text__small").text(file.title || "Untitled Document");
+
+        // Add click handler to open in new tab
+        $item.css("cursor", "pointer").on("click", function () {
+          window.open(file.path_url, "_blank");
+        });
+
+        // Append to container
+        $container.append($item);
+      });
+
 
     },
     complete: function () {
