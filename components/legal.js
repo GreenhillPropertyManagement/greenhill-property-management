@@ -44,16 +44,16 @@ document.addEventListener("DOMContentLoaded", function () {
   $("#legal-file-input").on("change", function () {
     const file = this.files[0];
     const userId = localStorage.userProfileRecId;
-
+  
     if (!file || !userId) return;
-
+  
     const formData = new FormData();
     formData.append("file", file);
     formData.append("file_name", file.name);
-    formData.append("user_id", parseInt(userId)); 
-
+    formData.append("assignee", parseInt(userId));
+  
     $(".loader").css("display", "flex");
-
+  
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc", 
       type: "POST",
@@ -65,10 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function (res) {
         alert("File uploaded successfully!");
-        // TODO: Re-render files list here
+        // Optional: reload file list here
       },
       complete: function () {
         $(".loader").hide();
+        $("#legal-file-input").val(""); 
       },
       error: function (xhr, status, err) {
         console.error("Upload failed:", err);
