@@ -193,9 +193,9 @@ function getLegalCase() {
 
       const $container = $(".legal__files-container");
       const $template = $container.find(".legal_file_item").first().clone();
-    
+
       $container.empty();
-    
+
       if (!response.legal_files || response.legal_files.length === 0) {
         $container.append(`
           <div class="legal_file_item no-files">
@@ -204,13 +204,16 @@ function getLegalCase() {
         `);
         return;
       }
-    
+
       response.legal_files.forEach((file) => {
         const $item = $template.clone();
+
+        $item.attr("id", file.id); 
         $item.find(".system-text__small").text(file.title || "Untitled Document");
         $item.css("cursor", "pointer").on("click", function () {
           window.open(file.path_url, "_blank");
         });
+
         $container.append($item);
       });
 
