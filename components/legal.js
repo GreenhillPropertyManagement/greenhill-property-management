@@ -36,13 +36,18 @@ document.addEventListener("DOMContentLoaded", function () {
   // Safe Save button handler
   $(document).off("click", ".quill__save-wrapper .cta-button").on("click", ".quill__save-wrapper .cta-button", function (e) {
     e.preventDefault();
-    const role = $("[data-profile='user_role']").text().trim().toLowerCase();
-    const content = quillInstances[role]?.getContents() || { ops: [] };
+
+    const role = $(this).closest('[data-legal-tab]').attr('data-legal-tab');
     const userId = localStorage.userProfileRecId;
+    const editor = quillInstances[role];
 
-    if (!userId) return alert("User ID not found");
+    if (!editor || !userId) {
+      alert("Editor not initialized or user ID missing");
+      return;
+    }
 
-    console.log("Saving content:", content); // Debug log
+    const content = editor.getContents();
+    console.log("📝 Saving for:", role, content);
 
     $(".loader").css("display", "flex");
 
@@ -85,7 +90,7 @@ function getLegalCase(roleOverride = null) {
       initQuillIfNeeded(role);
 
       if (quillInstances[role]) {
-        quillInstances[role].setContents({ ops: [] }); // reset first
+        quillInstances[role].setContents({ ops: [] });
         const contents = res.legal_case.notes?.ops ? res.legal_case.notes : { ops: [] };
         quillInstances[role].setContents(contents);
       }
