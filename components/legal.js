@@ -10,7 +10,6 @@ function initQuillIfNeeded(role) {
   }
 }
 
-
 function renderLegalFiles($section, files) {
   const $container = $section.find(".legal__files-container");
   const $template = $container.find(".legal_file_item").first().clone();
@@ -97,8 +96,6 @@ function getLegalCase(roleOverride = null) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-
-
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
@@ -118,26 +115,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Delete File Func
-
   $(document).on("click", ".file-delete", function (e) {
     e.stopPropagation();
-  
+
     const $fileItem = $(this).closest(".legal_file_item");
     const fileId = $fileItem.attr("id");
     const userId = localStorage.userProfileRecId;
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-  
+
     if (!fileId || !userId) {
       alert("Missing file ID or user ID.");
       return;
     }
-  
+
     if (!confirm("Are you sure you want to delete this file?")) return;
-  
+
     $(".loader").css("display", "flex");
-  
+
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
       type: "POST",
@@ -151,8 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }),
       success: function () {
         alert("File deleted successfully!");
-  
-        // Refresh file list for the active tab
+
         $.ajax({
           url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
           type: "GET",
@@ -176,8 +170,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
-  // Upload File Func 
 
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
@@ -210,7 +202,6 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function () {
         alert("File uploaded successfully!");
-        // Refresh only files for the current role
         $.ajax({
           url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
           type: "GET",
@@ -235,8 +226,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
-  // Save Notes Func
 
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
@@ -276,4 +265,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
