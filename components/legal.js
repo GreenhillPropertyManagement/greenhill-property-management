@@ -33,6 +33,7 @@ function renderLegalFiles($section, files) {
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
 
     // Delete file func
+    $item.find(".file-delete").attr("data-file-id", file.id); 
 
     $item.find(".file-delete").off("click").on("click", function (e) {
       e.stopPropagation();
