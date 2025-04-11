@@ -32,7 +32,9 @@ function renderLegalFiles($section, files) {
     $item.find(".file_name").text(file.title || "Untitled Document");
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
 
-    $item.find(".file-delete").on("click", function (e) {
+    // Delete file func
+
+    $item.find(".file-delete").off("click").on("click", function (e) {
       e.stopPropagation();
 
       if (!file.id || !userId) {
