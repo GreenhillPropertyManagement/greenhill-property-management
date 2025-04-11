@@ -12,7 +12,12 @@ function initQuillIfNeeded(role) {
 
 function renderLegalFiles($section, files) {
   const $container = $section.find(".legal__files-container");
-  const $template = $container.find(".legal_file_item").first().clone(false, false);
+  let $template = $container.find(".legal_file_item").first();
+if (!$template.length) {
+  // Create a basic default structure if no file item exists yet
+  $template = $(`<div class="legal_file_item"><div class="file_name"></div><div class="file-delete">🗑️</div></div>`);
+}
+$template = $template.clone(false, false);
   $container.empty();
 
   if (!Array.isArray(files) || files.length === 0) {
