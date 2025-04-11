@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Save button
-  $(document).on("click", ".quill__save-wrapper .cta-button", function (e) {
+  // Safe Save button handler
+  $(document).off("click", ".quill__save-wrapper .cta-button").on("click", ".quill__save-wrapper .cta-button", function (e) {
     e.preventDefault();
     const role = $("[data-profile='user_role']").text().trim().toLowerCase();
     const content = JSON.stringify(quillInstances[role]?.getContents() || { ops: [] });
@@ -83,6 +83,7 @@ function getLegalCase(roleOverride = null) {
       initQuillIfNeeded(role);
 
       if (quillInstances[role]) {
+        quillInstances[role].setContents({ ops: [] }); // reset first
         const contents = res.legal_case.notes?.ops ? res.legal_case.notes : { ops: [] };
         quillInstances[role].setContents(contents);
       }
@@ -105,7 +106,6 @@ function getLegalCase(roleOverride = null) {
       });
 
       const currentStatus = res.legal_case.status.toLowerCase();
-
       if (currentStatus === "inactive") {
         $section.find(".legal__status-fill-bar").removeClass("active");
       } else {
