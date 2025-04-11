@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
-      type: "DELETE",
+      type: "POST",
       contentType: "application/json",
       headers: {
         Authorization: "Bearer " + localStorage.authToken,
