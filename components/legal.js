@@ -121,6 +121,46 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Change legal status
+  $(document).on("change", '[data="legal-status-select"]', function () {
+    const selectedStatus = $(this).val();
+    const userId = localStorage.userProfileRecId;
+  
+    if (!userId || !selectedStatus) {
+      alert("Missing user ID or selected status.");
+      return;
+    }
+  
+    const confirmed = confirm(`Are you sure you want to update the status to "${selectedStatus}"?`);
+    if (!confirmed) return;
+  
+    $(".loader").css("display", "flex");
+  
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/update_status",
+      type: "POST",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify({
+        status: selectedStatus,
+        user_id: parseInt(userId)
+      }),
+      success: function () {
+        alert("Status updated successfully!");
+        getLegalCase(); // optional: refresh the UI
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function (xhr, status, error) {
+        console.error("Error updating status:", error);
+        alert("There was an error updating the status.");
+      }
+    });
+  });
+
 
   // Save Notes Button Handler
   $(".quill__save-wrapper .cta-button").click(function (e) {
