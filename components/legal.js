@@ -33,6 +33,51 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Upload file button triggers the correct input
+  $(document).on("click", ".upload-file", function () {
+    const $section = $(this).closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab");
+    $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
+  });
+
+  // Handle file input change and upload
+  $(document).on("change", ".file-upload-input", function () {
+    const file = this.files[0];
+    const role = $(this).data("upload-role");
+    const userId = localStorage.userProfileRecId;
+
+    if (!file || !role || !userId) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("file_name", file.name);
+    formData.append("assignee", parseInt(userId));
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc",
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      success: function () {
+        alert("File uploaded successfully!");
+        getLegalCase(role);
+      },
+      complete: function () {
+        $(".loader").hide();
+        $(this).val("");
+      },
+      error: function () {
+        alert("There was an error uploading the file.");
+      }
+    });
+  });
+
   // Scoped Save button handler
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
