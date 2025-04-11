@@ -25,58 +25,12 @@ function renderLegalFiles($section, files) {
   files.forEach(file => {
     const $item = $(`<div class="legal_file_item">
       <div class="system-text__small file_name"></div>
-      <div class="file-delete">🗑️</div>
+      <div class="file-delete" data-file-id="${file.id}">🗑️</div>
     </div>`);
 
     $item.attr("id", file.id);
     $item.find(".file_name").text(file.title || "Untitled Document");
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
-
-    // Delete file func
-    $item.find(".file-delete").attr("data-file-id", file.id); 
-
-    $item.find(".file-delete").off("click").on("click", function (e) {
-      e.stopPropagation();
-    
-      const $btn = $(this);
-      const fileId = $btn.attr("data-file-id");
-      const $section = $btn.closest("[data-legal-tab]");
-      const role = $section.attr("data-legal-tab");
-      const userId = localStorage.userProfileRecId;
-    
-      if (!fileId || !userId) {
-        alert("Missing file ID or user ID.");
-        return;
-      }
-    
-      if (!confirm("Are you sure you want to delete this file?")) return;
-    
-      $(".loader").css("display", "flex");
-    
-      $.ajax({
-        url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
-        type: "POST",
-        contentType: "application/json",
-        headers: {
-          Authorization: "Bearer " + localStorage.authToken,
-        },
-        data: JSON.stringify({
-          file_id: fileId,
-          user_id: parseInt(userId),
-        }),
-        success: function () {
-          alert("File deleted successfully!");
-          getLegalCase(role);
-        },
-        complete: function () {
-          $(".loader").hide();
-        },
-        error: function () {
-          $(".loader").hide();
-          alert("There was an error deleting the file.");
-        }
-      });
-    });
 
     $container.append($item);
   });
@@ -264,6 +218,50 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       error: function () {
         alert("Failed to save notes.");
+      }
+    });
+  });
+
+  // ✅ Global delete handler (only binds once)
+  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
+    e.stopPropagation();
+
+    const $btn = $(this);
+    const fileId = $btn.attr("data-file-id");
+    const $section = $btn.closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab");
+    const userId = localStorage.userProfileRecId;
+
+    if (!fileId || !userId) {
+      alert("Missing file ID or user ID.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this file?")) return;
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
+      type: "POST",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify({
+        file_id: fileId,
+        user_id: parseInt(userId),
+      }),
+      success: function () {
+        alert("File deleted successfully!");
+        getLegalCase(role);
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function () {
+        $(".loader").hide();
+        alert("There was an error deleting the file.");
       }
     });
   });
