@@ -184,23 +184,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  let saveLock = false;
+
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
+    if (saveLock) return; // prevent multiple triggers
+    saveLock = true;
+  
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
-
+  
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
+      saveLock = false;
       return;
     }
-
+  
     const content = editor.getContents();
-    console.log("📝 Saving for:", role, content);
-
     $(".loader").css("display", "flex");
-
+  
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
@@ -215,9 +219,11 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
+        saveLock = false; // allow next click
       },
       error: function () {
         alert("Failed to save notes.");
+        saveLock = false;
       }
     });
   });
