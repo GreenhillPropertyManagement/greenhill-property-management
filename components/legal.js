@@ -207,20 +207,26 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function () {
         alert("File uploaded successfully!");
-        $.ajax({
-          url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
-          type: "GET",
-          headers: {
-            Authorization: "Bearer " + localStorage.authToken
-          },
-          data: {
-            user_id: parseInt(userId)
-          },
-          success: function (res) {
-            const $section = $(`[data-legal-tab='${role}']`);
-            renderLegalFiles($section, res.legal_files || []);
-          }
-        });
+
+        setTimeout(() => {
+          $.ajax({
+            url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
+            type: "GET",
+            headers: {
+              Authorization: "Bearer " + localStorage.authToken
+            },
+            data: {
+              user_id: parseInt(userId)
+            },
+            success: function (res) {
+              const $section = $(`[data-legal-tab='${role}']`);
+              renderLegalFiles($section, res.legal_files || []);
+            },
+            complete: function () {
+              $(".loader").hide();
+            }
+          });
+        }, 500); // wait half a second before refreshing file list
       },
       complete: function () {
         $(".loader").hide();
