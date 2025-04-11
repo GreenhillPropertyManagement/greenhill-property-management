@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function (res) {
         alert("File uploaded successfully!");
-        // Optional: reload file list here
+        getLegalCase();
       },
       complete: function () {
         $(".loader").hide();
