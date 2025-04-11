@@ -78,6 +78,49 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Delete Legal File
+  $(document).on("click", ".file-delete", function (e) {
+    e.stopPropagation(); // prevent file open
+
+    const $fileItem = $(this).closest(".legal_file_item");
+    const fileId = $fileItem.attr("id");
+    const userId = localStorage.userProfileRecId;
+
+    if (!fileId || !userId) {
+      alert("Missing file ID or user ID.");
+      return;
+    }
+
+    const confirmed = confirm("Are you sure you want to delete this file?");
+    if (!confirmed) return;
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
+      type: "DELETE",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify({
+        file_id: fileId,
+        user_id: parseInt(userId)
+      }),
+      success: function () {
+        alert("File deleted successfully!");
+        getLegalCase(); // Refresh the full list of files
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function (xhr, status, error) {
+        console.error("Error deleting file:", error);
+        alert("There was an error deleting the file.");
+      }
+    });
+  });
+
 
   // Save Notes Button Handler
   $(".quill__save-wrapper .cta-button").click(function (e) {
