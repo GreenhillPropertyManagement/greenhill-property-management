@@ -12,12 +12,12 @@ function initQuillIfNeeded(role) {
 
 function renderLegalFiles($section, files) {
   const $container = $section.find(".legal__files-container");
-  let $template = $container.find(".legal_file_item").first();
-if (!$template.length) {
-  // Create a basic default structure if no file item exists yet
-  $template = $(`<div class="legal_file_item"><div class="file_name"></div><div class="file-delete">🗑️</div></div>`);
-}
-$template = $template.clone(false, false);
+  const $existingTemplate = $container.find(".legal_file_item").first();
+
+  const rawTemplate = $existingTemplate.length
+    ? $existingTemplate
+    : $(`<div class="legal_file_item"><div class="file_name"></div><div class="file-delete">🗑️</div></div>`);
+
   $container.empty();
 
   if (!Array.isArray(files) || files.length === 0) {
@@ -26,7 +26,7 @@ $template = $template.clone(false, false);
   }
 
   files.forEach(file => {
-    const $item = $template.clone(false, false);
+    const $item = rawTemplate.clone(false, false);
     $item.attr("id", file.id);
     $item.find(".file_name").text(file.title || "Untitled Document");
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
               $(".loader").hide();
             }
           });
-        }, 500); // wait half a second before refreshing file list
+        }, 500);
       },
       complete: function () {
         $(".loader").hide();
