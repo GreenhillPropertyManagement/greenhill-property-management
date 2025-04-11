@@ -230,19 +230,21 @@ function getLegalCase() {
           $(".legal__status-fill-bar").removeClass("active");
           return;
         }
-
-        let found = false;
+      
+        let reachedCurrent = false;
+      
         $(".legal__status-block").each(function () {
           const statusText = $(this).find(".system-text__small.legal").text().trim();
-
-          if (!found) {
+      
+          if (!reachedCurrent) {
             $(this).find(".legal__status-fill-bar").addClass("active");
           } else {
             $(this).find(".legal__status-fill-bar").removeClass("active");
           }
-
+      
+          // Stop activating after this block if it's the current status
           if (statusText.toLowerCase() === currentStatus.toLowerCase()) {
-            found = true;
+            reachedCurrent = true;
           }
         });
       }
