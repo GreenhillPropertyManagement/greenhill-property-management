@@ -222,7 +222,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // ✅ Global delete handler (only binds once)
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
 
@@ -262,6 +261,47 @@ document.addEventListener("DOMContentLoaded", function () {
       error: function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
+      }
+    });
+  });
+
+  // ✅ Status dropdown change
+  $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
+    const newStatus = $(this).val();
+    const $section = $(this).closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab");
+    const userId = localStorage.userProfileRecId;
+
+    if (!newStatus || !userId) {
+      alert("Missing status or user ID.");
+      return;
+    }
+
+    if (!confirm(`Change legal case status to "${newStatus}"?`)) return;
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/update_status", // Replace if different
+      type: "POST",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify({
+        status: newStatus,
+        user_id: parseInt(userId),
+      }),
+      success: function () {
+        alert("Status updated successfully!");
+        getLegalCase(role);
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function () {
+        $(".loader").hide();
+        alert("There was an error updating the status.");
       }
     });
   });
