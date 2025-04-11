@@ -10,18 +10,34 @@ function initQuillIfNeeded(role) {
   }
 }
 
+function renderLegalFiles($section, files) {
+  const $container = $section.find(".legal__files-container");
+  const $template = $container.find(".legal_file_item").first().clone();
+  $container.empty();
+
+  if (!Array.isArray(files) || files.length === 0) {
+    $container.append(`<div class="legal_file_item no-files"><div class="system-text__small">You have no files uploaded.</div></div>`);
+    return;
+  }
+
+  files.forEach(file => {
+    const $item = $template.clone();
+    $item.attr("id", file.id);
+    $item.find(".file_name").text(file.title || "Untitled Document");
+    $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
+    $container.append($item);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-  // Click handler for tenant tab
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
 
-  // Click handler for landlord tab
   $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
     getLegalCase("landlord");
   });
 
-  // Tab click fallback (if needed)
   $(document).on('click', '.w-tab-link', function () {
     const tabName = $(this).attr('data-w-tab')?.toLowerCase();
     if (tabName === 'legal') {
@@ -33,14 +49,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Upload file button triggers the correct input
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
     $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
   });
 
-  // Handle file input change and upload
   $(document).on("change", ".file-upload-input", function () {
     const file = this.files[0];
     const role = $(this).data("upload-role");
@@ -66,7 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function () {
         alert("File uploaded successfully!");
-        getLegalCase(role);
+        // Refresh only files for the current role
+        $.ajax({
+          url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
+          type: "GET",
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken
+          },
+          data: {
+            user_id: parseInt(userId)
+          },
+          success: function (res) {
+            const $section = $(`[data-legal-tab='${role}']`);
+            renderLegalFiles($section, res.legal_files || []);
+          }
+        });
       },
       complete: function () {
         $(".loader").hide();
@@ -78,10 +106,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Scoped Save button handler
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
-
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
@@ -174,22 +200,7 @@ function getLegalCase(roleOverride = null) {
         });
       }
 
-      const $files = $section.find(".legal__files-container");
-      const $template = $files.find(".legal_file_item").first().clone();
-      $files.empty();
-
-      if (!Array.isArray(res.legal_files) || res.legal_files.length === 0) {
-        $files.append(`<div class="legal_file_item no-files"><div class="system-text__small">You have no files uploaded.</div></div>`);
-        return;
-      }
-
-      res.legal_files.forEach(file => {
-        const $item = $template.clone();
-        $item.attr("id", file.id);
-        $item.find(".file_name").text(file.title || "Untitled Document");
-        $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
-        $files.append($item);
-      });
+      renderLegalFiles($section, res.legal_files || []);
     },
     complete: function () {
       $(".loader").hide();
