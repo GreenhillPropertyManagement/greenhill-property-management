@@ -204,6 +204,18 @@ function getLegalCase() {
         "Judgement Obtained",
         "Eviction"
       ];
+
+      // update status select field 
+      const $statusSelect = $('[data="legal-status-select"]');
+      $statusSelect.empty(); // Clear any existing options
+
+      // Add all status options
+      legalStatusStages.concat("Inactive").forEach((status) => {
+        const isSelected = status === response.legal_case.status;
+        const option = `<option value="${status}" ${isSelected ? "selected" : ""}>${status}</option>`;
+        $statusSelect.append(option);
+      });
+      
       
       // update status progress bar
       function updateLegalStatusUI(currentStatus) {
