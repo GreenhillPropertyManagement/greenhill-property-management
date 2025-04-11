@@ -22,7 +22,7 @@ function renderLegalFiles($section, files) {
   files.forEach(file => {
     // ✅ Always create a fresh template in the loop
     const $item = $(`<div class="legal_file_item">
-      <div class="file_name"></div>
+      <div class="system-text__small file_name"></div>
       <div class="file-delete">🗑️</div>
     </div>`);
 
