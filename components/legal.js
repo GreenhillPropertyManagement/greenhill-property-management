@@ -33,13 +33,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Safe Save button handler
-  $(document).off("click", ".quill__save-wrapper .cta-button").on("click", ".quill__save-wrapper .cta-button", function (e) {
+  // Scoped Save button handler
+  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
 
-    const role = $(this).closest('[data-legal-tab]').attr('data-legal-tab');
-    const userId = localStorage.userProfileRecId;
+    const $section = $(this).closest('[data-legal-tab]');
+    const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
+    const userId = localStorage.userProfileRecId;
 
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
