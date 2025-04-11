@@ -36,16 +36,22 @@ function renderLegalFiles($section, files) {
 
     $item.find(".file-delete").off("click").on("click", function (e) {
       e.stopPropagation();
-
-      if (!file.id || !userId) {
+    
+      const $btn = $(this);
+      const fileId = $btn.attr("data-file-id");
+      const $section = $btn.closest("[data-legal-tab]");
+      const role = $section.attr("data-legal-tab");
+      const userId = localStorage.userProfileRecId;
+    
+      if (!fileId || !userId) {
         alert("Missing file ID or user ID.");
         return;
       }
-
+    
       if (!confirm("Are you sure you want to delete this file?")) return;
-
+    
       $(".loader").css("display", "flex");
-
+    
       $.ajax({
         url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
         type: "POST",
@@ -54,7 +60,7 @@ function renderLegalFiles($section, files) {
           Authorization: "Bearer " + localStorage.authToken,
         },
         data: JSON.stringify({
-          file_id: file.id,
+          file_id: fileId,
           user_id: parseInt(userId),
         }),
         success: function () {
