@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Get active role from user role element in DOM
   const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+  const $section = $(`[data-legal-tab='${activeRole}']`);
 
   // When legal tab is clicked
   $(document).on("click", '[api-button="get-legal-case"]', function () {
@@ -16,12 +17,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // When upload file is clicked
-  $(document).on("click", ".upload-file", function () {
-    $("#legal-file-input").click(); // Trigger hidden file input
+  $section.on("click", ".upload-file", function () {
+    $section.find("#legal-file-input").click();
   });
 
   // Upload File 
-  $("#legal-file-input").on("change", function () {
+  $section.find("#legal-file-input").on("change", function () {
     const file = this.files[0];
     const userId = localStorage.userProfileRecId;
 
@@ -49,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
-        $("#legal-file-input").val(""); 
+        $section.find("#legal-file-input").val(""); 
       },
       error: function (xhr, status, err) {
         console.error("Upload failed:", err);
@@ -59,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete Legal File
-  $(document).on("click", ".file-delete", function (e) {
+  $section.on("click", ".file-delete", function (e) {
     e.stopPropagation();
 
     const $fileItem = $(this).closest(".legal_file_item");
@@ -102,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Change legal status
-  $(document).on("change", '[data="legal-status-select"]', function () {
+  $section.on("change", '[data="legal-status-select"]', function () {
     const selectedStatus = $(this).val();
     const userId = localStorage.userProfileRecId;
 
@@ -142,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Save Notes Button Handler
-  $(".quill__save-wrapper .cta-button").click(function (e) {
+  $section.find(".quill__save-wrapper .cta-button").click(function (e) {
     e.preventDefault();
 
     const userId = localStorage.userProfileRecId;
@@ -188,6 +189,9 @@ function getLegalCase() {
     return;
   }
 
+  const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+  const $section = $(`[data-legal-tab='${activeRole}']`);
+
   $(".loader").css("display", "flex");
 
   $.ajax({
@@ -210,12 +214,11 @@ function getLegalCase() {
 
       // Set notes in editor
       if (response.legal_case.notes && window.quillInstances) {
-        const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
         quillInstances[activeRole].setContents(response.legal_case.notes);
       }
 
       // Update status select field
-      const $statusSelect = $('[data="legal-status-select"]');
+      const $statusSelect = $section.find('[data="legal-status-select"]');
       $statusSelect.empty();
 
       legalStatusStages.concat("Inactive").forEach((status) => {
@@ -225,33 +228,34 @@ function getLegalCase() {
       });
 
       // Update status progress bar
-      function updateLegalStatusUI(currentStatus) {
+      function updateLegalStatusUI(currentStatus, role) {
+        const $statusWrapper = $(`[data-legal-tab='${role}']`);
+
         if (currentStatus === "Inactive") {
-          $(".legal__status-fill-bar").removeClass("active");
+          $statusWrapper.find(".legal__status-fill-bar").removeClass("active");
           return;
         }
-      
+
         let reachedCurrent = false;
-      
-        $(".legal__status-block").each(function () {
+        $statusWrapper.find(".legal__status-block").each(function () {
           const statusText = $(this).find(".system-text__small.legal").text().trim();
-      
+
           if (!reachedCurrent) {
             $(this).find(".legal__status-fill-bar").addClass("active");
           } else {
             $(this).find(".legal__status-fill-bar").removeClass("active");
           }
-      
-          // Stop activating after this block if it's the current status
+
           if (statusText.toLowerCase() === currentStatus.toLowerCase()) {
             reachedCurrent = true;
           }
         });
       }
-      updateLegalStatusUI(response.legal_case.status);
+
+      updateLegalStatusUI(response.legal_case.status, activeRole);
 
       // Render legal files
-      const $container = $(".legal__files-container");
+      const $container = $section.find(".legal__files-container");
       const $template = $container.find(".legal_file_item").first().clone();
       $container.empty();
 
