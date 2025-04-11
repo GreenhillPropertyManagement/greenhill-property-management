@@ -7,21 +7,25 @@ document.addEventListener("DOMContentLoaded", function () {
     quillInstances[role] = new Quill(this, { theme: "snow" });
   });
 
-  // Get active role from user role element in DOM
-  const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
-
-  function getActiveSection() {
-    return $(`[data-legal-tab='${activeRole}']`);
-  }
-
-  // When legal tab is clicked
+  // Trigger getLegalCase when either tab's legal button is clicked
   $(document).on("click", '[api-button="get-legal-case"]', function () {
     getLegalCase();
   });
 
-  // Upload File 
+  // Also trigger getLegalCase when switching tabs (Webflow tabs)
+  $('.w-tab-link').on('click', function () {
+    const isLandlord = $(this).text().toLowerCase().includes("landlord");
+    const isTenant = $(this).text().toLowerCase().includes("tenant");
+
+    if (isLandlord || isTenant) {
+      setTimeout(() => {
+        getLegalCase();
+      }, 100);
+    }
+  });
+
+  // Upload File
   $(document).on("change", "#legal-file-input", function () {
-    const $section = getActiveSection();
     const file = this.files[0];
     const userId = localStorage.userProfileRecId;
 
@@ -35,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $(".loader").css("display", "flex");
 
     $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc", 
+      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc",
       type: "POST",
       data: formData,
       processData: false,
@@ -49,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
-        $("#legal-file-input").val(""); 
+        $("#legal-file-input").val("");
       },
       error: function (xhr, status, err) {
         console.error("Upload failed:", err);
