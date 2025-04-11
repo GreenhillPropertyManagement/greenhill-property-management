@@ -1,5 +1,6 @@
+const quillInstances = {}; // Declare globally so all functions can access it
+
 document.addEventListener("DOMContentLoaded", function () {
-  const quillInstances = {};
 
   // Initialize Quill editors
   $("[data-role='quill']").each(function () {
