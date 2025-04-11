@@ -10,6 +10,7 @@ function initQuillIfNeeded(role) {
   }
 }
 
+
 function renderLegalFiles($section, files) {
   const $container = $section.find(".legal__files-container");
   const $template = $container.find(".legal_file_item").first().clone();
@@ -47,6 +48,63 @@ document.addEventListener("DOMContentLoaded", function () {
         getLegalCase(role);
       }, 100);
     }
+  });
+
+  $(document).on("click", ".file-delete", function (e) {
+    e.stopPropagation();
+  
+    const $fileItem = $(this).closest(".legal_file_item");
+    const fileId = $fileItem.attr("id");
+    const userId = localStorage.userProfileRecId;
+    const $section = $(this).closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab");
+  
+    if (!fileId || !userId) {
+      alert("Missing file ID or user ID.");
+      return;
+    }
+  
+    if (!confirm("Are you sure you want to delete this file?")) return;
+  
+    $(".loader").css("display", "flex");
+  
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
+      type: "POST",
+      contentType: "application/json",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify({
+        file_id: fileId,
+        user_id: parseInt(userId),
+      }),
+      success: function () {
+        alert("File deleted successfully!");
+  
+        // Refresh file list for the active tab
+        $.ajax({
+          url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
+          type: "GET",
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+          },
+          data: {
+            user_id: parseInt(userId),
+          },
+          success: function (res) {
+            renderLegalFiles($section, res.legal_files || []);
+          },
+          complete: function () {
+            $(".loader").hide();
+          }
+        });
+      },
+      error: function () {
+        $(".loader").hide();
+        alert("There was an error deleting the file.");
+      }
+    });
   });
 
   $(document).on("click", ".upload-file", function () {
