@@ -9,20 +9,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Get active role from user role element in DOM
   const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
-  const $section = $(`[data-legal-tab='${activeRole}']`);
+
+  function getActiveSection() {
+    return $(`[data-legal-tab='${activeRole}']`);
+  }
 
   // When legal tab is clicked
   $(document).on("click", '[api-button="get-legal-case"]', function () {
     getLegalCase();
   });
 
-  // When upload file is clicked
-  $section.on("click", ".upload-file", function () {
-    $section.find("#legal-file-input").click();
-  });
-
   // Upload File 
-  $section.find("#legal-file-input").on("change", function () {
+  $(document).on("change", "#legal-file-input", function () {
+    const $section = getActiveSection();
     const file = this.files[0];
     const userId = localStorage.userProfileRecId;
 
@@ -50,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
-        $section.find("#legal-file-input").val(""); 
+        $("#legal-file-input").val(""); 
       },
       error: function (xhr, status, err) {
         console.error("Upload failed:", err);
@@ -60,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete Legal File
-  $section.on("click", ".file-delete", function (e) {
+  $(document).on("click", ".file-delete", function (e) {
     e.stopPropagation();
 
     const $fileItem = $(this).closest(".legal_file_item");
@@ -103,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Change legal status
-  $section.on("change", '[data="legal-status-select"]', function () {
+  $(document).on("change", '[data="legal-status-select"]', function () {
     const selectedStatus = $(this).val();
     const userId = localStorage.userProfileRecId;
 
@@ -143,9 +142,10 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Save Notes Button Handler
-  $section.find(".quill__save-wrapper .cta-button").click(function (e) {
+  $(document).on("click", ".quill__save-wrapper .cta-button", function (e) {
     e.preventDefault();
 
+    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
     const userId = localStorage.userProfileRecId;
     const content = JSON.stringify(quillInstances[activeRole]?.getContents() || {});
 
@@ -180,110 +180,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
-function getLegalCase() {
-  const userId = localStorage.userProfileRecId;
-
-  if (!userId) {
-    console.error("User ID not found in localStorage.");
-    return;
-  }
-
-  const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
-  const $section = $(`[data-legal-tab='${activeRole}']`);
-
-  $(".loader").css("display", "flex");
-
-  $.ajax({
-    url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    data: {
-      user_id: parseInt(userId)
-    },
-    success: function (response) {
-      const legalStatusStages = [
-        "Case Opened",
-        "Notice of Default Sent",
-        "Initiation of Case",
-        "Litigation",
-        "Judgement Obtained",
-        "Eviction"
-      ];
-
-      // Set notes in editor
-      if (response.legal_case.notes && window.quillInstances) {
-        quillInstances[activeRole].setContents(response.legal_case.notes);
-      }
-
-      // Update status select field
-      const $statusSelect = $section.find('[data="legal-status-select"]');
-      $statusSelect.empty();
-
-      legalStatusStages.concat("Inactive").forEach((status) => {
-        const isSelected = status === response.legal_case.status;
-        const option = `<option value="${status}" ${isSelected ? "selected" : ""}>${status}</option>`;
-        $statusSelect.append(option);
-      });
-
-      // Update status progress bar
-      function updateLegalStatusUI(currentStatus, role) {
-        const $statusWrapper = $(`[data-legal-tab='${role}']`);
-
-        if (currentStatus === "Inactive") {
-          $statusWrapper.find(".legal__status-fill-bar").removeClass("active");
-          return;
-        }
-
-        let reachedCurrent = false;
-        $statusWrapper.find(".legal__status-block").each(function () {
-          const statusText = $(this).find(".system-text__small.legal").text().trim();
-
-          if (!reachedCurrent) {
-            $(this).find(".legal__status-fill-bar").addClass("active");
-          } else {
-            $(this).find(".legal__status-fill-bar").removeClass("active");
-          }
-
-          if (statusText.toLowerCase() === currentStatus.toLowerCase()) {
-            reachedCurrent = true;
-          }
-        });
-      }
-
-      updateLegalStatusUI(response.legal_case.status, activeRole);
-
-      // Render legal files
-      const $container = $section.find(".legal__files-container");
-      const $template = $container.find(".legal_file_item").first().clone();
-      $container.empty();
-
-      if (!response.legal_files || response.legal_files.length === 0) {
-        $container.append(`
-          <div class="legal_file_item no-files">
-            <div class="system-text__small">You have no files uploaded.</div>
-          </div>
-        `);
-        return;
-      }
-
-      response.legal_files.forEach((file) => {
-        const $item = $template.clone();
-        $item.attr("id", file.id);
-        $item.find(".file_name").text(file.title || "Untitled Document");
-        $item.find(".file_name").css("cursor", "pointer").on("click", function () {
-          window.open(file.path_url, "_blank");
-        });
-        $container.append($item);
-      });
-    },
-    complete: function () {
-      $(".loader").hide();
-    },
-    error: function (xhr, status, error) {
-      console.error("Error fetching legal notes:", error);
-      alert("There was an error loading the notes.");
-    }
-  });
-}
