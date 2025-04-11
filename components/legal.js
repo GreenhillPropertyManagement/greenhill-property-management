@@ -37,10 +37,12 @@ document.addEventListener("DOMContentLoaded", function () {
   $(document).off("click", ".quill__save-wrapper .cta-button").on("click", ".quill__save-wrapper .cta-button", function (e) {
     e.preventDefault();
     const role = $("[data-profile='user_role']").text().trim().toLowerCase();
-    const content = JSON.stringify(quillInstances[role]?.getContents() || { ops: [] });
+    const content = quillInstances[role]?.getContents() || { ops: [] };
     const userId = localStorage.userProfileRecId;
 
     if (!userId) return alert("User ID not found");
+
+    console.log("Saving content:", content); // Debug log
 
     $(".loader").css("display", "flex");
 
