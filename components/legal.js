@@ -104,17 +104,22 @@ function getLegalCase(roleOverride = null) {
         $dropdown.append(`<option value="${status}" ${selected}>${status}</option>`);
       });
 
-      let reached = false;
-      $section.find(".legal__status-block").each(function () {
-        const label = $(this).find(".system-text__small.legal").text().trim().toLowerCase();
-        const current = res.legal_case.status.toLowerCase();
-        if (!reached) {
-          $(this).find(".legal__status-fill-bar").addClass("active");
-        } else {
-          $(this).find(".legal__status-fill-bar").removeClass("active");
-        }
-        if (label === current) reached = true;
-      });
+      const currentStatus = res.legal_case.status.toLowerCase();
+
+      if (currentStatus === "inactive") {
+        $section.find(".legal__status-fill-bar").removeClass("active");
+      } else {
+        let reached = false;
+        $section.find(".legal__status-block").each(function () {
+          const label = $(this).find(".system-text__small.legal").text().trim().toLowerCase();
+          if (!reached) {
+            $(this).find(".legal__status-fill-bar").addClass("active");
+          } else {
+            $(this).find(".legal__status-fill-bar").removeClass("active");
+          }
+          if (label === currentStatus) reached = true;
+        });
+      }
 
       const $files = $section.find(".legal__files-container");
       const $template = $files.find(".legal_file_item").first().clone();
