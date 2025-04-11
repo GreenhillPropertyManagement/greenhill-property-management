@@ -207,13 +207,14 @@ function getLegalCase() {
 
       response.legal_files.forEach((file) => {
         const $item = $template.clone();
-
-        $item.attr("id", file.id); 
-        $item.find(".system-text__small").text(file.title || "Untitled Document");
-        $item.css("cursor", "pointer").on("click", function () {
+      
+        $item.attr("id", file.id);
+        $item.find(".file_name").text(file.title || "Untitled Document");
+      
+        $item.find(".file_name").css("cursor", "pointer").on("click", function () {
           window.open(file.path_url, "_blank");
         });
-
+      
         $container.append($item);
       });
 
