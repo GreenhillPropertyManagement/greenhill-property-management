@@ -145,8 +145,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $(".quill__save-wrapper .cta-button").click(function (e) {
     e.preventDefault();
 
-    const content = JSON.stringify(quillInstances[activeRole].getContents());
     const userId = localStorage.userProfileRecId;
+    const content = JSON.stringify(quillInstances[activeRole]?.getContents() || {});
 
     if (!userId) {
       alert("User ID not found in localStorage.");
@@ -241,7 +241,7 @@ function getLegalCase() {
             $(this).find(".legal__status-fill-bar").removeClass("active");
           }
 
-          if (statusText === currentStatus) {
+          if (statusText.toLowerCase() === currentStatus.toLowerCase()) {
             found = true;
           }
         });
