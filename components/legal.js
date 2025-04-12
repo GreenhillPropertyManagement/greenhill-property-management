@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
   handlersBound = true;
 
   // Save Notes
-  $(document)
+  $("[data-legal-tab]:visible")
   .off("click", "[data-tenant='save-content'], [data-landlord='save-content']")
   .on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
     e.preventDefault();
