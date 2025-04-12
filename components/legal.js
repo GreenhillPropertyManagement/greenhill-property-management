@@ -1,11 +1,12 @@
 const quillInstances = {}; // globally accessible for all tabs
 
 function initQuillIfNeeded(role) {
-  if (!quillInstances[role]) {
-    const el = document.querySelector(`[data-role='quill'][data-editor-role='${role}']`);
+  const lowerRole = role.toLowerCase();
+  if (!quillInstances[lowerRole]) {
+    const el = document.querySelector(`[data-role='quill'][data-editor-role='${lowerRole}']`);
     if (el) {
-      quillInstances[role] = new Quill(el, { theme: 'snow' });
-      console.log(`Initialized Quill for ${role}`);
+      quillInstances[lowerRole] = new Quill(el, { theme: 'snow' });
+      console.log(`Initialized Quill for ${lowerRole}`);
     }
   }
 }
@@ -19,9 +20,7 @@ function renderLegalFiles($section, files) {
     return;
   }
 
-  const role = $section.attr("data-legal-tab").toLowerCase(); // normalize to lowercase
-  const userId = localStorage.userProfileRecId;
-
+  const role = $section.attr("data-legal-tab").toLowerCase();
   const roleAttribute = role === "tenant"
     ? `data-tenant="delete-file"`
     : `data-landlord="delete-file"`;
@@ -41,7 +40,7 @@ function renderLegalFiles($section, files) {
 }
 
 function getLegalCase(roleOverride = null) {
-  const role = roleOverride || $("[data-profile='user_role']").text().trim().toLowerCase();
+  const role = (roleOverride || $("[data-profile='user_role']").text().trim()).toLowerCase();
   const $section = $(`[data-legal-tab='${role}']`);
   const userId = localStorage.userProfileRecId;
   if (!userId) return;
@@ -63,13 +62,8 @@ function getLegalCase(roleOverride = null) {
       }
 
       const legalStatusStages = [
-        "Case Opened",
-        "Notice of Default Sent",
-        "Initiation of Case",
-        "Litigation",
-        "Judgement Obtained",
-        "Eviction",
-        "Inactive"
+        "Case Opened", "Notice of Default Sent", "Initiation of Case",
+        "Litigation", "Judgement Obtained", "Eviction", "Inactive"
       ];
 
       const $dropdown = $section.find('[data="legal-status-select"]');
@@ -106,13 +100,12 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-// Run on Page Load
-
 document.addEventListener("DOMContentLoaded", function () {
+  // Save Notes
   $(document).on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
-    const role = $section.attr('data-legal-tab');
+    const role = $section.attr("data-legal-tab").toLowerCase();
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
 
@@ -122,8 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const content = editor.getContents();
-    console.log("📝 Saving for:", role, content);
-
     $(".loader").css("display", "flex");
 
     $.ajax({
@@ -143,17 +134,19 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       error: function () {
         alert("Failed to save notes.");
+        $(".loader").hide();
       }
     });
   });
 
+  // Delete File
   $(document).on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
     e.stopPropagation();
 
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
+    const role = $section.attr("data-legal-tab").toLowerCase();
     const userId = localStorage.userProfileRecId;
 
     if (!fileId || !userId) {
@@ -186,5 +179,92 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("There was an error deleting the file.");
       }
     });
+  });
+
+  // Status Dropdown
+  $(document).on("change", '[data="legal-status-select"]', function () {
+    const newStatus = $(this).val();
+    const $section = $(this).closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab").toLowerCase();
+    const userId = localStorage.userProfileRecId;
+
+    if (!newStatus || !userId) return;
+    if (!confirm(`Change legal case status to "${newStatus}"?`)) return;
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/update_status",
+      type: "POST",
+      contentType: "application/json",
+      headers: { Authorization: "Bearer " + localStorage.authToken },
+      data: JSON.stringify({
+        status: newStatus,
+        user_id: parseInt(userId)
+      }),
+      success: function () {
+        alert("Status updated successfully!");
+        getLegalCase(role);
+      },
+      complete: function () {
+        $(".loader").hide();
+      },
+      error: function () {
+        $(".loader").hide();
+        alert("There was an error updating the status.");
+      }
+    });
+  });
+
+  // File Upload
+  $(document).on("click", ".upload-file", function () {
+    const $section = $(this).closest("[data-legal-tab]");
+    const role = $section.attr("data-legal-tab").toLowerCase();
+    $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
+  });
+
+  $(document).on("change", ".file-upload-input", function () {
+    const file = this.files[0];
+    const role = $(this).data("upload-role").toLowerCase();
+    const userId = localStorage.userProfileRecId;
+
+    if (!file || !role || !userId) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("file_name", file.name);
+    formData.append("assignee", parseInt(userId));
+
+    $(".loader").css("display", "flex");
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc",
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: { Authorization: "Bearer " + localStorage.authToken },
+      success: function () {
+        alert("File uploaded successfully!");
+        setTimeout(() => getLegalCase(role), 500);
+      },
+      complete: function () {
+        $(".loader").hide();
+        $(this).val("");
+      },
+      error: function () {
+        alert("There was an error uploading the file.");
+        $(".loader").hide();
+      }
+    });
+  });
+
+  // Init from get-legal-case click
+  $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
+    getLegalCase("tenant");
+  });
+
+  $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
+    getLegalCase("landlord");
   });
 });
