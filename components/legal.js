@@ -2,7 +2,7 @@ const quillInstances = {}; // globally accessible for all tabs
 
 function initQuillIfNeeded(role) {
   if (!quillInstances[role]) {
-    const el = document.querySelector(`[data-role='quill'][data-editor-role='${role.toLowerCase()}']`);
+    const el = document.querySelector(`[data-role='quill'][data-editor-role='${role}']`);
     if (el) {
       quillInstances[role] = new Quill(el, { theme: 'snow' });
       console.log(`Initialized Quill for ${role}`);
