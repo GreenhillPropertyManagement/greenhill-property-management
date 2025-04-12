@@ -178,8 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
     saveNotesLocked = true;
 
     const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab")?.toLowerCase();
-    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+    const role = $section.attr("data-legal-tab");
+    const activeRole = $("[data-profile='user_role']").text().trim();
 
     if (role !== activeRole) {
       saveNotesLocked = false;
@@ -284,8 +284,8 @@ document.addEventListener("DOMContentLoaded", function () {
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab")?.toLowerCase();
-    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+    const role = $section.attr("data-legal-tab");
+    const activeRole = $("[data-profile='user_role']").text().trim();
     const userId = localStorage.userProfileRecId;
 
     if (role !== activeRole || !newStatus || !userId) return;
