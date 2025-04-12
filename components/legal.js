@@ -104,11 +104,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let deleteFileLocked = false;
 
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
-    getLegalCase("tenant");
+    getLegalCase("Tenant");
   });
 
   $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
-    getLegalCase("landlord");
+    getLegalCase("Landlord");
   });
 
   $(document).on("click", ".upload-file", function () {
