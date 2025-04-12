@@ -102,12 +102,13 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-// Run on Page Load
+// run code on page load 
 
 document.addEventListener("DOMContentLoaded", function () {
+  let saveNotesLocked = false;
+  let deleteFileLocked = false;
 
-
-  // figure out which tabs are active
+  // figure out active tabs
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
@@ -116,19 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
     getLegalCase("landlord");
   });
 
-  $(document).on('click', '.w-tab-link', function () {
-    const tabName = $(this).attr('data-w-tab')?.toLowerCase();
-    if (tabName === 'legal') {
-      const role = $('[data-profile="user_role"]').text().trim().toLowerCase();
-      setTimeout(() => {
-        initQuillIfNeeded(role);
-        getLegalCase(role);
-      }, 100);
-    }
-  });
-
-  // Upload File Func
-
+  // upload file func
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
@@ -191,17 +180,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Save Legal Notes Func
-
-  $(document)
-  .off("click", "[data-legal-tab]:visible .cta-button.quill")
-  .on("click", "[data-legal-tab]:visible .cta-button.quill", function (e) {
+  // save legal notes func
+  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
     if (saveNotesLocked) return;
     saveNotesLocked = true;
 
-    const $section = $(this).closest("[data-legal-tab]:visible");
+    const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
+    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    if (role !== activeRole) {
+      saveNotesLocked = false;
+      return;
+    }
+
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
 
@@ -223,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       data: JSON.stringify({
         legal_quill_content: content,
-        user_id: parseInt(userId),
+        user_id: parseInt(userId)
       }),
       success: function () {
         alert("Success! Legal notes saved.");
@@ -235,24 +227,27 @@ document.addEventListener("DOMContentLoaded", function () {
       error: function () {
         alert("Failed to save notes.");
         saveNotesLocked = false;
-      },
+      }
     });
   });
 
+  // delete files func
 
-  // Delete File Func 
-
-  $(document)
-  .off("click", "[data-legal-tab]:visible .file-delete")
-  .on("click", "[data-legal-tab]:visible .file-delete", function (e) {
+  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
     if (deleteFileLocked) return;
     deleteFileLocked = true;
 
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
-    const $section = $btn.closest("[data-legal-tab]:visible");
+    const $section = $btn.closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
+    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    if (role !== activeRole) {
+      deleteFileLocked = false;
+      return;
+    }
+
     const userId = localStorage.userProfileRecId;
 
     if (!fileId || !userId) {
@@ -291,16 +286,18 @@ document.addEventListener("DOMContentLoaded", function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
         deleteFileLocked = false;
-      },
+      }
     });
   });
 
-  // Status dropdown change
-
+  // update legal status
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
+    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    if (role !== activeRole) return;
+
     const userId = localStorage.userProfileRecId;
 
     if (!newStatus || !userId) {
@@ -313,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $(".loader").css("display", "flex");
 
     $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/update_status", // Replace if different
+      url: localStorage.baseUrl + "api:5KCOvB4S/update_status",
       type: "POST",
       contentType: "application/json",
       headers: {
