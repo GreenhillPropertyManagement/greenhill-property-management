@@ -3,11 +3,9 @@ const quillInstances = {}; // globally accessible for all tabs
 function initQuillIfNeeded(role) {
   if (!quillInstances[role]) {
     const el = document.querySelector(`[data-role='quill'][data-editor-role='${role}']`);
-    if (!el) {
-      console.warn("❌ No Quill editor found for role:", role);
-    } else {
-      console.log("✅ Initializing Quill for role:", role);
+    if (el) {
       quillInstances[role] = new Quill(el, { theme: 'snow' });
+      console.log(`Initialized Quill for ${role}`);
     }
   }
 }
@@ -21,20 +19,25 @@ function renderLegalFiles($section, files) {
     return;
   }
 
+  const role = $section.attr("data-legal-tab");
+  const userId = localStorage.userProfileRecId;
+
   files.forEach(file => {
     const $item = $(`<div class="legal_file_item">
       <div class="system-text__small file_name"></div>
       <div class="file-delete" data-file-id="${file.id}">🗑️</div>
     </div>`);
+
     $item.attr("id", file.id);
     $item.find(".file_name").text(file.title || "Untitled Document");
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
+
     $container.append($item);
   });
 }
 
 function getLegalCase(roleOverride = null) {
-  const role = roleOverride || $("[data-profile='user_role']").text().trim();
+  const role = roleOverride || $("[data-profile='user_role']").text().trim().toLowerCase();
   const $section = $(`[data-legal-tab='${role}']`);
   const userId = localStorage.userProfileRecId;
   if (!userId) return;
@@ -72,13 +75,13 @@ function getLegalCase(roleOverride = null) {
         $dropdown.append(`<option value="${status}" ${selected}>${status}</option>`);
       });
 
-      const currentStatus = res.legal_case.status;
+      const currentStatus = res.legal_case.status.toLowerCase();
       if (currentStatus === "inactive") {
         $section.find(".legal__status-fill-bar").removeClass("active");
       } else {
         let reached = false;
         $section.find(".legal__status-block").each(function () {
-          const label = $(this).find(".system-text__small.legal").text().trim();
+          const label = $(this).find(".system-text__small.legal").text().trim().toLowerCase();
           if (!reached) {
             $(this).find(".legal__status-fill-bar").addClass("active");
           } else {
@@ -99,17 +102,31 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-$(document).ready(function () {
-  let saveNotesLocked = false;
-  let deleteFileLocked = false;
+// Run on Page Load
 
+document.addEventListener("DOMContentLoaded", function () {
+
+  // figure out which tabs are active
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
-    getLegalCase("Tenant");
+    getLegalCase("tenant");
   });
 
   $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
-    getLegalCase("Landlord");
+    getLegalCase("landlord");
   });
+
+  $(document).on('click', '.w-tab-link', function () {
+    const tabName = $(this).attr('data-w-tab')?.toLowerCase();
+    if (tabName === 'legal') {
+      const role = $('[data-profile="user_role"]').text().trim().toLowerCase();
+      setTimeout(() => {
+        initQuillIfNeeded(role);
+        getLegalCase(role);
+      }, 100);
+    }
+  });
+
+  // Upload File Func
 
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
@@ -173,38 +190,25 @@ $(document).ready(function () {
     });
   });
 
-  // Save Legal Notes
+  // Save Legal Notes Func
+
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
-    if (saveNotesLocked) return;
-    saveNotesLocked = true;
-  
-    const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
-    const activeRole = $("[data-profile='user_role']").text().trim();
-  
-    if (role !== activeRole) {
-      saveNotesLocked = false;
-      return;
-    }
-  
-    // 🔍 Debug logs
-    console.log("🧠 role:", role);
-    console.log("🧠 quillInstances keys:", Object.keys(quillInstances));
-    console.log("🧠 quillInstances[role]:", quillInstances[role]);
-  
+    const $section = $(this).closest('[data-legal-tab]');
+    const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
-  
+
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
-      saveNotesLocked = false;
       return;
     }
-  
+
     const content = editor.getContents();
+    console.log("📝 Saving for:", role, content);
+
     $(".loader").css("display", "flex");
-  
+
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
@@ -219,43 +223,30 @@ $(document).ready(function () {
       },
       complete: function () {
         $(".loader").hide();
-        saveNotesLocked = false;
       },
       error: function () {
         alert("Failed to save notes.");
-        saveNotesLocked = false;
       }
     });
   });
-  // Delete File
+
+  // Delete File Func 
+
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
-    if (deleteFileLocked) return;
-    deleteFileLocked = true;
 
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-    const activeRole = $("[data-profile='user_role']").text().trim();
-
-    if (role !== activeRole) {
-      deleteFileLocked = false;
-      return;
-    }
-
     const userId = localStorage.userProfileRecId;
 
     if (!fileId || !userId) {
       alert("Missing file ID or user ID.");
-      deleteFileLocked = false;
       return;
     }
 
-    if (!confirm("Are you sure you want to delete this file?")) {
-      deleteFileLocked = false;
-      return;
-    }
+    if (!confirm("Are you sure you want to delete this file?")) return;
 
     $(".loader").css("display", "flex");
 
@@ -276,32 +267,33 @@ $(document).ready(function () {
       },
       complete: function () {
         $(".loader").hide();
-        deleteFileLocked = false;
       },
       error: function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
-        deleteFileLocked = false;
       }
     });
   });
 
-  // Status Dropdown
+  // Status dropdown change
+  
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-    const activeRole = $("[data-profile='user_role']").text().trim();
     const userId = localStorage.userProfileRecId;
 
-    if (role !== activeRole || !newStatus || !userId) return;
+    if (!newStatus || !userId) {
+      alert("Missing status or user ID.");
+      return;
+    }
 
     if (!confirm(`Change legal case status to "${newStatus}"?`)) return;
 
     $(".loader").css("display", "flex");
 
     $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/update_status",
+      url: localStorage.baseUrl + "api:5KCOvB4S/update_status", // Replace if different
       type: "POST",
       contentType: "application/json",
       headers: {
