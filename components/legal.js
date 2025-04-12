@@ -19,13 +19,17 @@ function renderLegalFiles($section, files) {
     return;
   }
 
-  const role = $section.attr("data-legal-tab");
+  const role = $section.attr("data-legal-tab").toLowerCase(); // normalize to lowercase
   const userId = localStorage.userProfileRecId;
+
+  const roleAttribute = role === "tenant"
+    ? `data-tenant="delete-file"`
+    : `data-landlord="delete-file"`;
 
   files.forEach(file => {
     const $item = $(`<div class="legal_file_item">
       <div class="system-text__small file_name"></div>
-      <div class="file-delete" data-file-id="${file.id}" data-${role.toLowerCase()}="delete-file">🖑️</div>
+      <div class="file-delete" data-file-id="${file.id}" ${roleAttribute}>🗑️</div>
     </div>`);
 
     $item.attr("id", file.id);
