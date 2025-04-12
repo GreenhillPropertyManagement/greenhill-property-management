@@ -100,7 +100,12 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
+let handlersBound = false;
+
 document.addEventListener("DOMContentLoaded", function () {
+  if (handlersBound) return;
+  handlersBound = true;
+
   // Save Notes
   $(document).on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
     e.preventDefault();
@@ -140,9 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete File
-  $(document)
-  .off("click", "[data-tenant='delete-file'], [data-landlord='delete-file']")
-  .on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
+  $(document).on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
     e.stopPropagation();
 
     const $btn = $(this);
@@ -218,13 +221,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // File Upload
+  // File Upload Trigger
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab").toLowerCase();
     $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
   });
 
+  // File Upload Handler
   $(document).on("change", ".file-upload-input", function () {
     const file = this.files[0];
     const role = $(this).data("upload-role").toLowerCase();
@@ -248,8 +252,7 @@ document.addEventListener("DOMContentLoaded", function () {
       headers: { Authorization: "Bearer " + localStorage.authToken },
       success: function () {
         alert("File uploaded successfully!");
-        //setTimeout(() => getLegalCase(role), 500);
-        getLegalCase(role)
+        getLegalCase(role);
       },
       complete: function () {
         $(".loader").hide();
@@ -262,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Init from get-legal-case click
+  // Init Legal Case Buttons
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
