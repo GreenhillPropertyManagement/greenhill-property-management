@@ -230,8 +230,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab")?.toLowerCase();
-    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+    const role = $section.attr("data-legal-tab");
+    const activeRole = $("[data-profile='user_role']").text().trim();
 
     if (role !== activeRole) {
       deleteFileLocked = false;
