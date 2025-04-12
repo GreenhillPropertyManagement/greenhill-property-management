@@ -2,7 +2,7 @@ const quillInstances = {}; // globally accessible for all tabs
 
 function initQuillIfNeeded(role) {
   if (!quillInstances[role]) {
-    const el = document.querySelector(`[data-role='quill'][data-editor-role='${role}']`);
+    const el = document.querySelector(`[data-role='quill'][data-editor-role='${role.toLowerCase()}']`);
     if (el) {
       quillInstances[role] = new Quill(el, { theme: 'snow' });
       console.log(`Initialized Quill for ${role}`);
@@ -171,14 +171,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Save Legal Notes
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
     if (saveNotesLocked) return;
     saveNotesLocked = true;
 
     const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
+    const role = $section.attr("data-legal-tab")?.toLowerCase();
     const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+
     if (role !== activeRole) {
       saveNotesLocked = false;
       return;
@@ -219,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Delete File
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
     if (deleteFileLocked) return;
@@ -227,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
+    const role = $section.attr("data-legal-tab")?.toLowerCase();
     const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
 
     if (role !== activeRole) {
@@ -277,19 +280,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Status Dropdown
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
+    const role = $section.attr("data-legal-tab")?.toLowerCase();
     const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
-    if (role !== activeRole) return;
-
     const userId = localStorage.userProfileRecId;
 
-    if (!newStatus || !userId) {
-      alert("Missing status or user ID.");
-      return;
-    }
+    if (role !== activeRole || !newStatus || !userId) return;
 
     if (!confirm(`Change legal case status to "${newStatus}"?`)) return;
 
