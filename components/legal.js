@@ -3,9 +3,11 @@ const quillInstances = {}; // globally accessible for all tabs
 function initQuillIfNeeded(role) {
   if (!quillInstances[role]) {
     const el = document.querySelector(`[data-role='quill'][data-editor-role='${role}']`);
-    if (el) {
+    if (!el) {
+      console.warn("❌ No Quill editor found for role:", role);
+    } else {
+      console.log("✅ Initializing Quill for role:", role);
       quillInstances[role] = new Quill(el, { theme: 'snow' });
-      console.log(`Initialized Quill for ${role}`);
     }
   }
 }
@@ -176,28 +178,33 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     if (saveNotesLocked) return;
     saveNotesLocked = true;
-
+  
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
     const activeRole = $("[data-profile='user_role']").text().trim();
-
+  
     if (role !== activeRole) {
       saveNotesLocked = false;
       return;
     }
-
+  
+    // 🔍 Debug logs
+    console.log("🧠 role:", role);
+    console.log("🧠 quillInstances keys:", Object.keys(quillInstances));
+    console.log("🧠 quillInstances[role]:", quillInstances[role]);
+  
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
-
+  
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
       saveNotesLocked = false;
       return;
     }
-
+  
     const content = editor.getContents();
     $(".loader").css("display", "flex");
-
+  
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
@@ -220,7 +227,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
   // Delete File
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
