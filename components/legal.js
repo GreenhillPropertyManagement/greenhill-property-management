@@ -25,7 +25,7 @@ function renderLegalFiles($section, files) {
   files.forEach(file => {
     const $item = $(`<div class="legal_file_item">
       <div class="system-text__small file_name"></div>
-      <div class="file-delete" data-file-id="${file.id}">🗑️</div>
+      <div class="file-delete" data-file-id="${file.id}" data-${role.toLowerCase()}="delete-file">🖑️</div>
     </div>`);
 
     $item.attr("id", file.id);
@@ -105,94 +105,7 @@ function getLegalCase(roleOverride = null) {
 // Run on Page Load
 
 document.addEventListener("DOMContentLoaded", function () {
-
-  // figure out which tabs are active
-  $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
-    getLegalCase("tenant");
-  });
-
-  $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
-    getLegalCase("landlord");
-  });
-
-  $(document).on('click', '.w-tab-link', function () {
-    const tabName = $(this).attr('data-w-tab')?.toLowerCase();
-    if (tabName === 'legal') {
-      const role = $('[data-profile="user_role"]').text().trim().toLowerCase();
-      setTimeout(() => {
-        initQuillIfNeeded(role);
-        getLegalCase(role);
-      }, 100);
-    }
-  });
-
-  // Upload File Func
-
-  $(document).on("click", ".upload-file", function () {
-    const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
-    $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
-  });
-
-  $(document).on("change", ".file-upload-input", function () {
-    const file = this.files[0];
-    const role = $(this).data("upload-role");
-    const userId = localStorage.userProfileRecId;
-
-    if (!file || !role || !userId) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("file_name", file.name);
-    formData.append("assignee", parseInt(userId));
-
-    $(".loader").css("display", "flex");
-
-    $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/upload_legal_doc",
-      type: "POST",
-      data: formData,
-      processData: false,
-      contentType: false,
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      success: function () {
-        alert("File uploaded successfully!");
-
-        setTimeout(() => {
-          $.ajax({
-            url: localStorage.baseUrl + "api:5KCOvB4S/get_legal_case",
-            type: "GET",
-            headers: {
-              Authorization: "Bearer " + localStorage.authToken
-            },
-            data: {
-              user_id: parseInt(userId)
-            },
-            success: function (res) {
-              const $section = $(`[data-legal-tab='${role}']`);
-              renderLegalFiles($section, res.legal_files || []);
-            },
-            complete: function () {
-              $(".loader").hide();
-            }
-          });
-        }, 500);
-      },
-      complete: function () {
-        $(".loader").hide();
-        $(this).val("");
-      },
-      error: function () {
-        alert("There was an error uploading the file.");
-      }
-    });
-  });
-
-  // Save Legal Notes Func
-
-  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
+  $(document).on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr('data-legal-tab');
@@ -230,9 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Delete File Func 
-
-  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
+  $(document).on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
     e.stopPropagation();
 
     const $btn = $(this);
@@ -254,12 +165,10 @@ document.addEventListener("DOMContentLoaded", function () {
       url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
       type: "POST",
       contentType: "application/json",
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
+      headers: { Authorization: "Bearer " + localStorage.authToken },
       data: JSON.stringify({
         file_id: fileId,
-        user_id: parseInt(userId),
+        user_id: parseInt(userId)
       }),
       success: function () {
         alert("File deleted successfully!");
@@ -271,48 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
       error: function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
-      }
-    });
-  });
-
-  // Status dropdown change
-  
-  $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
-    const newStatus = $(this).val();
-    const $section = $(this).closest("[data-legal-tab]");
-    const role = $section.attr("data-legal-tab");
-    const userId = localStorage.userProfileRecId;
-
-    if (!newStatus || !userId) {
-      alert("Missing status or user ID.");
-      return;
-    }
-
-    if (!confirm(`Change legal case status to "${newStatus}"?`)) return;
-
-    $(".loader").css("display", "flex");
-
-    $.ajax({
-      url: localStorage.baseUrl + "api:5KCOvB4S/update_status", // Replace if different
-      type: "POST",
-      contentType: "application/json",
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      data: JSON.stringify({
-        status: newStatus,
-        user_id: parseInt(userId),
-      }),
-      success: function () {
-        alert("Status updated successfully!");
-        getLegalCase(role);
-      },
-      complete: function () {
-        $(".loader").hide();
-      },
-      error: function () {
-        $(".loader").hide();
-        alert("There was an error updating the status.");
       }
     });
   });
