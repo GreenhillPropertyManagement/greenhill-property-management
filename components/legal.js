@@ -100,7 +100,12 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-let handlersBound = false;
+function showToast(message, duration = 3000) {
+  const $toast = $("#toast");
+  $toast.text(message).fadeIn(200);
+  setTimeout(() => $toast.fadeOut(300), duration);
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
   if (handlersBound) return;
@@ -134,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
         user_id: parseInt(userId)
       }),
       success: function () {
-        alert("Success! Legal notes saved.");
+        showToast("Success! Legal notes saved.");
       },
       complete: function () {
         $(".loader").hide();
