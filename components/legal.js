@@ -140,7 +140,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete File
-  $(document).on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
+  $(document)
+  .off("click", "[data-tenant='delete-file'], [data-landlord='delete-file']")
+  .on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
     e.stopPropagation();
 
     const $btn = $(this);
@@ -154,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    confirm("Are you sure you want to delete this file?");
+    if (!confirm("Are you sure you want to delete this file?")) return;
 
     $(".loader").css("display", "flex");
 
