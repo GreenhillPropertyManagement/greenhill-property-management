@@ -19,19 +19,14 @@ function renderLegalFiles($section, files) {
     return;
   }
 
-  const role = $section.attr("data-legal-tab");
-  const userId = localStorage.userProfileRecId;
-
   files.forEach(file => {
     const $item = $(`<div class="legal_file_item">
       <div class="system-text__small file_name"></div>
       <div class="file-delete" data-file-id="${file.id}">🗑️</div>
     </div>`);
-
     $item.attr("id", file.id);
     $item.find(".file_name").text(file.title || "Untitled Document");
     $item.find(".file_name").css("cursor", "pointer").on("click", () => window.open(file.path_url, "_blank"));
-
     $container.append($item);
   });
 }
@@ -102,13 +97,10 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-// run code on page load 
-
 document.addEventListener("DOMContentLoaded", function () {
   let saveNotesLocked = false;
   let deleteFileLocked = false;
 
-  // figure out active tabs
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
@@ -117,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function () {
     getLegalCase("landlord");
   });
 
-  // upload file func
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
@@ -180,7 +171,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // save legal notes func
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
     if (saveNotesLocked) return;
@@ -188,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
     if (role !== activeRole) {
       saveNotesLocked = false;
       return;
@@ -210,9 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
       contentType: "application/json",
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
+      headers: { Authorization: "Bearer " + localStorage.authToken },
       data: JSON.stringify({
         legal_quill_content: content,
         user_id: parseInt(userId)
@@ -231,8 +219,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // delete files func
-
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
     if (deleteFileLocked) return;
@@ -242,7 +228,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
+
     if (role !== activeRole) {
       deleteFileLocked = false;
       return;
@@ -290,12 +277,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // update legal status
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
-    const activeRole = $(`[data-profile='user_role']`).text().trim().toLowerCase();
+    const activeRole = $("[data-profile='user_role']").text().trim().toLowerCase();
     if (role !== activeRole) return;
 
     const userId = localStorage.userProfileRecId;
