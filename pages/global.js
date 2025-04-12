@@ -253,7 +253,11 @@ function initializeApp() {
       
 }
 /* Utlity Functions */
-
+function showToast(message, duration = 3000) {
+  const $toast = $("#toast");
+  $toast.text(message).fadeIn(200);
+  setTimeout(() => $toast.fadeOut(300), duration);
+}
 
 function authUser() {
 
