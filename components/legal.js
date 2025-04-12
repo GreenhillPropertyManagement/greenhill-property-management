@@ -107,7 +107,9 @@ document.addEventListener("DOMContentLoaded", function () {
   handlersBound = true;
 
   // Save Notes
-  $(document).on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
+  $(document)
+  .off("click", "[data-tenant='save-content'], [data-landlord='save-content']")
+  .on("click", "[data-tenant='save-content'], [data-landlord='save-content']", function (e) {
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr("data-legal-tab").toLowerCase();
@@ -143,9 +145,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-
   // Delete File
-  $(document).on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
+  $(document)
+  .off("click", "[data-tenant='delete-file'], [data-landlord='delete-file']")
+  .on("click", "[data-tenant='delete-file'], [data-landlord='delete-file']", function (e) {
     e.stopPropagation();
 
     const $btn = $(this);
@@ -222,14 +225,18 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // File Upload Trigger
-  $(document).on("click", ".upload-file", function () {
+  $(document)
+  .off("click", ".upload-file")
+  .on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab").toLowerCase();
     $(`.file-upload-input[data-upload-role='${role}']`).trigger("click");
   });
 
-  // File Upload Handler
-  $(document).on("change", ".file-upload-input", function () {
+// File Upload Handler
+$(document)
+  .off("change", ".file-upload-input")
+  .on("change", ".file-upload-input", function () {
     const file = this.files[0];
     const role = $(this).data("upload-role").toLowerCase();
     const userId = localStorage.userProfileRecId;
@@ -250,20 +257,21 @@ document.addEventListener("DOMContentLoaded", function () {
       processData: false,
       contentType: false,
       headers: { Authorization: "Bearer " + localStorage.authToken },
-      success: function () {
+      success: () => {
         alert("File uploaded successfully!");
         getLegalCase(role);
       },
-      complete: function () {
+      complete: () => {
         $(".loader").hide();
-        $(this).val("");
+        $(this).val(""); // Reset file input
       },
-      error: function () {
+      error: () => {
         alert("There was an error uploading the file.");
         $(".loader").hide();
       }
     });
   });
+
 
   // Init Legal Case Buttons
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
