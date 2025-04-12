@@ -106,6 +106,9 @@ function getLegalCase(roleOverride = null) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
+  let saveNotesLocked = false;
+  let deleteFileLocked = false;
+
   // figure out which tabs are active
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
@@ -192,8 +195,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Save Legal Notes Func
 
-  $(document).off("click", ".cta-button.quill").on("click", "[data-legal-tab]:visible .cta-button.quill", function (e) {
+  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
+  
+    if (saveNotesLocked) return;
+    saveNotesLocked = true;
+  
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
@@ -201,6 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
+      saveNotesLocked = false;
       return;
     }
   
@@ -211,7 +219,9 @@ document.addEventListener("DOMContentLoaded", function () {
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
       contentType: "application/json",
-      headers: { Authorization: "Bearer " + localStorage.authToken },
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
       data: JSON.stringify({
         legal_quill_content: content,
         user_id: parseInt(userId)
@@ -221,16 +231,20 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
+        saveNotesLocked = false;
       },
       error: function () {
         alert("Failed to save notes.");
+        saveNotesLocked = false;
       }
     });
   });
-
   // Delete File Func 
 
-  $(document).off("click", ".file-delete").on("click", "[data-legal-tab]:visible .file-delete", function (e) {
+  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
+    if (deleteFileLocked) return;
+    deleteFileLocked = true;
+  
     e.stopPropagation();
   
     const $btn = $(this);
@@ -241,10 +255,14 @@ document.addEventListener("DOMContentLoaded", function () {
   
     if (!fileId || !userId) {
       alert("Missing file ID or user ID.");
+      deleteFileLocked = false;
       return;
     }
   
-    if (!confirm("Are you sure you want to delete this file?")) return;
+    if (!confirm("Are you sure you want to delete this file?")) {
+      deleteFileLocked = false;
+      return;
+    }
   
     $(".loader").css("display", "flex");
   
@@ -265,10 +283,12 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       complete: function () {
         $(".loader").hide();
+        deleteFileLocked = false;
       },
       error: function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
+        deleteFileLocked = false;
       }
     });
   });
