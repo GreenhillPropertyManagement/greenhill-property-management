@@ -106,8 +106,6 @@ function getLegalCase(roleOverride = null) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  let saveNotesLocked = false;
-  let deleteFileLocked = false;
 
   // figure out which tabs are active
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
@@ -195,26 +193,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Save Legal Notes Func
 
-  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
+  $(document)
+  .off("click", "[data-legal-tab]:visible .cta-button.quill")
+  .on("click", "[data-legal-tab]:visible .cta-button.quill", function (e) {
     e.preventDefault();
-  
     if (saveNotesLocked) return;
     saveNotesLocked = true;
-  
-    const $section = $(this).closest('[data-legal-tab]');
-    const role = $section.attr('data-legal-tab');
+
+    const $section = $(this).closest("[data-legal-tab]:visible");
+    const role = $section.attr("data-legal-tab");
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
-  
+
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
       saveNotesLocked = false;
       return;
     }
-  
+
     const content = editor.getContents();
     $(".loader").css("display", "flex");
-  
+
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
@@ -224,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       data: JSON.stringify({
         legal_quill_content: content,
-        user_id: parseInt(userId)
+        user_id: parseInt(userId),
       }),
       success: function () {
         alert("Success! Legal notes saved.");
@@ -236,38 +235,39 @@ document.addEventListener("DOMContentLoaded", function () {
       error: function () {
         alert("Failed to save notes.");
         saveNotesLocked = false;
-      }
+      },
     });
   });
 
-  
+
   // Delete File Func 
 
-  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
+  $(document)
+  .off("click", "[data-legal-tab]:visible .file-delete")
+  .on("click", "[data-legal-tab]:visible .file-delete", function (e) {
+    e.stopPropagation();
     if (deleteFileLocked) return;
     deleteFileLocked = true;
-  
-    e.stopPropagation();
-  
+
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
-    const $section = $btn.closest("[data-legal-tab]");
+    const $section = $btn.closest("[data-legal-tab]:visible");
     const role = $section.attr("data-legal-tab");
     const userId = localStorage.userProfileRecId;
-  
+
     if (!fileId || !userId) {
       alert("Missing file ID or user ID.");
       deleteFileLocked = false;
       return;
     }
-  
+
     if (!confirm("Are you sure you want to delete this file?")) {
       deleteFileLocked = false;
       return;
     }
-  
+
     $(".loader").css("display", "flex");
-  
+
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
       type: "POST",
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
         $(".loader").hide();
         alert("There was an error deleting the file.");
         deleteFileLocked = false;
-      }
+      },
     });
   });
 
