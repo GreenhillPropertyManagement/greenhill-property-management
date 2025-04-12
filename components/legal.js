@@ -246,7 +246,8 @@ document.addEventListener("DOMContentLoaded", function () {
       headers: { Authorization: "Bearer " + localStorage.authToken },
       success: function () {
         alert("File uploaded successfully!");
-        setTimeout(() => getLegalCase(role), 500);
+        //setTimeout(() => getLegalCase(role), 500);
+        getLegalCase(role)
       },
       complete: function () {
         $(".loader").hide();
