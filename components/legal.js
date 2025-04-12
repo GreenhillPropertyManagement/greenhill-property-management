@@ -239,6 +239,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+
+  
   // Delete File Func 
 
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
