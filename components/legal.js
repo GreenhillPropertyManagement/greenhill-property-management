@@ -32,7 +32,7 @@ function renderLegalFiles($section, files) {
 }
 
 function getLegalCase(roleOverride = null) {
-  const role = roleOverride || $("[data-profile='user_role']").text().trim().toLowerCase();
+  const role = roleOverride || $("[data-profile='user_role']").text().trim();
   const $section = $(`[data-legal-tab='${role}']`);
   const userId = localStorage.userProfileRecId;
   if (!userId) return;
@@ -70,13 +70,13 @@ function getLegalCase(roleOverride = null) {
         $dropdown.append(`<option value="${status}" ${selected}>${status}</option>`);
       });
 
-      const currentStatus = res.legal_case.status.toLowerCase();
+      const currentStatus = res.legal_case.status;
       if (currentStatus === "inactive") {
         $section.find(".legal__status-fill-bar").removeClass("active");
       } else {
         let reached = false;
         $section.find(".legal__status-block").each(function () {
-          const label = $(this).find(".system-text__small.legal").text().trim().toLowerCase();
+          const label = $(this).find(".system-text__small.legal").text().trim();
           if (!reached) {
             $(this).find(".legal__status-fill-bar").addClass("active");
           } else {
