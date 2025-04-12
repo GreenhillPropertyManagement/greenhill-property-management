@@ -100,12 +100,6 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-function showToast(message, duration = 3000) {
-  const $toast = $("#toast");
-  $toast.text(message).fadeIn(200);
-  setTimeout(() => $toast.fadeOut(300), duration);
-}
-
 let handlersBound = false;
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -182,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
         user_id: parseInt(userId)
       }),
       success: function () {
-        alert("File deleted successfully!");
+        showToast("File deleted successfully!");
         getLegalCase(role);
       },
       complete: function () {
@@ -217,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
         user_id: parseInt(userId)
       }),
       success: function () {
-        alert("Status updated successfully!");
+        showToast("Status updated successfully!");
         getLegalCase(role);
       },
       complete: function () {
@@ -264,7 +258,7 @@ $(document)
       contentType: false,
       headers: { Authorization: "Bearer " + localStorage.authToken },
       success: () => {
-        alert("File uploaded successfully!");
+        showToast("File uploaded successfully!");
         getLegalCase(role);
       },
       complete: () => {
