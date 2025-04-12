@@ -106,6 +106,7 @@ function showToast(message, duration = 3000) {
   setTimeout(() => $toast.fadeOut(300), duration);
 }
 
+let handlersBound = false;
 
 document.addEventListener("DOMContentLoaded", function () {
   if (handlersBound) return;
