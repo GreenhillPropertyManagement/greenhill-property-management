@@ -192,23 +192,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Save Legal Notes Func
 
-  $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
+  $(document).off("click", ".cta-button.quill").on("click", "[data-legal-tab]:visible .cta-button.quill", function (e) {
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
     const role = $section.attr('data-legal-tab');
     const editor = quillInstances[role];
     const userId = localStorage.userProfileRecId;
-
+  
     if (!editor || !userId) {
       alert("Editor not initialized or user ID missing");
       return;
     }
-
+  
     const content = editor.getContents();
-    console.log("📝 Saving for:", role, content);
-
     $(".loader").css("display", "flex");
-
+  
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/save_legal_notes",
       method: "POST",
@@ -232,24 +230,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Delete File Func 
 
-  $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
+  $(document).off("click", ".file-delete").on("click", "[data-legal-tab]:visible .file-delete", function (e) {
     e.stopPropagation();
-
+  
     const $btn = $(this);
     const fileId = $btn.attr("data-file-id");
     const $section = $btn.closest("[data-legal-tab]");
     const role = $section.attr("data-legal-tab");
     const userId = localStorage.userProfileRecId;
-
+  
     if (!fileId || !userId) {
       alert("Missing file ID or user ID.");
       return;
     }
-
+  
     if (!confirm("Are you sure you want to delete this file?")) return;
-
+  
     $(".loader").css("display", "flex");
-
+  
     $.ajax({
       url: localStorage.baseUrl + "api:5KCOvB4S/delete_legal_file",
       type: "POST",
@@ -276,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Status dropdown change
-  
+
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
