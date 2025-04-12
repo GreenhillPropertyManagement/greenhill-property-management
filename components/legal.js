@@ -99,7 +99,7 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+$(document).ready(function () {
   let saveNotesLocked = false;
   let deleteFileLocked = false;
 
