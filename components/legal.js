@@ -102,7 +102,11 @@ function getLegalCase(roleOverride = null) {
   });
 }
 
+// Run on Page Load
+
 document.addEventListener("DOMContentLoaded", function () {
+
+  // figure out which tabs are active
   $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
@@ -121,6 +125,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 100);
     }
   });
+
+  // Upload File Func
 
   $(document).on("click", ".upload-file", function () {
     const $section = $(this).closest("[data-legal-tab]");
@@ -184,6 +190,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Save Legal Notes Func
+
   $(document).off("click", ".cta-button.quill").on("click", ".cta-button.quill", function (e) {
     e.preventDefault();
     const $section = $(this).closest('[data-legal-tab]');
@@ -211,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
         user_id: parseInt(userId)
       }),
       success: function () {
-        alert("Legal notes saved.");
+        alert("Success! Legal notes saved.");
       },
       complete: function () {
         $(".loader").hide();
@@ -221,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+
+  // Delete File Func 
 
   $(document).off("click", ".file-delete").on("click", ".file-delete", function (e) {
     e.stopPropagation();
@@ -265,7 +275,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // ✅ Status dropdown change
+  // Status dropdown change
+  
   $(document).off("change", '[data="legal-status-select"]').on("change", '[data="legal-status-select"]', function () {
     const newStatus = $(this).val();
     const $section = $(this).closest("[data-legal-tab]");
