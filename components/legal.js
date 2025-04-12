@@ -274,11 +274,15 @@ $(document)
 
 
   // Init Legal Case Buttons
-  $(document).on("click", '[api-button="get-legal-case-tenant"]', function () {
+  $(document)
+  .off("click", '[api-button="get-legal-case-tenant"]')
+  .on("click", '[api-button="get-legal-case-tenant"]', function () {
     getLegalCase("tenant");
   });
 
-  $(document).on("click", '[api-button="get-legal-case-landlord"]', function () {
+  $(document)
+  .off("click", '[api-button="get-legal-case-landlord"]')
+  .on("click", '[api-button="get-legal-case-landlord"]', function () {
     getLegalCase("landlord");
   });
 });
