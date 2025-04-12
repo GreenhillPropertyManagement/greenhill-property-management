@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    if (!confirm("Are you sure you want to delete this file?")) return;
+    confirm("Are you sure you want to delete this file?");
 
     $(".loader").css("display", "flex");
 
