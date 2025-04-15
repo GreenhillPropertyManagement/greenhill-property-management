@@ -84,6 +84,8 @@ function initLandlordFinances() {
                 console.log("API Response:", response);
                 latestApiResponse = response; // Store response globally for quick updates
 
+                $('[data-api="display-name"]').text(response.display_name || ""); // Update display name
+
                 // Extract graph_type and transaction_type
                 let graphType = formData.graph_type || "bar"; // Default to bar
                 let transactionType = formData.transaction_type || "noi"; // Default to NOI
