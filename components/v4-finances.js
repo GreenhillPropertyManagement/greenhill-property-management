@@ -468,12 +468,18 @@ function formatTransDate(dateString) {
 }
 
 function fetchStatements() {
-    $.ajax({
+    const mode = localStorage.getItem("financeMode") || "profile";
+    const target = localStorage.getItem("pageRefreshParam") || null;
 
+    $.ajax({
         url: localStorage.baseUrl + "api:rpDXPv3x/v4_fetch_statements",
         method: "GET",
         headers: {
             "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: {
+            mode: mode,
+            target: target
         },
         dataType: "json",
         success: function (data) {
