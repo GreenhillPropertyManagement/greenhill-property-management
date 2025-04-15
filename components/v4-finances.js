@@ -139,62 +139,68 @@ function formatTransDate(dateString) {
 function extractChartData(response, transactionType) {
     let labels = [];
     let paymentData = {};
-    let expenseData = {};
+    let expenseData = [];
+
+    // Combine payments and expenses to get all dates
+    let allDates = [];
+
+    if (transactionType === "noi") {
+        allDates = [...response.payments, ...response.expenses].map(t => t.transaction_date);
+    } else if (transactionType === "payments") {
+        allDates = response.payments.map(t => t.transaction_date);
+    } else if (transactionType === "expenses") {
+        allDates = response.expenses.map(t => t.transaction_date);
+    }
+
+    // Sort and determine time span
+    allDates.sort();
+    const firstDate = new Date(allDates[0]);
+    const lastDate = new Date(allDates[allDates.length - 1]);
+    const spanMonths = firstDate.getUTCFullYear() !== lastDate.getUTCFullYear() ||
+                       firstDate.getUTCMonth() !== lastDate.getUTCMonth();
+
+    // Choose grouping function
+    const groupFn = spanMonths ? v4formatToMonthYear : formatTransDate;
+
+    // Initialize grouped buckets
+    const paymentBuckets = {};
+    const expenseBuckets = {};
+
+    // Helper to add amounts to the correct bucket
+    function addToBucket(buckets, date, amount) {
+        if (!buckets[date]) buckets[date] = 0;
+        buckets[date] += amount;
+    }
 
     if (transactionType === "noi") {
         let transactions = [...response.payments, ...response.expenses];
-
-        // ✅ Sort transactions newest to oldest
-        transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
-
         transactions.forEach(item => {
-            let formattedDate = formatTransDate(item.transaction_date);
-
-            // Ensure each date appears only once
-            if (!labels.includes(formattedDate)) {
-                labels.push(formattedDate);
-                paymentData[formattedDate] = 0; // Initialize payment value
-                expenseData[formattedDate] = 0; // Initialize expense value
-            }
-
-            // Aggregate totals for the day
+            let groupKey = groupFn(item.transaction_date);
             if (item.type === "payment") {
-                paymentData[formattedDate] += Math.abs(item.amount); // Convert payments to positive
+                addToBucket(paymentBuckets, groupKey, Math.abs(item.amount));
             } else {
-                expenseData[formattedDate] += item.amount; // Expenses stay as is
+                addToBucket(expenseBuckets, groupKey, item.amount);
             }
         });
-
     } else if (transactionType === "payments") {
         response.payments.forEach(payment => {
-            let formattedDate = formatTransDate(payment.transaction_date);
-
-            if (!labels.includes(formattedDate)) {
-                labels.push(formattedDate);
-                paymentData[formattedDate] = 0;
-                expenseData[formattedDate] = 0;
-            }
-
-            paymentData[formattedDate] += Math.abs(payment.amount);
+            let groupKey = groupFn(payment.transaction_date);
+            addToBucket(paymentBuckets, groupKey, Math.abs(payment.amount));
         });
-
     } else if (transactionType === "expenses") {
         response.expenses.forEach(expense => {
-            let formattedDate = formatTransDate(expense.transaction_date);
-
-            if (!labels.includes(formattedDate)) {
-                labels.push(formattedDate);
-                paymentData[formattedDate] = 0;
-                expenseData[formattedDate] = 0;
-            }
-
-            expenseData[formattedDate] += expense.amount;
+            let groupKey = groupFn(expense.transaction_date);
+            addToBucket(expenseBuckets, groupKey, expense.amount);
         });
     }
 
-    // Convert objects to arrays for Chart.js
-    let paymentArray = labels.map(date => paymentData[date] || 0);
-    let expenseArray = labels.map(date => expenseData[date] || 0);
+    // Combine labels from both buckets and sort
+    labels = [...new Set([...Object.keys(paymentBuckets), ...Object.keys(expenseBuckets)])];
+    labels.sort((a, b) => new Date(a) - new Date(b));
+
+    // Build final chart arrays
+    const paymentArray = labels.map(label => paymentBuckets[label] || 0);
+    const expenseArray = labels.map(label => expenseBuckets[label] || 0);
 
     return { labels, paymentData: paymentArray, expenseData: expenseArray };
 }
@@ -642,4 +648,11 @@ function fetchCustomReport(statementId) {
         });
     }, 3000); // Poll every 5 seconds
 
+}
+
+function v4formatToMonthYear(dateString) {
+    const date = new Date(dateString);
+    const month = date.getUTCMonth() + 1;
+    const year = date.getUTCFullYear();
+    return `${month}/${year}`;
 }
