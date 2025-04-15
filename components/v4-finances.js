@@ -20,8 +20,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .on("click", '[api="finance-v4"]', function () {
             const currentPageId = localStorage.getItem("pageId");
             localStorage.setItem("financeMode", currentPageId);         // Step 1
-            localStorage.setItem("pageId", "finance-v4");               // Step 3
             $("#finance-v4").trigger("click");                          // Step 2
+            localStorage.setItem("pageId", "finance-v4");               // Step 3
+
 
             // Step 4: Set default filter
             $('[form-input="date_range"]').val("month_to_date");
