@@ -416,9 +416,19 @@ function setupChartTypeListener() {
 }
 
 function loadRecentPayments() {
+    const mode = localStorage.getItem("financeMode") || "profile";
+    const target = localStorage.getItem("pageRefreshParam") || null;
+
     $.ajax({
         url: localStorage.baseUrl + "api:rpDXPv3x/v4_recent_payments",
         method: "GET",
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: {
+            mode: mode,
+            target: target
+        },
         dataType: "json",
         success: function(response) {
             let container = $(".recent-payments-container");
