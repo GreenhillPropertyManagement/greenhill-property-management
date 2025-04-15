@@ -6,15 +6,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     initLandlordFinances();           // init finance component
     setupChartTypeListener();         // Allow users to change chart type dynamically
-    loadRecentPayments();             // load in the recent payments
-    fetchStatements();                // fetch user's statements
+
 
     // Event listener to trigger report generation
     $('#download-report').off('click').on('click', function() {
         generateCustomReport();
     });
 
-    // ✅ Event listener to trigger finance view and fetch logic
+    // Event listener to trigger finance view and fetch logic
     $(document)
         .off("click", '[api="finance-v4"]')  // Unbind previous click handlers
         .on("click", '[api="finance-v4"]', function () {
@@ -23,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function() {
             $("#finance-v4").trigger("click");                          // Step 2
             localStorage.setItem("pageId", "finance-v4");               // Step 3
 
-
             // Step 4: Set default filter
             $('[form-input="date_range"]').val("month_to_date");
             $('#start_date').val('');
@@ -31,6 +29,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // Submit form to trigger finance data fetching
             $('[api-form="finance-filter"]').trigger("submit");
+            loadRecentPayments();             // load in the recent payments
+            fetchStatements();                // fetch user's statements
         });
 
     // Ensure the chart resizes when the window resizes
