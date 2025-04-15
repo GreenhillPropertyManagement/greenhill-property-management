@@ -4,15 +4,33 @@ let latestApiResponse = null; // Declare it globally before using
 
 document.addEventListener("DOMContentLoaded", function() {
 
-    initLandlordFinances(); // init finance component
-    setupChartTypeListener(); // Allow users to change chart type dynamically
-    loadRecentPayments(); // load in the recent payments
-    fetchStatements(); // fetch user's statements
+    initLandlordFinances();           // init finance component
+    setupChartTypeListener();         // Allow users to change chart type dynamically
+    loadRecentPayments();             // load in the recent payments
+    fetchStatements();                // fetch user's statements
 
     // Event listener to trigger report generation
     $('#download-report').off('click').on('click', function() {
-    generateCustomReport();
+        generateCustomReport();
     });
+
+    // ✅ Event listener to trigger finance view and fetch logic
+    $(document)
+        .off("click", '[api="finance-v4"]')  // Unbind previous click handlers
+        .on("click", '[api="finance-v4"]', function () {
+            const currentPageId = localStorage.getItem("pageId");
+            localStorage.setItem("financeMode", currentPageId);         // Step 1
+            localStorage.setItem("pageId", "finance-v4");               // Step 3
+            $("#finance-v4").trigger("click");                          // Step 2
+
+            // Step 4: Set default filter
+            $('[form-input="date_range"]').val("month_to_date");
+            $('#start_date').val('');
+            $('#end_date').val('');
+
+            // Submit form to trigger finance data fetching
+            $('[api-form="finance-filter"]').trigger("submit");
+        });
 
     // Ensure the chart resizes when the window resizes
     window.addEventListener("resize", function () {
@@ -20,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
             chartInstance.resize();
         }
     });
-    
+
 });
 
 function initLandlordFinances() {
@@ -38,12 +56,17 @@ function initLandlordFinances() {
         form.find('[form-input]').each(function() {
             let key = $(this).attr("form-input");
             let value = $(this).val();
-            
+        
             if (key === "start_date" || key === "end_date") {
                 value = value.trim() === "" ? null : value;
             }
+        
             formData[key] = value;
         });
+        
+        // Add backend inputs: mode + target
+        formData["mode"] = localStorage.getItem("financeMode") || "profile";
+        formData["target"] = localStorage.getItem("pageRefreshParam") || null;
 
         // Make the AJAX request
         $.ajax({
