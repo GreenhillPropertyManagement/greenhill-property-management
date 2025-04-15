@@ -652,7 +652,6 @@ function fetchCustomReport(statementId) {
 
 function v4formatToMonthYear(dateString) {
     const date = new Date(dateString);
-    const month = date.getUTCMonth() + 1;
-    const year = date.getUTCFullYear();
-    return `${month}/${year}`;
+    const options = { month: 'short', year: 'numeric', timeZone: 'UTC' };
+    return date.toLocaleDateString('en-US', options).toUpperCase(); // → "NOV 2025"
 }
