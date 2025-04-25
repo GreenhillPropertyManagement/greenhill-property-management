@@ -237,7 +237,7 @@ function initializeApp() {
   });
 
   // conditional logic for testing (dummy tenant account)
-  if(localStorage.userId === "682fd788-ebea-4246-b6fe-54c2709eb191" || localStorage.userId === "9e60fffc-5f8e-4a3d-9411-99d4df9d852c") {
+  if(localStorage.userId === "2d3235a8-2520-4153-8d7b-760fe7545d7d" || localStorage.userId === "f7173331-dc22-4157-88c4-f8bc507ef267") {
     alert('Testing Mode!');
     $('[dynamic-visibility=test-mode]').show();
   } else {
