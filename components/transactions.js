@@ -879,17 +879,15 @@ function loadOutstandingTransactions() {
         const amount = parseFloat(amountText) || 0;
         total += amount;
       });
-
+    
       const formattedTotal = `$${total.toFixed(2)}`;
       const label = `Pay ${count} Charge${count > 1 ? "s" : ""} (${formattedTotal})`;
-
+    
       $payButton.removeClass("inactive");
-      $payButton.find("[data-property='user-counter']").text(count);
-      $payButton.find(".dynamic-delete-bttn-text").last().text(label);
+      $payButton.html(`<div class="dynamic-delete-bttn-text">${label}</div>`);
     } else {
       $payButton.addClass("inactive");
-      $payButton.find("[data-property='user-counter']").text("0");
-      $payButton.find(".dynamic-delete-bttn-text").last().text("Charge");
+      $payButton.html(`<div class="dynamic-delete-bttn-text">Charge</div>`);
     }
   });
 }
