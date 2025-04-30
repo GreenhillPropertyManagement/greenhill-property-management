@@ -810,7 +810,7 @@ function tenantMakesPayment(amount) {
 function loadOutstandingTransactions() {
 
   $('.loader').css('display','flex'); //show loader
-  
+
   $(".pay-transactions-button")
   .removeClass("active")
   .html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
@@ -850,7 +850,7 @@ function loadOutstandingTransactions() {
               <div class="payment__trans-header">Total Amount</div>
               <div data-api="amount" class="system-text__small">$${item.amount.toFixed(2)}</div>
             </div>
-            <div class="payment-trans__cell">
+            <div class="payment-trans__amount-wrapper">
               <div class="payment__trans-header">Remaining Balance</div>
               <div data-api="remaining_transaction_balance" class="system-text__small">$${item.remaining_transaction_balance.toFixed(2)}</div>
             </div>
