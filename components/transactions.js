@@ -812,7 +812,7 @@ function loadOutstandingTransactions() {
   $('.loader').css('display','flex'); //show loader
 
   const $container = $(".pay-rent__container");
-  const $payButton = $(".intake-form__submit-bttn.payment");
+  const $payButton = $(".pay-transactions-button");
 
   $.ajax({
     url:  localStorage.baseUrl + "api:rpDXPv3x/fetch_outstanding_transactions",
@@ -879,15 +879,13 @@ function loadOutstandingTransactions() {
         const amount = parseFloat(amountText) || 0;
         total += amount;
       });
-    
+
       const formattedTotal = `$${total.toFixed(2)}`;
       const label = `Pay ${count} Charge${count > 1 ? "s" : ""} (${formattedTotal})`;
-    
-      $payButton.removeClass("inactive");
-      $payButton.html(`<div class="dynamic-delete-bttn-text">${label}</div>`);
+
+      $payButton.addClass("active").html(`<div class="dynamic-delete-bttn-text">${label}</div>`);
     } else {
-      $payButton.addClass("inactive");
-      $payButton.html(`<div class="dynamic-delete-bttn-text">Charge</div>`);
+      $payButton.removeClass("active").html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
     }
   });
 }
