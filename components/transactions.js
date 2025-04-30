@@ -809,6 +809,8 @@ function tenantMakesPayment(amount) {
 
 function loadOutstandingTransactions() {
 
+  $('.loader').css('display','flex'); //show loader
+
   const $container = $(".pay-rent__container");
   const $payButton = $(".intake-form__submit-bttn.payment");
 
@@ -852,7 +854,11 @@ function loadOutstandingTransactions() {
         $container.append($item);
       });
     },
+    complete: function () {
+      $('.loader').hide(); // hide laoder
+    },
     error: function () {
+      $('.loader').hide(); // hide laoder
       $container.html('<p class="error-message">Something went wrong. Please try again later.</p>');
     }
   });
