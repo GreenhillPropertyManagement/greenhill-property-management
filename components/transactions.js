@@ -866,7 +866,7 @@ function loadOutstandingTransactions() {
   });
 
   // Bind transaction item click for selection
-  $(document).on("click", ".payment__transaction-item", function () {
+  $(document).off("click", ".payment__transaction-item").on("click", ".payment__transaction-item", function () {
     $(this).toggleClass("selected");
 
     const $selectedItems = $(".payment__transaction-item.selected");
