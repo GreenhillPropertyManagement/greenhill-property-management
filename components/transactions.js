@@ -837,7 +837,7 @@ function loadOutstandingTransactions() {
 
       data.forEach((item) => {
         const $item = $(`
-          <div class="payment__transaction-item" id="${item.transaction_id}">
+          <div class="payment__transaction-item" id="${item.id}">
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Description</div>
               <div data-api="description" class="system-text__small">${item.description || "N/A"}</div>
