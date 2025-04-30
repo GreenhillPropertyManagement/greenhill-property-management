@@ -2,6 +2,12 @@ let transactionToDelete;
 let amount;
 document.addEventListener("DOMContentLoaded", function () {
 
+  /* Load Outstanding Transactions Func (Tenant Screen) */
+  $(document).on("click", '[data-api="load-transactions"]', function (e) {
+    e.preventDefault();
+    loadOutstandingTransactions();
+  });
+
   createPropertyTransaction(); // init property transaction creation
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
@@ -798,5 +804,73 @@ function tenantMakesPayment(amount) {
       fetchTransactions("tenant-user-ledger", localStorage.userId);
     },
     error: function (error) {},
+  });
+}
+
+function loadOutstandingTransactions() {
+
+  const $container = $(".pay-rent__container");
+  const $payButton = $(".intake-form__submit-bttn.payment");
+
+  $.ajax({
+    url:  localStorage.baseUrl + "api:rpDXPv3x/fetch_outstanding_transactions",
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    success: function (data) {
+      $container.empty(); // Clear previous content
+
+      if (!data.length) {
+        $container.append('<p class="no-charges-message">You currently have no outstanding charges.</p>');
+        $payButton.addClass("inactive").find("[data-property='user-counter']").text("0");
+        return;
+      }
+
+      data.forEach((item) => {
+        const $item = $(`
+          <div class="payment__transaction-item" id="${item.transaction_id}">
+            <div class="payment-trans__cell">
+              <div class="payment__trans-header">Description</div>
+              <div data-api="description" class="system-text__small">${item.description || "N/A"}</div>
+            </div>
+            <div class="payment-trans__cell">
+              <div class="payment__trans-header">Due Date</div>
+              <div data-api="due_date" class="system-text__small">${item.due_date || "—"}</div>
+            </div>
+            <div class="payment-trans__cell">
+              <div class="payment__trans-header">Total Amount</div>
+              <div data-api="amount" class="system-text__small">$${item.amount.toFixed(2)}</div>
+            </div>
+            <div class="payment-trans__cell">
+              <div class="payment__trans-header">Remaining Balance</div>
+              <div data-api="remaining_transaction_balance" class="system-text__small">$${item.remaining_transaction_balance.toFixed(2)}</div>
+            </div>
+          </div>
+        `);
+
+        $container.append($item);
+      });
+    },
+    error: function () {
+      $container.html('<p class="error-message">Something went wrong. Please try again later.</p>');
+    }
+  });
+
+  // Bind transaction item click for selection
+  $(document).on("click", ".payment__transaction-item", function () {
+    $(this).toggleClass("selected");
+
+    const count = $(".payment__transaction-item.selected").length;
+
+    if (count > 0) {
+      $payButton.removeClass("inactive");
+      $payButton.find("[data-property='user-counter']").text(count);
+      $payButton.find(".dynamic-delete-bttn-text").last().text(`Charge${count > 1 ? "s" : ""}`);
+    } else {
+      $payButton.addClass("inactive");
+      $payButton.find("[data-property='user-counter']").text("0");
+      $payButton.find(".dynamic-delete-bttn-text").last().text("Charge");
+    }
   });
 }
