@@ -869,12 +869,23 @@ function loadOutstandingTransactions() {
   $(document).on("click", ".payment__transaction-item", function () {
     $(this).toggleClass("selected");
 
-    const count = $(".payment__transaction-item.selected").length;
+    const $selectedItems = $(".payment__transaction-item.selected");
+    const count = $selectedItems.length;
 
     if (count > 0) {
+      let total = 0;
+      $selectedItems.each(function () {
+        const amountText = $(this).find('[data-api="remaining_transaction_balance"]').text().replace(/[^0-9.]/g, '');
+        const amount = parseFloat(amountText) || 0;
+        total += amount;
+      });
+
+      const formattedTotal = `$${total.toFixed(2)}`;
+      const label = `Pay ${count} Charge${count > 1 ? "s" : ""} (${formattedTotal})`;
+
       $payButton.removeClass("inactive");
       $payButton.find("[data-property='user-counter']").text(count);
-      $payButton.find(".dynamic-delete-bttn-text").last().text(`Charge${count > 1 ? "s" : ""}`);
+      $payButton.find(".dynamic-delete-bttn-text").last().text(label);
     } else {
       $payButton.addClass("inactive");
       $payButton.find("[data-property='user-counter']").text("0");
