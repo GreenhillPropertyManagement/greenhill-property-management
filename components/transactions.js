@@ -810,6 +810,10 @@ function tenantMakesPayment(amount) {
 function loadOutstandingTransactions() {
 
   $('.loader').css('display','flex'); //show loader
+  
+  $(".pay-transactions-button")
+  .removeClass("active")
+  .html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
 
   const $container = $(".pay-rent__container");
   const $payButton = $(".pay-transactions-button");
