@@ -809,6 +809,8 @@ function tenantMakesPayment(amount) {
 
 function loadOutstandingTransactions() {
 
+  /* Function dedicated for tenants to load and select outstanding charges/transactions to pay */
+
   $('.loader').css('display','flex'); //show loader
 
   $(".pay-transactions-button")
