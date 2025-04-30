@@ -838,7 +838,9 @@ function loadOutstandingTransactions() {
             </div>
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Due Date</div>
-              <div data-api="due_date" class="system-text__small">${item.due_date || "—"}</div>
+              <div data-api="due_date" class="system-text__small">${
+                item.due_date ? formatDateNoTime(item.due_date) : "—"
+              }</div>
             </div>
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Total Amount</div>
