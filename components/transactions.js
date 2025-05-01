@@ -2,11 +2,11 @@ let transactionToDelete;
 let amount;
 document.addEventListener("DOMContentLoaded", function () {
 
-  /* Load Outstanding Transactions Func (Tenant Screen) */
+  /* Load Outstanding Transactions Func (Tenant Screen) 
   $(document).on("click", '[data-api="load-transactions"]', function (e) {
     e.preventDefault();
     loadOutstandingTransactions();
-  });
+  });v */
 
   createPropertyTransaction(); // init property transaction creation
 
