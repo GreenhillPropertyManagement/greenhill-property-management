@@ -368,6 +368,8 @@ function loadUserProfile(user) {
         $("[data-profile=yearly_term]")
           .text(formatDateNoTime(response.tenant_info.yearly_term))
           .val(response.tenant_info.yearly_term);
+        $("[data-profile=payment_due_in_days]")
+          .val(response.tenant_info.payment_due_in_days);
         $("[data-profile=renewal_notice_deadline]")
           .text(formatDateNoTime(response.tenant_info.renewal_notice_deadline))
           .val(response.tenant_info.renewal_notice_deadline);
