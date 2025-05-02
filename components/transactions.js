@@ -823,7 +823,7 @@ function loadOutstandingTransactions() {
 
   /* Function dedicated for tenants to load and select outstanding charges/transactions to pay */
 
-  $('.loader').css('display','flex'); //show loader
+  $('.container-loader').show(); //show loader
 
   $(".pay-transactions-button")
   .removeClass("active")
@@ -875,7 +875,7 @@ function loadOutstandingTransactions() {
       });
     },
     complete: function () {
-      $('.loader').hide(); // hide laoder
+      $('.container-loader').hide();
     },
     error: function () {
       $('.loader').hide(); // hide laoder
@@ -970,7 +970,7 @@ function paySelectedTransactions() {
 
 function loadBalance() {
 
-  $('.loader').css('display','flex');
+  $('.container-loader').show();
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_current_balance",
@@ -988,7 +988,7 @@ function loadBalance() {
       alert("There was an error processing your payment.");
     },
     complete: function (response) {
-      $('.loader').hide();
+      $('.container-loader').hide();
     }
   });
 
