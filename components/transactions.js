@@ -2,11 +2,17 @@ let transactionToDelete;
 let amount;
 document.addEventListener("DOMContentLoaded", function () {
 
-  /* Load Outstanding Transactions Func (Tenant Screen) 
+  /* Load Outstanding Transactions Func (Tenant Screen)  */
   $(document).on("click", '[data-api="load-transactions"]', function (e) {
     e.preventDefault();
     loadOutstandingTransactions();
-  });v */
+  });
+
+  /* Initiate pay transactions on button click */
+  $(document).on("click", '[data-api-button="pay-transactions"]', function (e) {
+    e.preventDefault();
+    paySelectedTransactions();
+  });
 
   createPropertyTransaction(); // init property transaction creation
 
@@ -892,6 +898,62 @@ function loadOutstandingTransactions() {
       $payButton.addClass("active").html(`<div class="dynamic-delete-bttn-text">${label}</div>`);
     } else {
       $payButton.removeClass("active").html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
+    }
+  });
+}
+
+function paySelectedTransactions() {
+  
+  const $selectedItems = $(".payment__transaction-item.selected");
+
+  const selectedTransactionIds = $selectedItems.map(function () {
+    return parseInt($(this).attr("id")); // ensure numeric IDs
+  }).get();
+
+  if (selectedTransactionIds.length === 0) {
+    alert("Please select at least one transaction to pay.");
+    return;
+  }
+
+  // Calculate total remaining balance
+  let total = 0;
+  $selectedItems.each(function () {
+    const amountText = $(this).find('[data-api="remaining_transaction_balance"]').text().replace(/[^0-9.]/g, '');
+    const amount = parseFloat(amountText) || 0;
+    total += amount;
+  });
+
+  const formattedTotal = `$${total.toFixed(2)}`;
+  const count = selectedTransactionIds.length;
+  const confirmMessage = `Pay ${count} transaction${count > 1 ? "s" : ""} (${formattedTotal})?`;
+
+  // Show confirmation
+  if (!confirm(confirmMessage)) {
+    return; // Exit if user cancels
+  }
+
+  $('.loader').css('display', 'flex');
+
+  $.ajax({
+    url: localStorage.baseUrl + "api:rpDXPv3x/pay_selected_transaction",
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+      "Content-Type": "application/json"
+    },
+    data: JSON.stringify({
+      transactions: selectedTransactionIds
+    }),
+    success: function (response) {
+      $('.loader').hide();
+      loadOutstandingTransactions(); // Reload updated list
+    },
+    error: function (xhr) {
+      console.error("Payment error:", xhr.responseText);
+      alert("There was an error processing your payment.");
+    },
+    complete: function () {
+      showToast("Payment submitted successfully.");
     }
   });
 }
