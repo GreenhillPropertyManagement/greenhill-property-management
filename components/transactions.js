@@ -875,7 +875,9 @@ function loadOutstandingTransactions() {
       });
     },
     complete: function () {
-      $('.container-loader').hide();
+      setTimeout(function () {
+        $('.container-loader').hide();
+      }, 1000); // 1000ms = 1 second
     },
     error: function () {
       $('.loader').hide(); // hide laoder
@@ -988,7 +990,9 @@ function loadBalance() {
       alert("There was an error processing your payment.");
     },
     complete: function (response) {
-      $('.container-loader').hide();
+      setTimeout(function () {
+        $('.container-loader').hide();
+      }, 1000); // 1000ms = 1 second
     }
   });
 
