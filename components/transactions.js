@@ -14,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
     paySelectedTransactions();
   });
 
+  /* Initiate pay transactions on button click */
+  $(document).on("click", '[data-api-button="general-balance-payment"]', function (e) {
+    e.preventDefault();
+    loadBalance();
+  });
+
   createPropertyTransaction(); // init property transaction creation
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
@@ -971,11 +977,7 @@ function loadBalance() {
       Authorization: "Bearer " + localStorage.authToken,
       "Content-Type": "application/json"
     },
-    data: JSON.stringify({
-      transactions: selectedTransactionIds
-    }),
     success: function (response) {
-
       $('[data=current-balance]').text("$" + parseFloat(response.balance).toFixed(2));
       loadOutstandingTransactions(); // Reload updated list
     },
