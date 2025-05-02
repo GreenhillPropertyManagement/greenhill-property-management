@@ -980,7 +980,7 @@ function loadBalance() {
       "Content-Type": "application/json"
     },
     success: function (response) {
-      $('[data=current-balance]').text("$" + parseFloat(response.balance).toFixed(2));
+      $('[data=current-balance]').text("$" + parseFloat(response.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
       loadOutstandingTransactions(); // Reload updated list
     },
     error: function (xhr) {
