@@ -961,3 +961,33 @@ function paySelectedTransactions() {
     }
   });
 }
+
+function loadBalance() {
+
+  $.ajax({
+    url: localStorage.baseUrl + "api:rpDXPv3x/load_current_balance",
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+      "Content-Type": "application/json"
+    },
+    data: JSON.stringify({
+      transactions: selectedTransactionIds
+    }),
+    success: function (response) {
+
+      $('[data=current-balance]').text("$" + parseFloat(response.balance).toFixed(2));
+      loadOutstandingTransactions(); // Reload updated list
+    },
+    error: function (xhr) {
+      console.error("Payment error:", xhr.responseText);
+      alert("There was an error processing your payment.");
+    },
+    complete: function (response) {
+      $('.modal__pay-rent').hide();
+      $('.modal__block').hide();
+      $('.loader').hide();
+    }
+  });
+
+}
