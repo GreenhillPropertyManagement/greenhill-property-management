@@ -949,7 +949,7 @@ function paySelectedTransactions() {
       $('.modal__pay-rent').hide();
       $('.modal__block').hide();
       $('.loader').hide();
-      
+
       loadOutstandingTransactions(); // Reload updated list
     },
     error: function (xhr) {
@@ -957,7 +957,7 @@ function paySelectedTransactions() {
       alert("There was an error processing your payment.");
     },
     complete: function () {
-      showToast("Payment submitted successfully.");
+      showToast("Your Payment Was Submitted.");
     }
   });
 }
