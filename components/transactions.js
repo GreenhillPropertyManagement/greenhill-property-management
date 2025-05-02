@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     paySelectedTransactions();
   });
 
-  /* Initiate pay transactions on button click */
+  /* load balance on button click */
   $(document).on("click", '[data-api-button="general-balance-payment"]', function (e) {
     e.preventDefault();
     loadBalance();
@@ -970,6 +970,8 @@ function paySelectedTransactions() {
 
 function loadBalance() {
 
+  $('.loader').css('display','flex');
+
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_current_balance",
     method: "GET",
@@ -986,8 +988,6 @@ function loadBalance() {
       alert("There was an error processing your payment.");
     },
     complete: function (response) {
-      $('.modal__pay-rent').hide();
-      $('.modal__block').hide();
       $('.loader').hide();
     }
   });
