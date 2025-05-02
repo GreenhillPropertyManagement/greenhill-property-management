@@ -903,7 +903,7 @@ function loadOutstandingTransactions() {
 }
 
 function paySelectedTransactions() {
-  
+
   const $selectedItems = $(".payment__transaction-item.selected");
 
   const selectedTransactionIds = $selectedItems.map(function () {
@@ -945,7 +945,11 @@ function paySelectedTransactions() {
       transactions: selectedTransactionIds
     }),
     success: function (response) {
+
+      $('.modal__pay-rent').hide();
+      $('.modal__block').hide();
       $('.loader').hide();
+      
       loadOutstandingTransactions(); // Reload updated list
     },
     error: function (xhr) {
