@@ -1,5 +1,6 @@
 let transactionToDelete;
 let amount;
+
 document.addEventListener("DOMContentLoaded", function () {
 
   /* Load Outstanding Transactions Func (Tenant Screen)  */
@@ -820,26 +821,23 @@ function tenantMakesPayment(amount) {
 }
 
 function loadOutstandingTransactions() {
-
-  /* Function dedicated for tenants to load and select outstanding charges/transactions to pay */
-
-  $('.container-loader').show(); //show loader
+  $('.container-loader').show(); // Show loader
 
   $(".pay-transactions-button")
-  .removeClass("active")
-  .html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
+    .removeClass("active")
+    .html(`<div class="dynamic-delete-bttn-text">Select Transaction(s)</div>`);
 
   const $container = $(".pay-rent__container");
   const $payButton = $(".pay-transactions-button");
 
   $.ajax({
-    url:  localStorage.baseUrl + "api:rpDXPv3x/fetch_outstanding_transactions",
+    url: localStorage.baseUrl + "api:rpDXPv3x/fetch_outstanding_transactions",
     method: "GET",
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
     },
     success: function (data) {
-      $container.empty(); // Clear previous content
+      $container.empty();
 
       if (!data.length) {
         $container.append('<p class="no-charges-message">You currently have no outstanding charges.</p>');
@@ -847,26 +845,28 @@ function loadOutstandingTransactions() {
         return;
       }
 
-      data.forEach((item) => {
+      data.forEach((record) => {
+        const master = record.master_transaction;
+
         const $item = $(`
-          <div class="payment__transaction-item" id="${item.id}">
+          <div class="payment__transaction-item" id="${master.id}">
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Description</div>
-              <div data-api="description" class="system-text__small">${item.description || "N/A"}</div>
+              <div data-api="description" class="system-text__small">${master.description || "N/A"}</div>
             </div>
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Due Date</div>
               <div data-api="due_date" class="system-text__small">${
-                item.due_date ? formatDateNoTime(item.due_date) : "—"
+                master.due_date ? formatDateNoTime(master.due_date) : "—"
               }</div>
             </div>
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Total Amount</div>
-              <div data-api="amount" class="system-text__small">$${item.amount.toFixed(2)}</div>
+              <div data-api="amount" class="system-text__small">$${master.amount.toFixed(2)}</div>
             </div>
             <div class="payment-trans__amount-wrapper">
               <div class="payment__trans-header">Remaining Balance</div>
-              <div data-api="remaining_transaction_balance" class="system-text__small">$${item.remaining_transaction_balance.toFixed(2)}</div>
+              <div data-api="remaining_transaction_balance" class="system-text__small">$${master.remaining_transaction_balance.toFixed(2)}</div>
             </div>
           </div>
         `);
@@ -878,12 +878,12 @@ function loadOutstandingTransactions() {
       $('.container-loader').hide();
     },
     error: function () {
-      $('.loader').hide(); // hide laoder
+      $('.container-loader').hide();
       $container.html('<p class="error-message">Something went wrong. Please try again later.</p>');
     }
   });
 
-  // Bind transaction item click for selection
+  // Click handler to toggle selection
   $(document).off("click", ".payment__transaction-item").on("click", ".payment__transaction-item", function () {
     $(this).toggleClass("selected");
 
@@ -898,7 +898,7 @@ function loadOutstandingTransactions() {
         total += amount;
       });
 
-      const formattedTotal = `$${total.toFixed(2)}`;
+      const formattedTotal = `$${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       const label = `Pay ${count} Charge${count > 1 ? "s" : ""} (${formattedTotal})`;
 
       $payButton.addClass("active").html(`<div class="dynamic-delete-bttn-text">${label}</div>`);
