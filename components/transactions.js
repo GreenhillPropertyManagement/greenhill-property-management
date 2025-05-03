@@ -839,14 +839,16 @@ function loadOutstandingTransactions() {
     success: function (data) {
       $container.empty();
 
-      if (!data.length) {
-        $container.append('<p class="no-charges-message">You currently have no outstanding charges.</p>');
-        $payButton.addClass("inactive").find("[data-property='user-counter']").text("0");
-        return;
-      }
+      // Track if anything was displayed
+      let hasVisibleCharges = false;
 
       data.forEach((record) => {
         const master = record.master_transaction;
+        const pendingPayment = parseFloat(record.pending_payment) || 0;
+
+        if (pendingPayment > 0) return; // ⛔ Skip if there's a pending payment
+
+        hasVisibleCharges = true;
 
         const $item = $(`
           <div class="payment__transaction-item" id="${master.id}">
@@ -873,6 +875,11 @@ function loadOutstandingTransactions() {
 
         $container.append($item);
       });
+
+      if (!hasVisibleCharges) {
+        $container.append('<p class="no-charges-message">You currently have no outstanding charges.</p>');
+        $payButton.addClass("inactive").find("[data-property='user-counter']").text("0");
+      }
     },
     complete: function () {
       $('.container-loader').hide();
