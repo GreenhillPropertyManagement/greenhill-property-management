@@ -971,6 +971,7 @@ function paySelectedTransactions() {
     },
     complete: function () {
       showToast("Your Payment Was Submitted.");
+      $('#pay-rent').clcik();
     }
   });
 }
