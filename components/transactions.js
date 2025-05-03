@@ -821,7 +821,7 @@ function tenantMakesPayment(amount) {
 }
 
 function loadOutstandingTransactions() {
-  $('.container-loader').show(); // Show loader
+  $('.container-loader').css('display','flex'); // Show loader
 
   $(".pay-transactions-button")
     .removeClass("active")
@@ -977,7 +977,7 @@ function paySelectedTransactions() {
 
 function loadBalance() {
 
-  $('.container-loader').show();
+  $('.container-loader').css('display','flex');
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_current_balance",
