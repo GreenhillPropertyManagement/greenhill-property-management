@@ -1058,6 +1058,7 @@ function makeGeneralBalancePayment() {
       loadOutstandingTransactions(); // refresh charges
       $('.modal__block').hide();
       $('#pay-rent').click();
+      $('[data-api-input="general-balance-amount"]').val(''); // clear payment amount input 
     },
     error: function (xhr) {
       console.error("Payment error:", xhr.responseText);
