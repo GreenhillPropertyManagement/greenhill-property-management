@@ -1056,6 +1056,7 @@ function makeGeneralBalancePayment() {
     success: function (response) {
       loadOutstandingTransactions(); // refresh charges
       $('.modal__block').hide();
+      $('#pay-rent').click();
     },
     error: function (xhr) {
       console.error("Payment error:", xhr.responseText);
