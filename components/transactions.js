@@ -1009,7 +1009,7 @@ function loadBalance() {
 }
 
 function makeGeneralBalancePayment() {
-  $(.loader).css('display','flex');
+  $('.loader').css('display','flex');
   const amount = parseFloat($('[data-api-input="general-balance-amount"]').val()) || 0;
 
   if (amount <= 0) {
