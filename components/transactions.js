@@ -877,7 +877,7 @@ function loadOutstandingTransactions() {
       });
 
       if (!hasVisibleCharges) {
-        $container.append('<p class="no-charges-message" style="text-align: center; margin-top: 1em;">You currently have no outstanding charges.</p>');
+        $container.append('<p class="no-charges-message" style="text-align: center; margin-top: 1em;">All charges are either paid or pending payment.</p>');
         $payButton.addClass("inactive").find("[data-property='user-counter']").text("0");
       }
     },
