@@ -4,9 +4,9 @@ let amount;
 document.addEventListener("DOMContentLoaded", function () {
 
   /* Load Outstanding Transactions Func (Tenant Screen)  */
-  $(document).on("click", '[data-api="load-transactions"]', function (e) {
+  $(document).on("click", '[data-api="launch-trans-default"]', function (e) {
     e.preventDefault();
-    $('#pay-trans-button').click(); // click tab button to default to pay transaction tab pane
+    $("[data-api='load-transactions']").click();
     loadOutstandingTransactions(); // fetch transactions 
   });
 
