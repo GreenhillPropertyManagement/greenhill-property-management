@@ -21,6 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
     loadBalance();
   });
 
+  /* Make general balance payment */
+  $(document).on("click", '[api-button="general-balance-payment"]', function (e) {
+    e.preventDefault();
+    makeGeneralBalancePayment();
+  });
+
   createPropertyTransaction(); // init property transaction creation
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
@@ -1000,4 +1006,47 @@ function loadBalance() {
     }
   });
 
+}
+
+function makeGeneralBalancePayment() {
+  $(.loader).css('display','flex');
+  const amount = parseFloat($('[data-api-input="general-balance-amount"]').val()) || 0;
+
+  if (amount <= 0) {
+    alert("Please enter a valid payment amount.");
+    return;
+  }
+
+  const formattedAmount = `$${amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+
+  const confirmed = confirm(`Are you sure you want to make a general balance payment of ${formattedAmount}?`);
+  if (!confirmed) return;
+
+  $('.container-loader').show(); // Show loader
+
+  $.ajax({
+    url: localStorage.baseUrl + "api:S5JmTHue/general_balance_payment",
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+      "Content-Type": "application/json"
+    },
+    data: JSON.stringify({ amount }),
+    success: function (response) {
+      loadOutstandingTransactions(); // refresh charges
+      $('.modal__block').hide();
+    },
+    error: function (xhr) {
+      console.error("Payment error:", xhr.responseText);
+      alert("There was an error processing your payment.");
+    },
+    complete: function () {
+      $('.container-loader').hide();
+      $('.loader').hide();
+      showToast("Payment submitted successfully.");
+    }
+  });
 }
