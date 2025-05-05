@@ -827,6 +827,8 @@ function tenantMakesPayment(amount) {
 }
 
 function loadOutstandingTransactions() {
+
+
   $('.container-loader').css('display','flex'); // Show loader
 
   $(".pay-transactions-button")
@@ -882,9 +884,25 @@ function loadOutstandingTransactions() {
         $container.append($item);
       });
 
-      if (!hasVisibleCharges) {
-        $container.append('<p class="no-charges-message" style="text-align: center; margin-top: 1em;">All charges are either paid or pending payment.</p>');
+      if (!hasVisibleCharges) { // if all transactions have payments pending....
+        $container.append('<p class="no-charges-message" style="text-align: center; margin-top: 1em;">All charges are either paid or pending payment. Transactions and balances will be updated once payments clear.</p>');
         $payButton.addClass("inactive").find("[data-property='user-counter']").text("0");
+
+        $('.no-charges-payment-text').show(); // show the no transactions available text
+        $('#general-payment-form').hide(); // hide the payment form
+        $('[api-button="general-balance-payment"]').css({ // hide the submit payment button
+          display: 'none',
+          'pointer-events': 'none'
+        });
+
+      } else {
+
+        $('.no-charges-payment-text').hide(); // hide the no transactions avbailble text
+        $('#general-payment-form').show(); // show the patyment form
+        $('[api-button="general-balance-payment"]').css({ // show the submit payment button
+          display: 'flex',
+          'pointer-events': 'auto'
+        });
       }
     },
     complete: function () {
