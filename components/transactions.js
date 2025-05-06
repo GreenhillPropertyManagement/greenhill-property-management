@@ -61,10 +61,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Only show dueDate if type is not payment/credit
         if (typeField.value !== "payment" && typeField.value !== "credit") {
           dueDateField.closest(".form__item").style.display = "block";
-          dueDateField.setAttribute("required", "");
         } else {
           dueDateField.closest(".form__item").style.display = "none";
-          dueDateField.removeAttribute("required");
           dueDateField.value = "";
         }
 
@@ -78,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
         transDateField.removeAttribute("required");
 
         dueDateField.closest(".form__item").style.display = "none";
-        dueDateField.removeAttribute("required");
         dueDateField.value = "";
 
         startDateField.closest(".form__item").style.display = "block";
@@ -94,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (selectedType === "payment" || selectedType === "credit") {
         dueDateField.closest(".form__item").style.display = "none";
-        dueDateField.removeAttribute("required");
         dueDateField.value = "";
       } else if (freqField.value === "one-time") {
         // Only show due date if frequency is one-time
