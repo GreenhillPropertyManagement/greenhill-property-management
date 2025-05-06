@@ -99,6 +99,7 @@ function insertSortedTransactionCode($newItem) {
 
 // Funciton to create new transaction code
 function createTransCode() {
+
     $("#code-transaction-form").submit(function (event) {
         event.preventDefault(); // Prevent default form submission
   
@@ -151,6 +152,7 @@ function createTransCode() {
             },
             complete: function () {
                 $('.loader').hide(); // Hide loader
+                reloadTransactionCodes(); // update transaction form with new codes
             }
         });
     });
@@ -219,6 +221,7 @@ function createTransCode() {
             complete: function () {
                 // Re-enable the button after the request is completed
                 $('[data-api-button="delete-trans-code"]').prop("disabled", false);
+                reloadTransactionCodes(); // update transaction form with new codes
             }
         });
     });
@@ -335,6 +338,7 @@ function setupEditTransactionHandler() {
             },
             complete: function () {
                 $('.loader').hide(); // Hide loader
+                reloadTransactionCodes(); // update transaction form with new codes
             }
         });
     });
@@ -391,4 +395,33 @@ function populateLinkedExpenseSelect(selectedExpenseId) {
             console.error("Error loading expense codes:", error);
         }
     });
+}
+
+function reloadTransactionCodes() {
+
+    $.ajax({
+        url: localStorage.baseUrl + "api:ehsPQykn/load_transaction_codes_form",
+        method: "GET",
+        headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+            "Content-Type": "application/json"
+        },
+        success: function (response) {
+            const $select = $('[data-api-input="transaction_code"]');
+
+            $select.empty();
+            $select.append('<option selected disabled value="">Select Transaction Code...</option>');
+
+            response.forEach(item => {
+            const option = `<option value="${item.id}">${item.code} - ${item.title}</option>`;
+            $select.append(option);
+            });
+        },
+        error: function (xhr) {
+            console.error("Error loading transaction codes:", xhr.responseText);
+        },
+        complete: function () {
+            console.log("Transaction codes loaded.");
+        }
+        });
 }
