@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
         transDateField.closest(".form__item").style.display = "block"; // trans date
         transDateField.setAttribute("required", "");
         dueDateField.closest(".form__item").style.display = "block"; // due daate
-        dueDateField.setAttribute("required", "");
         startDateField.closest(".form__item").style.display = "none"; // start date
         startDateField.removeAttribute("required");
         endDateField.closest(".form__item").style.display = "none"; // end date
