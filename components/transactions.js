@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   createPropertyTransaction(); // init property transaction creation
+  loadTransactionCodesInForm(); // load transaction codes in the transaciton form
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
   // Select all forms with the 'api-form="user-transaction"' attribute
@@ -63,22 +64,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Logic for showing/hiding form items based on selected frequency
       if (selectedFreq === "one-time") {
-        transDateField.closest(".form__item").style.display = "block";
+        transDateField.closest(".form__item").style.display = "block"; // trans date
         transDateField.setAttribute("required", "");
-        dueDateField.closest(".form__item").style.display = "block";
+        dueDateField.closest(".form__item").style.display = "block"; // due daate
         dueDateField.setAttribute("required", "");
-        startDateField.closest(".form__item").style.display = "none";
+        startDateField.closest(".form__item").style.display = "none"; // start date
         startDateField.removeAttribute("required");
-        endDateField.closest(".form__item").style.display = "none";
+        endDateField.closest(".form__item").style.display = "none"; // end date
         endDateField.removeAttribute("required");
       } else if (selectedFreq === "recurring") {
-        transDateField.closest(".form__item").style.display = "none";
+        transDateField.closest(".form__item").style.display = "none"; // trans date
         transDateField.removeAttribute("required");
-        dueDateField.closest(".form__item").style.display = "none";
+        dueDateField.closest(".form__item").style.display = "none"; // due date
         dueDateField.removeAttribute("required");
-        startDateField.closest(".form__item").style.display = "block";
+        startDateField.closest(".form__item").style.display = "block"; // start date
         startDateField.setAttribute("required", "");
-        endDateField.closest(".form__item").style.display = "block";
+        endDateField.closest(".form__item").style.display = "block"; // end date
         endDateField.setAttribute("required", "");
       }
     });
@@ -1076,6 +1077,34 @@ function makeGeneralBalancePayment() {
       $('.container-loader').hide();
       $('.loader').hide();
       showToast("Payment submitted successfully.");
+    }
+  });
+}
+
+function loadTransactionCodesInForm() {
+  $.ajax({
+    url: localStorage.baseUrl + "api:ehsPQykn/load_transaction_codes_form",
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+      "Content-Type": "application/json"
+    },
+    success: function (response) {
+      const $select = $('[data-api-input="transaction_code"]');
+
+      $select.empty();
+      $select.append('<option selected disabled value="">Select Transaction Code...</option>');
+
+      response.forEach(item => {
+        const option = `<option value="${item.id}">${item.code} - ${item.title}</option>`;
+        $select.append(option);
+      });
+    },
+    error: function (xhr) {
+      console.error("Error loading transaction codes:", xhr.responseText);
+    },
+    complete: function () {
+      console.log("Transaction codes loaded.");
     }
   });
 }
