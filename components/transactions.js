@@ -33,24 +33,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* HANDLE FORM UX FOR TRANSACTION FORMS */
   // Select all forms with the 'api-form="user-transaction"' attribute
-  var transactionForms = document.querySelectorAll(
-    'form[api-form="user-transaction"]',
-  );
-  transactionForms.forEach(function (form) {
-    var freqField = form.querySelector('[data-api-input="frequency"]');
-    var transDateField = form.querySelector(
-      '[data-api-input="transaction_date"]',
-    );
-    var startDateField = form.querySelector(
-      '[data-api-input="transaction_start_date"]',
-    );
-    var endDateField = form.querySelector(
-      '[data-api-input="transaction_end_date"]',
-    );
-    var dueDateField = form.querySelector(
-      '[data-api-input="due_date"]',
-    );
+  var transactionForms = document.querySelectorAll('form[api-form="user-transaction"]');
 
+  transactionForms.forEach(function (form) {
+    // Field references
+    var freqField = form.querySelector('[data-api-input="frequency"]');
+    var typeField = form.querySelector('[data-api-input="type"]');
+    var transDateField = form.querySelector('[data-api-input="transaction_date"]');
+    var startDateField = form.querySelector('[data-api-input="transaction_start_date"]');
+    var endDateField = form.querySelector('[data-api-input="transaction_end_date"]');
+    var dueDateField = form.querySelector('[data-api-input="due_date"]');
 
     // Initialize by hiding and disabling form items
     [transDateField, startDateField, endDateField, dueDateField].forEach(function (field) {
@@ -58,31 +50,64 @@ document.addEventListener("DOMContentLoaded", function () {
       field.removeAttribute("required");
     });
 
-    // Add event listener to the frequency field
+    // Handle frequency field changes
     freqField.addEventListener("change", function () {
       var selectedFreq = freqField.value;
 
-      // Logic for showing/hiding form items based on selected frequency
       if (selectedFreq === "one-time") {
-        transDateField.closest(".form__item").style.display = "block"; // trans date
+        transDateField.closest(".form__item").style.display = "block";
         transDateField.setAttribute("required", "");
-        dueDateField.closest(".form__item").style.display = "block"; // due daate
-        startDateField.closest(".form__item").style.display = "none"; // start date
+
+        // Only show dueDate if type is not payment/credit
+        if (typeField.value !== "payment" && typeField.value !== "credit") {
+          dueDateField.closest(".form__item").style.display = "block";
+          dueDateField.setAttribute("required", "");
+        } else {
+          dueDateField.closest(".form__item").style.display = "none";
+          dueDateField.removeAttribute("required");
+          dueDateField.value = "";
+        }
+
+        startDateField.closest(".form__item").style.display = "none";
         startDateField.removeAttribute("required");
-        endDateField.closest(".form__item").style.display = "none"; // end date
+        endDateField.closest(".form__item").style.display = "none";
         endDateField.removeAttribute("required");
+
       } else if (selectedFreq === "recurring") {
-        transDateField.closest(".form__item").style.display = "none"; // trans date
+        transDateField.closest(".form__item").style.display = "none";
         transDateField.removeAttribute("required");
-        dueDateField.closest(".form__item").style.display = "none"; // due date
+
+        dueDateField.closest(".form__item").style.display = "none";
         dueDateField.removeAttribute("required");
-        startDateField.closest(".form__item").style.display = "block"; // start date
+        dueDateField.value = "";
+
+        startDateField.closest(".form__item").style.display = "block";
         startDateField.setAttribute("required", "");
-        endDateField.closest(".form__item").style.display = "block"; // end date
+        endDateField.closest(".form__item").style.display = "block";
         endDateField.setAttribute("required", "");
       }
     });
+
+    // Handle type field changes to conditionally hide/show due_date
+    typeField.addEventListener("change", function () {
+      var selectedType = typeField.value;
+
+      if (selectedType === "payment" || selectedType === "credit") {
+        dueDateField.closest(".form__item").style.display = "none";
+        dueDateField.removeAttribute("required");
+        dueDateField.value = "";
+      } else if (freqField.value === "one-time") {
+        // Only show due date if frequency is one-time
+        dueDateField.closest(".form__item").style.display = "block";
+        dueDateField.setAttribute("required", "");
+      }
+    });
+
+    //Trigger initial state in case the form is pre-filled
+    freqField.dispatchEvent(new Event("change"));
+    typeField.dispatchEvent(new Event("change"));
   });
+
 
   // load property transactions
   $("#property").click(function () {
