@@ -32,57 +32,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* HANDLE FORM UX FOR TRANSACTION FORMS */
 // Select all forms with the 'api-form="user-transaction"' attribute
-var transactionForms = document.querySelectorAll('form[api-form="user-transaction"]');
-
-transactionForms.forEach(function (form) {
-  var freqField = form.querySelector('[data-api-input="frequency"]');
-  var transDateField = form.querySelector('[data-api-input="transaction_date"]');
-  var startDateField = form.querySelector('[data-api-input="transaction_start_date"]');
-  var endDateField = form.querySelector('[data-api-input="transaction_end_date"]');
-  var dueDateField = form.querySelector('[data-api-input="due_date"]');
-  var transCodeField = form.querySelector('[data-api-input="transaction_code"]');
-
-  // Always show and require Transaction Code field
-  transCodeField.closest(".form__item").style.display = "block";
-  transCodeField.setAttribute("required", "");
-
-  // Initially hide conditional fields
-  [transDateField, startDateField, endDateField, dueDateField].forEach(function (field) {
-    field.closest(".form__item").style.display = "none";
-    field.removeAttribute("required");
-  });
-
-  // Add event listener to frequency field
-  freqField.addEventListener("change", function () {
-    var selectedFreq = freqField.value;
-
-    if (selectedFreq === "one-time") {
-      transDateField.closest(".form__item").style.display = "block";
-      transDateField.setAttribute("required", "");
-
-      dueDateField.closest(".form__item").style.display = "block";
-      dueDateField.setAttribute("required", "");
-
-      startDateField.closest(".form__item").style.display = "none";
-      startDateField.removeAttribute("required");
-
-      endDateField.closest(".form__item").style.display = "none";
-      endDateField.removeAttribute("required");
-
-    } else if (selectedFreq === "recurring") {
-      transDateField.closest(".form__item").style.display = "none";
-      transDateField.removeAttribute("required");
-
-      dueDateField.closest(".form__item").style.display = "none";
-      dueDateField.removeAttribute("required");
-
-      startDateField.closest(".form__item").style.display = "block";
-      startDateField.setAttribute("required", "");
-
-      endDateField.closest(".form__item").style.display = "block";
-      endDateField.setAttribute("required", "");
+document.querySelectorAll('form[api-form="user-transaction"]').forEach(function (form) {
+  const getField = (name) => form.querySelector(`[data-api-input="${name}"]`);
+  const showItem = (field) => {
+    if (field && field.parentElement.classList.contains("form__item")) {
+      field.parentElement.style.display = "block";
+      field.setAttribute("required", "");
     }
-  });
+  };
+  const hideItem = (field) => {
+    if (field && field.parentElement.classList.contains("form__item")) {
+      field.parentElement.style.display = "none";
+      field.removeAttribute("required");
+    }
+  };
+
+  const freqField = getField("frequency");
+  const transactionDate = getField("transaction_date");
+  const dueDate = getField("due_date");
+  const startDate = getField("transaction_start_date");
+  const endDate = getField("transaction_end_date");
+
+  // Set initial visibility
+  const updateVisibility = () => {
+    const value = freqField?.value;
+
+    if (value === "one-time") {
+      showItem(transactionDate);
+      showItem(dueDate);
+      hideItem(startDate);
+      hideItem(endDate);
+    } else if (value === "recurring") {
+      hideItem(transactionDate);
+      hideItem(dueDate);
+      showItem(startDate);
+      showItem(endDate);
+    }
+  };
+
+  freqField?.addEventListener("change", updateVisibility);
+
+  // Trigger once on load in case prefilled
+  updateVisibility();
 });
 
   // load property transactions
