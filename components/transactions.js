@@ -595,7 +595,7 @@ function updateUserTransaction(transId, transFreq) {
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
-  $("#edit-prop-trans").show();
+  $("#edit-transaction").show();
 
    /*update form depending on the transaction frequency type 
   if (transFreq === "one-time") {
