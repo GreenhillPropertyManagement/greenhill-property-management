@@ -901,7 +901,7 @@ function loadOutstandingTransactions() {
               }</div>
             </div>
             <div class="payment-trans__cell">
-              <div class="payment__trans-header">Total Amount</div>
+              <div class="payment__trans-header">Charge Amount</div>
               <div data-api="amount" class="system-text__small">$${master.amount.toFixed(2)}</div>
             </div>
             <div class="payment-trans__amount-wrapper">
