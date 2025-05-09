@@ -63,7 +63,9 @@ $("[api-button='unit-transactions']")
     loadUserTransactions("active-tenant", "all");
   });
   // 'Recurring Transactions' Tab clicked
-  $("[api-button='recurring-user-transactions']").click(function () {
+  $("[api-button='recurring-user-transactions']")
+  .off("click")
+  .on("click", function () {
     if (localStorage.pageId === "profile") {
       loadUserTransactions("profile", "recurring");
     } else if (localStorage.pageId === "unit") {
