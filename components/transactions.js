@@ -532,7 +532,7 @@ function loadUserTransactions(view, type) {
 
     success: function (response) {
       response.forEach((userTrans) => {
-        const transactionId = userTrans.transaction_id;
+        const transactionId = userTrans.id;
         const description = userTrans.description || "";
     
         // Determine frequency
