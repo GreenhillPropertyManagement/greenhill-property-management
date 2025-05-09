@@ -597,7 +597,7 @@ function updateUserTransaction(transId, transFreq) {
   $(".modal__block").show().children().hide();
   $("#edit-prop-trans").show();
 
-   /*update form depending on the transaction frequency type */
+   /*update form depending on the transaction frequency type 
   if (transFreq === "one-time") {
    
     
@@ -612,6 +612,7 @@ function updateUserTransaction(transId, transFreq) {
     $("#edit-prop-trans-amount").closest(".form__item").hide();
     $("#edit-prop-trans-amount").removeAttr("required");
   } else {
+    
     $("#edit-prop-trans-type").closest(".form__item").show();
     $("#edit-prop-trans-type").attr("required", "required");
     $("#edit-prop-trans-recipient").closest(".form__item").hide();
@@ -622,8 +623,9 @@ function updateUserTransaction(transId, transFreq) {
     $("#edit-prop-trans-end-date").attr("required", "required");
     $("#edit-prop-trans-amount").closest(".form__item").show();
     $("#edit-prop-trans-amount").attr("required", "required");
+    
   } 
-
+  */
 
   /* Load Selected Property Transaction */
   $.ajax({
