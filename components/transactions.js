@@ -598,6 +598,7 @@ function updateUserTransaction(transId, transFreq) {
   $("#edit-transaction").show();
 
    /*update form depending on the transaction frequency type */
+
    if (transFreq === "one-time") {
     // Step 1: Bind dynamic fields using data-api-input
     const $form = $('form[api-form="update-transaction"]');
@@ -654,7 +655,8 @@ function updateUserTransaction(transId, transFreq) {
   });
 
   /* Handle Form Submission to Update Transaction */
-  $("#edit-prop-trans-form")
+
+  $('form[api-form="update-transaction"]')
     .off("submit")
     .submit(function (event) {
       // Prevent the default form submission behavior
