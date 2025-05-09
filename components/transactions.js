@@ -619,12 +619,16 @@ function updateUserTransaction(transId, transFreq) {
     const $amountField = $form.find('[data-api-input="amount"]');
     const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
     const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
+    const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
+    const $actionDateField = $form.find('[data-api-input="action_date"]');
   
     // Step 2: Hide and reset the amount field initially
     $amountWrapper.hide();
     $amountField.val('');
     $actionDescription.hide();
     $actionDescriptionField.val('');
+    $actionDate.hide();
+    $actionDateField.val('');
   
     // Step 3: Watch for changes to action dropdown
     $action.off('change').on('change', function () {
@@ -634,11 +638,14 @@ function updateUserTransaction(transId, transFreq) {
       if (["charge", "payment", "credit"].includes(selectedValue)) {
         $amountWrapper.show();
         $actionDescription.show();
+        $actionDate.show();
       } else {
         $amountWrapper.hide();
         $amountField.val('');
         $actionDescription.hide();
         $actionDescriptionField.val('');
+        $actionDate.hide();
+        $actionDateField.val('');
       }
     });
   }
