@@ -611,6 +611,8 @@ function updateUserTransaction(transId, transFreq) {
    if (transFreq === "one-time") {
     // Step 1: Bind dynamic fields using data-api-input
     const $form = $('form[api-form="update-transaction"]');
+    $form[0].reset(); // Clears all inputs to default
+    $form.find('.form__item').show(); // Ensure all fields are visible initially
     const $description = $form.find('[data-api-input="description"]');
     const $code = $form.find('[data-api-input="transaction_code"]');
     const $dueDate = $form.find('[data-api-input="due_date"]');
@@ -671,6 +673,7 @@ function updateUserTransaction(transId, transFreq) {
       $("[data-api-input=transaction_code]").val(response.code);
       $("[data-api-input=transaction_date]").val(response.transaction_date);
       $("[data-api-input=due_date]").val(response.due_date);
+      $("[data-api-input=action]").trigger("change");
 
     },
     complete: function (response) {
