@@ -653,6 +653,7 @@ function updateUserTransaction(transId, transFreq) {
 
       /*  Pre Populate Form Fields */
       $("[data-api-input=description]").val(response.description);
+      $("[data-api-input=remaining_transaction_balance]").val(response.remaining_transaction_balance);
       $("[data-api-input=transaction_code]").val(response.code);
       $("[data-api-input=transaction_date]").val(response.transaction_date);
       $("[data-api-input=due_date]").val(response.due_date);
