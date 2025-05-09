@@ -687,13 +687,15 @@ function updateUserTransaction(transId, transFreq) {
         data: JSON.stringify(formData), // Convert formData to JSON
         contentType: "application/json", // Set the content type to JSON
         success: function (response) {
-          alert("Success! Property Transaction Updated.");
+          
           $(".loader").hide();
           //loadProperty();
           $("#property-transaction-form")[0].reset();
+          loadUserTransactions();
         },
         complete: function () {
-          $("[api-button='all-user-transactions']").click();
+          showToast("Success! Property Transaction Updated.");
+          
         },
       });
     });
