@@ -626,6 +626,7 @@ function loadUserTransactions(view, type) {
                 " " +
                 formatDateNoTime(userTrans.transaction_end_date),
             );
+
           // click handler for 'edit transaction' button
           userTransItem
             .find("[api-button=edit-prop-trans]")
@@ -633,6 +634,7 @@ function loadUserTransactions(view, type) {
             .click(function () {
               updateUserTransaction(userTransItem.attr("id"), "recurring");
             });
+
           // click handler for delete button
           userTransItem
             .find(".transactions-log__bttn.delete")
@@ -692,6 +694,7 @@ function updateUserTransaction(transId, transFreq) {
 
   /* update form depending on the transaction frequency type */
   if (transFreq === "one-time") {
+    /*
     $("#edit-prop-trans-type").closest(".form__item").hide();
     $("#edit-prop-trans-type").removeAttr("required");
     $("#edit-prop-trans-recipient").closest(".form__item").hide();
@@ -713,7 +716,7 @@ function updateUserTransaction(transId, transFreq) {
     $("#edit-prop-trans-end-date").attr("required", "required");
     $("#edit-prop-trans-amount").closest(".form__item").show();
     $("#edit-prop-trans-amount").attr("required", "required");
-  }
+  } */
 
   /* Load Selected Property Transaction */
   $.ajax({
