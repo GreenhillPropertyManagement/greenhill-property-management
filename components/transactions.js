@@ -10,6 +10,16 @@ document.addEventListener("DOMContentLoaded", function () {
     loadOutstandingTransactions(); // fetch transactions 
   });
 
+
+  /* Click handler for dynamically loaded transactions */
+  $(document)
+  .off("click", ".trans-item-updated")
+  .on("click", ".trans-item-updated", function () {
+    const transactionId = $(this).attr("id");
+    const frequency = $(this).data("frequency") || "one_time";
+    updateUserTransaction(transactionId, frequency);
+  });
+
   /* Initiate pay transactions on button click */
   $(document).on("click", '[data-api-button="pay-transactions"]', function (e) {
     e.preventDefault();
@@ -544,33 +554,37 @@ function loadUserTransactions(view, type) {
     
         // Build transaction item HTML
         const html = `
-          <div class="trans-item-updated wf-grid" id="${transactionId}" style="cursor: pointer;">
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Description</div>
-              <div class="trans-item__cell-data" data-api="description">${description}</div>
-            </div>
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Due Date</div>
-              <div class="trans-item__cell-data" data-api="due_date">${dueDate}</div>
-            </div>
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Charge Amount</div>
-              <div class="trans-item__cell-data" data-api="amount">${amount}</div>
-            </div>
-            <div class="trans-item__cell last">
-              <div class="trans-item__cell-header">Remaining Transaction Balance</div>
-              <div class="trans-item__cell-data" data-api="remaining_transaction_balance">${remaining}</div>
-            </div>
+        <div class="trans-item-updated wf-grid" 
+             id="${transactionId}" 
+             data-frequency="${frequency}" 
+             style="cursor: pointer;">
+             
+          <div class="trans-item__cell">
+            <div class="trans-item__cell-header">Description</div>
+            <div class="trans-item__cell-data" data-api="description">${description}</div>
           </div>
-        `;
+          
+          <div class="trans-item__cell">
+            <div class="trans-item__cell-header">Due Date</div>
+            <div class="trans-item__cell-data" data-api="due_date">${dueDate}</div>
+          </div>
+          
+          <div class="trans-item__cell">
+            <div class="trans-item__cell-header">Charge Amount</div>
+            <div class="trans-item__cell-data" data-api="amount">${amount}</div>
+          </div>
+          
+          <div class="trans-item__cell last">
+            <div class="trans-item__cell-header">Remaining Transaction Balance</div>
+            <div class="trans-item__cell-data" data-api="remaining_transaction_balance">${remaining}</div>
+          </div>
+          
+        </div>
+      `;
     
         const $html = $(html);
         $(".dyn-container__transactions").append($html);
     
-        // Click handler for entire transaction item
-        $html.on("click", function () {
-          updateUserTransaction(transactionId, frequency);
-        });
       });
     },
 
