@@ -47,28 +47,21 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // 'Transactions' Tab clicked - Profile
-  $("[api-button='user-transactions']").click(function () {
+  $("[api-button='user-transactions']")
+  .off("click")
+  .on("click", function () {
     $("[data-api-input='recipient']").val("tenant");
     $("[dynamic-element='recipient']").hide();
-    $("[api-button='all-user-transactions']").click();
+    loadUserTransactions("profile", "all");
   });
 
-  // 'Transactions' Tab clicked - Unit
-  $("[api-button='unit-transactions']").click(function () {
-    $("[api-button='all-user-transactions']").click();
+$("[api-button='unit-transactions']")
+  .off("click")
+  .on("click", function () {
     $("[data-api-input='recipient']").val("");
     $("[dynamic-element='recipient']").show();
+    loadUserTransactions("active-tenant", "all");
   });
-
-  // 'Past Transactions' Tab clicked
-  $("[api-button='all-user-transactions']").click(function () {
-    if (localStorage.pageId === "profile") {
-      loadUserTransactions("profile", "all");
-    } else if (localStorage.pageId === "unit") {
-      loadUserTransactions("active-tenant", "all");
-    }
-  });
-
   // 'Recurring Transactions' Tab clicked
   $("[api-button='recurring-user-transactions']").click(function () {
     if (localStorage.pageId === "profile") {
