@@ -691,11 +691,10 @@ function updateUserTransaction(transId, transFreq) {
           $(".loader").hide();
           //loadProperty();
           $("#property-transaction-form")[0].reset();
-          loadUserTransactions();
         },
         complete: function () {
           showToast("Success! Property Transaction Updated.");
-          
+          $("[api-button='all-user-transactions']").click();
         },
       });
     });
