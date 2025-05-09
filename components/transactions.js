@@ -573,13 +573,12 @@ function createUserTransaction(view, form) {
 }
 
 function loadUserTransactions(view, type) {
-  
   const urlParams = new URLSearchParams(window.location.search);
   let target = urlParams.get("id");
 
   $(".pocket-loader").css("display", "flex");
   const userTransContainer = $(".dyn-container__transactions");
-  const sampleItem = $(".trans-item-updated").first(); // grab the first instance as a template
+  userTransContainer.empty(); // clear existing transactions
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_transactions_component",
@@ -595,34 +594,50 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
-      userTransContainer.empty(); // clear existing items
-
       response.forEach((userTrans) => {
-        const userTransItem = $(sampleItem).clone().appendTo(userTransContainer);
-        userTransItem.attr("id", userTrans.transaction_id);
+        const transactionId = userTrans.transaction_id;
+        const description = userTrans.description || "";
+        const dueDate = formatDateNoTime(userTrans.transaction_date || userTrans.transaction_start_date);
+        const amount = `$${userTrans.amount}`;
+        const remaining = `$${userTrans.remaining_transaction_balance || 0}`;
 
-        // bind dynamic fields
-        userTransItem.find('[data-api="description"]').text(userTrans.description);
-        userTransItem.find('[data-api="due_date"]').text(formatDateNoTime(userTrans.transaction_date || userTrans.transaction_start_date));
-        userTransItem.find('[data-api="amount"]').text(`$${userTrans.amount}`);
-        userTransItem.find('[data-api="remaining_transaction_balance"]').text(`$${userTrans.remaining_transaction_balance || "0"}`);
+        // Build HTML for transaction item
+        const html = `
+          <div class="trans-item-updated wf-grid" id="${transactionId}">
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Description</div>
+              <div class="trans-item__cell-data" data-api="description">${description}</div>
+            </div>
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Due Date</div>
+              <div class="trans-item__cell-data" data-api="due_date">${dueDate}</div>
+            </div>
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Charge Amount</div>
+              <div class="trans-item__cell-data" data-api="amount">${amount}</div>
+            </div>
+            <div class="trans-item__cell last">
+              <div class="trans-item__cell-header">Remaining Transaction Balance</div>
+              <div class="trans-item__cell-data" data-api="remaining_transaction_balance">${remaining}</div>
+            </div>
+            <div class="transactions-log__bttn edit" style="cursor:pointer;" data-action="edit"></div>
+            ${type === "recurring" ? `<div class="transactions-log__bttn delete" style="cursor:pointer;" data-action="delete"></div>` : ""}
+          </div>
+        `;
 
-        // handle edit button
-        userTransItem.find(".transactions-log__bttn.edit")
-          .off("click")
-          .click(function () {
-            updateUserTransaction(userTrans.transaction_id, type);
-          });
+        const $html = $(html);
+        userTransContainer.append($html);
 
-        // handle delete button (recurring only)
+        // Bind edit button
+        $html.find('[data-action="edit"]').click(function () {
+          updateUserTransaction(transactionId, type);
+        });
+
+        // Bind delete button only if recurring
         if (type === "recurring") {
-          userTransItem.find(".transactions-log__bttn.delete")
-            .off("click")
-            .click(function () {
-              transactionToDelete = userTrans.transaction_id;
-            });
-        } else {
-          userTransItem.find(".transactions-log__bttn.delete").remove();
+          $html.find('[data-action="delete"]').click(function () {
+            transactionToDelete = transactionId;
+          });
         }
       });
     },
@@ -630,7 +645,7 @@ function loadUserTransactions(view, type) {
     complete: function () {
       $(".pocket-loader").hide();
 
-      // delete handler
+      // Final delete trigger
       $("#delete-transaction-button")
         .off("click")
         .click(function () {
