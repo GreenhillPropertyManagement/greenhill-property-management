@@ -709,8 +709,15 @@ function updateUserTransaction(transId, transFreq) {
         },
         complete: function () {
           showToast("Success! Property Transaction Updated.");
-          $("[api-button='all-user-transactions']").click();
-        },
+          
+          const pageId = localStorage.pageId;
+        
+          if (pageId === "unit") {
+            $("[api-button='unit-transactions']").click();
+          } else if (pageId === "profile") {
+            $("[api-button='user-transactions']").click();
+          }
+        }
       });
     });
 }
