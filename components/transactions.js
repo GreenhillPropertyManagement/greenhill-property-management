@@ -597,35 +597,35 @@ function updateUserTransaction(transId, transFreq) {
   $(".modal__block").show().children().hide();
   $("#edit-transaction").show();
 
-   /*update form depending on the transaction frequency type 
-  if (transFreq === "one-time") {
-   
-    
-    $("#edit-prop-trans-type").closest(".form__item").hide();
-    $("#edit-prop-trans-type").removeAttr("required");
-    $("#edit-prop-trans-recipient").closest(".form__item").hide();
-    $("#edit-prop-trans-recipient").removeAttr("required");
-    $("#edit-prop-trans-start-date").closest(".form__item").hide();
-    $("#edit-prop-trans-start-date").removeAttr("required");
-    $("#edit-prop-trans-end-date").closest(".form__item").hide();
-    $("#edit-prop-trans-end-date").removeAttr("required");
-    $("#edit-prop-trans-amount").closest(".form__item").hide();
-    $("#edit-prop-trans-amount").removeAttr("required");
-  } else {
-    
-    $("#edit-prop-trans-type").closest(".form__item").show();
-    $("#edit-prop-trans-type").attr("required", "required");
-    $("#edit-prop-trans-recipient").closest(".form__item").hide();
-    $("#edit-prop-trans-recipient").removeAttr("required");
-    $("#edit-prop-trans-start-date").closest(".form__item").show();
-    $("#edit-prop-trans-start-date").attr("required", "required");
-    $("#edit-prop-trans-end-date").closest(".form__item").show();
-    $("#edit-prop-trans-end-date").attr("required", "required");
-    $("#edit-prop-trans-amount").closest(".form__item").show();
-    $("#edit-prop-trans-amount").attr("required", "required");
-    
-  } 
-  */
+   /*update form depending on the transaction frequency type */
+   if (transFreq === "one-time") {
+    // Step 1: Bind dynamic fields using data-api-input
+    const $form = $('form[api-form="update-transaction"]');
+    const $description = $form.find('[data-api-input="description"]');
+    const $code = $form.find('[data-api-input="transaction_code"]');
+    const $dueDate = $form.find('[data-api-input="due_date"]');
+    const $action = $form.find('[data-api-input="action"]');
+    const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+    const $amountField = $form.find('[data-api-input="amount"]');
+  
+    // Step 2: Hide and reset the amount field initially
+    $amountWrapper.hide();
+    $amountField.val('');
+  
+    // Step 3: Watch for changes to action dropdown
+    $action.off('change').on('change', function () {
+      const selectedValue = $(this).val();
+  
+      // Show amount field for these specific values
+      if (["charge", "payment", "credit"].includes(selectedValue)) {
+        $amountWrapper.show();
+      } else {
+        $amountWrapper.hide();
+        $amountField.val('');
+      }
+    });
+  }
+
 
   /* Load Selected Property Transaction */
   $.ajax({
