@@ -573,11 +573,13 @@ function createUserTransaction(view, form) {
 }
 
 function loadUserTransactions(view, type) {
+  
   const urlParams = new URLSearchParams(window.location.search);
   let target = urlParams.get("id");
 
   $(".pocket-loader").css("display", "flex");
-  var userTransContainer = $(".dyn-container__transactions");
+  const userTransContainer = $(".dyn-container__transactions");
+  const sampleItem = $(".trans-item-updated").first(); // grab the first instance as a template
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_transactions_component",
@@ -593,94 +595,51 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
-      var sampleItem = $(".prop-trans-sample-wrapper").find(
-        '[data-dyn-item="prop-trans"]',
-      );
-      userTransContainer.empty();
+      userTransContainer.empty(); // clear existing items
 
       response.forEach((userTrans) => {
-        let userTransItem = $(sampleItem).clone().appendTo(userTransContainer);
-
+        const userTransItem = $(sampleItem).clone().appendTo(userTransContainer);
         userTransItem.attr("id", userTrans.transaction_id);
 
-        // bind data
-        userTransItem
-          .find("[data-prop-trans='description']")
-          .text(userTrans.description);
-        userTransItem
-          .find("[data-prop-trans='created-at']")
-          .text(formatDateNoTime(userTrans.created_at));
-        userTransItem
-          .find("[data-prop-trans='recipient']")
-          .text(userTrans.recipient_type);
-        userTransItem.find("[data-prop-trans='type']").text(userTrans.type);
+        // bind dynamic fields
+        userTransItem.find('[data-api="description"]').text(userTrans.description);
+        userTransItem.find('[data-api="due_date"]').text(formatDateNoTime(userTrans.transaction_date || userTrans.transaction_start_date));
+        userTransItem.find('[data-api="amount"]').text(`$${userTrans.amount}`);
+        userTransItem.find('[data-api="remaining_transaction_balance"]').text(`$${userTrans.remaining_transaction_balance || "0"}`);
 
+        // handle edit button
+        userTransItem.find(".transactions-log__bttn.edit")
+          .off("click")
+          .click(function () {
+            updateUserTransaction(userTrans.transaction_id, type);
+          });
+
+        // handle delete button (recurring only)
         if (type === "recurring") {
-          // update date
-          userTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(
-              formatDateNoTime(userTrans.transaction_start_date) +
-                " " +
-                "-" +
-                " " +
-                formatDateNoTime(userTrans.transaction_end_date),
-            );
-
-          // click handler for 'edit transaction' button
-          userTransItem
-            .find("[api-button=edit-prop-trans]")
+          userTransItem.find(".transactions-log__bttn.delete")
             .off("click")
             .click(function () {
-              updateUserTransaction(userTransItem.attr("id"), "recurring");
-            });
-
-          // click handler for delete button
-          userTransItem
-            .find(".transactions-log__bttn.delete")
-            .off("click")
-            .click(function () {
-              transactionToDelete = userTransItem.attr("id");
+              transactionToDelete = userTrans.transaction_id;
             });
         } else {
-          // update date
-          userTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(formatDateNoTime(userTrans.transaction_date));
-          // click handler for 'edit transaction' button
-          userTransItem
-            .find("[api-button=edit-prop-trans]")
-            .off("click")
-            .click(function () {
-              updateUserTransaction(userTransItem.attr("id"), "one-time");
-            });
-          // remove delete button
           userTransItem.find(".transactions-log__bttn.delete").remove();
-        }
-
-        // Format amount
-        if (userTrans.type === "credit") {
-          userTransItem
-            .find("[data-prop-trans='amount']")
-            .text("-" + "$" + userTrans.amount);
-        } else {
-          userTransItem
-            .find("[data-prop-trans='amount']")
-            .text("$" + userTrans.amount);
         }
       });
     },
+
     complete: function () {
       $(".pocket-loader").hide();
-      /* Delete Recurring Transaction Func */
+
+      // delete handler
       $("#delete-transaction-button")
         .off("click")
         .click(function () {
           deleteRecurringTransaction(transactionToDelete, "user");
         });
     },
+
     error: function (error) {
-      // Handle errors here
+      console.error("Failed to load transactions:", error);
     },
   });
 }
