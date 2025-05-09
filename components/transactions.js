@@ -537,9 +537,9 @@ function loadUserTransactions(view, type) {
         const amount = `$${userTrans.amount}`;
         const remaining = `$${userTrans.remaining_transaction_balance || 0}`;
 
-        // Build HTML for transaction item
+        // Build HTML without separate edit/delete buttons
         const html = `
-          <div class="trans-item-updated wf-grid" id="${transactionId}">
+          <div class="trans-item-updated wf-grid" id="${transactionId}" style="cursor: pointer;">
             <div class="trans-item__cell">
               <div class="trans-item__cell-header">Description</div>
               <div class="trans-item__cell-data" data-api="description">${description}</div>
@@ -556,37 +556,21 @@ function loadUserTransactions(view, type) {
               <div class="trans-item__cell-header">Remaining Transaction Balance</div>
               <div class="trans-item__cell-data" data-api="remaining_transaction_balance">${remaining}</div>
             </div>
-            <div class="transactions-log__bttn edit" style="cursor:pointer;" data-action="edit"></div>
-            ${type === "recurring" ? `<div class="transactions-log__bttn delete" style="cursor:pointer;" data-action="delete"></div>` : ""}
           </div>
         `;
 
         const $html = $(html);
         userTransContainer.append($html);
 
-        // Bind edit button
-        $html.find('[data-action="edit"]').click(function () {
+        // Bind click on entire transaction item
+        $html.on("click", function () {
           updateUserTransaction(transactionId, type);
         });
-
-        // Bind delete button only if recurring
-        if (type === "recurring") {
-          $html.find('[data-action="delete"]').click(function () {
-            transactionToDelete = transactionId;
-          });
-        }
       });
     },
 
     complete: function () {
       $(".pocket-loader").hide();
-
-      // Final delete trigger
-      $("#delete-transaction-button")
-        .off("click")
-        .click(function () {
-          deleteRecurringTransaction(transactionToDelete, "user");
-        });
     },
 
     error: function (error) {
