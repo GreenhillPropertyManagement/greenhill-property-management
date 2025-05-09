@@ -616,6 +616,7 @@ function updateUserTransaction(transId, transFreq) {
     const $dueDate = $form.find('[data-api-input="due_date"]');
     const $action = $form.find('[data-api-input="action"]');
     const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+    const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
     const $amountField = $form.find('[data-api-input="amount"]');
   
     // Step 2: Hide and reset the amount field initially
@@ -629,9 +630,12 @@ function updateUserTransaction(transId, transFreq) {
       // Show amount field for these specific values
       if (["charge", "payment", "credit"].includes(selectedValue)) {
         $amountWrapper.show();
+        $actionDescription.show();
       } else {
         $amountWrapper.hide();
         $amountField.val('');
+        $actionDescription.hide();
+        $actionDescription.val('');
       }
     });
   }
