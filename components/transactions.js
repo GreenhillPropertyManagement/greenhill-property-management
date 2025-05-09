@@ -31,8 +31,9 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Run form ui when modal opens */
   $('[modal="create-transaction"]').on("click", function () {
     const form = document.querySelector('form[api-form="user-transaction"]');
-    if (form) {
+    if (form && !form.dataset.initialized) {
       initTransactionFormUX(form);
+      form.dataset.initialized = "true";
     }
   });
 
@@ -1130,6 +1131,6 @@ function initTransactionFormUX(form) {
   });
 
   // Trigger initial state
-  freqField.dispatchEvent(new Event("change"));
-  typeField.dispatchEvent(new Event("change"));
+  $(freqField).trigger("change");
+  $(typeField).trigger("change");
 }
