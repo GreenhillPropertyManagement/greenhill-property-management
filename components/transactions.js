@@ -672,7 +672,47 @@ function updateUserTransaction(transId, transFreq) {
         $actionDateField.val('');
       }
     });
+
   } else {
+
+    // run logic for recurring transction fields ...
+
+    const $form = $('form[api-form="update-transaction"]');
+    $form[0].reset();
+    $form.find('.form__item').show();
+    $form.find('[data-api-input]').val('').removeAttr('required');
+
+    // Field wrappers & inputs
+    const $description = $form.find('[data-api-input="description"]').closest('.form__item');
+    const $code = $form.find('[data-api-input="transaction_code"]').closest('.form__item');
+    const $startDate = $form.find('[data-api-input="transaction_start_date"]').closest('.form__item');
+    const $endDate = $form.find('[data-api-input="transaction_end_date"]').closest('.form__item');
+    const $amount = $form.find('#edit-trans-amount').closest('.form__item');
+
+    // Fields to hide
+    const $remainingBalance = $form.find('[data-api-input="remaining_transaction_balance"]').closest('.form__item');
+    const $transDate = $form.find('[data-api-input="transaction_date"]').closest('.form__item');
+    const $dueDate = $form.find('[data-api-input="due_date"]').closest('.form__item');
+    const $action = $form.find('[data-api-input="action"]').closest('.form__item');
+    const $actionDesc = $form.find('[data-api-input="action_description"]').closest('.form__item');
+    const $actionDate = $form.find('[data-api-input="action_date"]').closest('.form__item');
+    const $amountField = $form.find('[data-api-input="amount"]');
+
+    // Show and require recurring fields
+    $description.show();
+    $code.show();
+    $startDate.show();
+    $endDate.show();
+    $amount.show();
+
+    // Hide and clear one-time fields
+    [$remainingBalance, $transDate, $dueDate, $action, $actionDesc, $actionDate].forEach($el => {
+      $el.hide();
+      $el.find('[data-api-input]').val('').removeAttr('required');
+    });
+
+    // Clear hidden amount field
+    $amountField.val('');
 
   }
 
