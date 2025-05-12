@@ -615,20 +615,21 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
 
-  if (transFreq === "one_time") {
-    // One-time fields
-    const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
-    const $amountField = $form.find('[data-api-input="amount"]');
-    const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
-    const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
-    const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
-    const $actionDateField = $form.find('[data-api-input="action_date"]');
-    const $action = $form.find('[data-api-input="action"]');
+  // one time fields 
+  const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+  const $amountField = $form.find('[data-api-input="amount"]');
+  const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
+  const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
+  const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
+  const $actionDateField = $form.find('[data-api-input="action_date"]');
+  const $action = $form.find('[data-api-input="action"]');
 
-    // Recurring fields
-    const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
-    const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
-    const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
+  // Recurring fields
+  const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
+  const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
+  const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
+
+  if (transFreq === "one_time") {
 
     // Show one-time
     $amountWrapper.show();
@@ -662,32 +663,18 @@ function updateUserTransaction(transId, transFreq) {
         $actionDateField.val('');
       }
     });
-  } else {
-    // Recurring fields
-    const $description = $form.find('[data-api-input="description"]').closest('.form__item');
-    const $code = $form.find('[data-api-input="transaction_code"]').closest('.form__item');
-    const $startDate = $form.find('[data-api-input="transaction_start_date"]').closest('.form__item');
-    const $endDate = $form.find('[data-api-input="transaction_end_date"]').closest('.form__item');
-    const $amount = $form.find('#edit-trans-amount').closest('.form__item');
 
-    // One-time fields
-    const $remainingBalance = $form.find('[data-api-input="remaining_transaction_balance"]').closest('.form__item');
-    const $transDate = $form.find('[data-api-input="transaction_date"]').closest('.form__item');
-    const $dueDate = $form.find('[data-api-input="due_date"]').closest('.form__item');
-    const $action = $form.find('[data-api-input="action"]').closest('.form__item');
-    const $actionDesc = $form.find('[data-api-input="action_description"]').closest('.form__item');
-    const $actionDate = $form.find('[data-api-input="action_date"]').closest('.form__item');
-    const $amountField = $form.find('[data-api-input="amount"]');
+  } else {
 
     // Show recurring
-    [$description, $code, $startDate, $endDate, $amount].forEach($el => {
+    [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.show();
-      $el.find('.w-embed').show();
-      $el.find('[data-api-input]').show().attr('required', 'required');
+      //$el.find('[data-api-input]').show().attr('required', 'required');
+
     });
 
     // Hide one-time
-    [$remainingBalance, $transDate, $dueDate, $action, $actionDesc, $actionDate].forEach($el => {
+    [$remainingBalance, $transDate, $dueDate, $action, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
