@@ -207,14 +207,13 @@ function createPropertyTransaction() {
 function loadPropertyTransactions(type) {
   $(".pocket-loader").css("display", "flex");
 
-  if (type === "recurring") {
-    var propTransContainer = $("#recurring-prop-trans-container");
-  } else {
-    var propTransContainer = $("#prop-trans-container");
-  }
+  const propTransContainer =
+    type === "recurring"
+      ? $("#recurring-prop-trans-container")
+      : $("#prop-trans-container");
 
   $.ajax({
-    url: localStorage.baseUrl + "api:rpDXPv3x/get_property_transactions", // Use the provided endpoint URL
+    url: localStorage.baseUrl + "api:rpDXPv3x/get_property_transactions",
     method: "GET",
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
@@ -224,92 +223,69 @@ function loadPropertyTransactions(type) {
       property_id: localStorage.propertyRecId,
       type: type,
     },
-
     success: function (response) {
-      var sampleItem = $(".prop-trans-sample-wrapper").find(
-        '[data-dyn-item="prop-trans"]',
-      );
+      const { mode, transactions } = response;
       propTransContainer.empty();
 
-      response.forEach((propTrans) => {
-        let propTransItem = $(sampleItem).clone().appendTo(propTransContainer);
+      transactions.forEach((trans) => {
+        const transactionId = trans.transaction_id;
+        const description = trans.description || "";
+        const recipient = trans.recipient_type || "";
+        const transType = trans.type || "";
 
-        propTransItem.attr("id", propTrans.transaction_id);
+        const createdAt =
+          mode === "recurring"
+            ? `${formatDateNoTime(trans.transaction_start_date)} - ${formatDateNoTime(trans.transaction_end_date)}`
+            : formatDateNoTime(trans.transaction_date);
 
-        // bind data
-        propTransItem
-          .find("[data-prop-trans='description']")
-          .text(propTrans.description);
-        propTransItem
-          .find("[data-prop-trans='created-at']")
-          .text(formatDateNoTime(propTrans.created_at));
-        propTransItem
-          .find("[data-prop-trans='recipient']")
-          .text(propTrans.recipient_type);
-        propTransItem.find("[data-prop-trans='type']").text(propTrans.type);
+        const amount = trans.type === "credit" ? `-$${trans.amount}` : `$${trans.amount}`;
 
-        // format transaction date
-        if (propTrans.frequency === "recurring") {
-          propTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(
-              formatDateNoTime(propTrans.transaction_start_date) +
-                " " +
-                "-" +
-                " " +
-                formatDateNoTime(propTrans.transaction_end_date),
-            );
-          // click handler for delete button
-          propTransItem
-            .find(".transactions-log__bttn.delete")
-            .off("click")
-            .click(function () {
-              transactionToDelete = propTransItem.attr("id");
-            });
-        } else {
-          propTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(formatDateNoTime(propTrans.transaction_date));
-        }
+        const html = `
+          <div data-dyn-item="prop-trans" class="dyn-item__transaction" id="${transactionId}">
+            <div class="transactions-log__dyn-item__left-block">
+              <div class="div-block-10">
+                <div data-prop-trans="created-at" class="system-text__small inline">${createdAt}</div>
+                <div data-prop-trans="recipient" class="system-text__small inline meta">${recipient}</div>
+                <div data-prop-trans="type" class="system-text__small inline meta">${transType}</div>
+              </div>
+              <div data-prop-trans="description" class="system-text__main is--grey no-elipses is--small">${description}</div>
+            </div>
+            <div class="transactions-log__dyn-item__right-block">
+              <div data-prop-trans="amount" class="system-text__main is--grey no-margin small">${amount}</div>
+              <div dynamic-visibility="admin-only" api-button="edit-prop-trans" class="transactions-log__bttn edit">
+                <div></div>
+              </div>
+              <div modal="delete-transaction" dynamic-visibility="admin-only" element="modal" class="transactions-log__bttn delete">
+                <div></div>
+              </div>
+            </div>
+          </div>
+        `;
 
-        // format amount
-        if (propTrans.type === "credit") {
-          propTransItem
-            .find("[data-prop-trans='amount']")
-            .text("-" + "$" + propTrans.amount);
-        } else {
-          propTransItem
-            .find("[data-prop-trans='amount']")
-            .text("$" + propTrans.amount);
-        }
+        const $item = $(html);
+        propTransContainer.append($item);
 
-        // click handler for 'edit transaction' button
-        propTransItem
-          .find("[api-button=edit-prop-trans]")
-          .off("click")
-          .click(function () {
-            updatePropertyTransaction(
-              propTransItem.attr("id"),
-              propTrans.frequency,
-              "property",
-            );
-          });
+        // Edit handler
+        $item.find("[api-button='edit-prop-trans']").off("click").on("click", function () {
+          updatePropertyTransaction(transactionId, mode, "property");
+        });
+
+        // Delete handler
+        $item.find(".transactions-log__bttn.delete").off("click").on("click", function () {
+          transactionToDelete = transactionId;
+        });
       });
     },
     complete: function () {
       $(".pocket-loader").hide();
-      /* Delete Recurring Transaction Func */
-      $("#delete-transaction-button")
-        .off("click")
-        .click(function () {
-          deleteRecurringTransaction(transactionToDelete, "property");
-        });
     },
     error: function (error) {
-      // Handle errors here
+      console.error("Error loading property transactions:", error);
+      propTransContainer.html('<p class="error-message">Failed to load transactions.</p>');
     },
   });
 }
+
 
 function updatePropertyTransaction(transId, transFreq) {
   var responseData; // Variable to store response data
@@ -1173,4 +1149,7 @@ function initTransactionFormUX(form) {
   $(freqField).trigger("change");
   $(typeField).trigger("change");
 }
+
+
+
 
