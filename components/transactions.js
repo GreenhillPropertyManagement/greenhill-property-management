@@ -615,7 +615,7 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
 
-  // one time fields 
+  // one-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
@@ -624,14 +624,12 @@ function updateUserTransaction(transId, transFreq) {
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
   const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
 
-
-  // Recurring fields
+  // recurring fields
   const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
   const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
   const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
 
   if (transFreq === "one_time") {
-
     // Show one-time
     $remainingBalancewrapper.show();
     $actionDescription.show();
@@ -652,30 +650,24 @@ function updateUserTransaction(transId, transFreq) {
         $actionAmount.show();
         $actionDescription.show();
         $actionDate.show();
-        $actionAmount.show();
       } else {
         $actionAmount.hide();
         $actionDescription.hide();
         $actionDate.hide();
-        $actionAmount.hide();
       }
     });
 
   } else {
-
     // Show recurring
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.show();
-
     });
 
     // Hide one-time
-    [$remainingBalancewrapper, $transDateWrapper,  $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
+    [$remainingBalancewrapper, $transDateWrapper, $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
-
-
   }
 
   // Load existing data
@@ -690,14 +682,11 @@ function updateUserTransaction(transId, transFreq) {
       frequency: transFreq,
     },
     success: function (response) {
-      responseData = response;
-
       const mode = response.mode;
       const data = response.transaction;
-    
-      // Shared fields
+
       $form.find('[data-api-input="description"]').val(data.description);
-    
+
       if (mode === "one_time") {
         $form.find('[data-api-input="remaining_transaction_balance"]').val(data.remaining_transaction_balance);
         $form.find('[data-api-input="transaction_code"]').val(data.code);
@@ -706,12 +695,12 @@ function updateUserTransaction(transId, transFreq) {
         $form.find('[data-api-input="action_description"]').val(data.action_description);
         $form.find('[data-api-input="action_date"]').val(data.action_date);
         $form.find('[data-api-input="action"]').val(data.action).trigger("change");
-    
+
       } else if (mode === "recurring") {
         $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
         $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
         $form.find('[data-api-input="transaction_code"]').val(data.transaction_code);
-        $form.find('[data-api-input="recurring_amount"]').val(data.amount);
+        $form.find('[data-api-input="amount"]').val(data.amount);
       }
     },
     complete: function () {
@@ -749,12 +738,13 @@ function updateUserTransaction(transId, transFreq) {
       },
       complete: function () {
         showToast("Success! Property Transaction Updated.");
+
         const pageId = localStorage.pageId;
-        if (pageId === "unit") {
-          loadUserTransactions("active-tenant", "all");
-        } else if (pageId === "profile") {
-          loadUserTransactions("profile", "all");
-        }
+        const isRecurring = $('[api-button="recurring-user-transactions"]').hasClass('w--current');
+        const view = pageId === "unit" ? "active-tenant" : "profile";
+        const type = isRecurring ? "recurring" : "all";
+
+        loadUserTransactions(view, type);
       },
     });
   });
