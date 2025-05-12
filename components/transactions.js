@@ -616,10 +616,9 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('[data-api-input]').val('').removeAttr('required');
 
   // one time fields 
-  const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+  const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
-  const $actionAmount = $form.find('#edit-trans-amount').closest('.form__item');
   const $action = $form.find('#edit-transaction-action').closest('.form__item');
   const $remainingBalancewrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
@@ -651,12 +650,12 @@ function updateUserTransaction(transId, transFreq) {
     $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
-        $amountWrapper.show();
+        $actionAmount.show();
         $actionDescription.show();
         $actionDate.show();
         $actionAmount.show();
       } else {
-        $amountWrapper.hide();
+        $actionAmount.hide();
         $actionDescription.hide();
         $actionDate.hide();
         $actionAmount.hide();
@@ -668,7 +667,6 @@ function updateUserTransaction(transId, transFreq) {
     // Show recurring
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.show();
-      //$el.find('[data-api-input]').show().attr('required', 'required');
 
     });
 
