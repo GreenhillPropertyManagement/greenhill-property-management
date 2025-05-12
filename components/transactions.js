@@ -634,7 +634,6 @@ function updateUserTransaction(transId, transFreq) {
 
     // Show one-time
     $remainingBalancewrapper.show();
-    $amountWrapper.show();
     $actionDescription.show();
     $actionDate.show();
     $actionAmount.show();
