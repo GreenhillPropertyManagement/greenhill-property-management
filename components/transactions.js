@@ -603,7 +603,7 @@ function loadUserTransactions(view, type) {
   });
 }
 
-""function updateUserTransaction(transId, transFreq) {
+function updateUserTransaction(transId, transFreq) {
   const $form = $('form[api-form="update-transaction"]');
   var responseData;
 
@@ -712,7 +712,6 @@ function loadUserTransactions(view, type) {
     });
   });
 }
-
 
 function deleteRecurringTransaction(transId, type) {
   $(".loader").css("display", "flex");
