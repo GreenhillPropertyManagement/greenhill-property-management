@@ -1096,10 +1096,11 @@ function loadTransactionCodesInForm() {
 }
 
 function initTransactionFormUX(form) {
+
   const freqField = form.querySelector('[data-api-input="frequency"]');
   const typeField = form.querySelector('[data-api-input="type"]');
   const transDateField = form.querySelector('[data-api-input="transaction_date"]');
-  const endDateField = form.querySelector('[data-api-input="transaction_start_date"]');
+  const startDateField = form.querySelector('[data-api-input="transaction_start_date"]');
   const endDateField = form.querySelector('[data-api-input="transaction_end_date"]');
   const dueDateField = form.querySelector('[data-api-input="due_date"]');
 
