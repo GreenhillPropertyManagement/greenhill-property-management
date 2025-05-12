@@ -207,10 +207,9 @@ function createPropertyTransaction() {
 function loadPropertyTransactions(type) {
   $(".pocket-loader").css("display", "flex");
 
-  const propTransContainer =
-    type === "recurring"
-      ? $("#recurring-prop-trans-container")
-      : $("#prop-trans-container");
+  const containerId = type === "recurring" ? "#recurring-prop-trans-container" : "#prop-trans-container";
+  const $container = $(containerId);
+  $container.empty();
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_property_transactions",
@@ -224,56 +223,52 @@ function loadPropertyTransactions(type) {
       type: type,
     },
     success: function (response) {
-      const { mode, transactions } = response;
-      propTransContainer.empty();
+      const mode = response.mode;
+      const transactions = response.transactions;
 
-      transactions.forEach((trans) => {
-        const transactionId = trans.transaction_id;
-        const description = trans.description || "";
-        const recipient = trans.recipient_type || "";
-        const transType = trans.type || "";
+      transactions.forEach((item) => {
+        const id = item.id;
+        const description = item.description || "";
+        const amount = `$${item.amount}`;
+        const frequency = mode;
 
-        const createdAt =
-          mode === "recurring"
-            ? `${formatDateNoTime(trans.transaction_start_date)} - ${formatDateNoTime(trans.transaction_end_date)}`
-            : formatDateNoTime(trans.transaction_date);
+        const startOrDue = mode === "recurring"
+          ? formatDateNoTime(item.transaction_start_date)
+          : formatDateNoTime(item.transaction_date);
 
-        const amount = trans.type === "credit" ? `-$${trans.amount}` : `$${trans.amount}`;
+        const endOrAmount = mode === "recurring"
+          ? formatDateNoTime(item.transaction_end_date)
+          : amount;
+
+        const finalValue = mode === "recurring"
+          ? amount
+          : `$${item.remaining_transaction_balance || 0}`;
 
         const html = `
-          <div data-dyn-item="prop-trans" class="dyn-item__transaction" id="${transactionId}">
-            <div class="transactions-log__dyn-item__left-block">
-              <div class="div-block-10">
-                <div data-prop-trans="created-at" class="system-text__small inline">${createdAt}</div>
-                <div data-prop-trans="recipient" class="system-text__small inline meta">${recipient}</div>
-                <div data-prop-trans="type" class="system-text__small inline meta">${transType}</div>
-              </div>
-              <div data-prop-trans="description" class="system-text__main is--grey no-elipses is--small">${description}</div>
+          <div class="trans-item-updated wf-grid" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Description</div>
+              <div class="trans-item__cell-data" data-api="description">${description}</div>
             </div>
-            <div class="transactions-log__dyn-item__right-block">
-              <div data-prop-trans="amount" class="system-text__main is--grey no-margin small">${amount}</div>
-              <div dynamic-visibility="admin-only" api-button="edit-prop-trans" class="transactions-log__bttn edit">
-                <div></div>
-              </div>
-              <div modal="delete-transaction" dynamic-visibility="admin-only" element="modal" class="transactions-log__bttn delete">
-                <div></div>
-              </div>
+
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${mode === "recurring" ? "Start Date" : "Due Date"}</div>
+              <div class="trans-item__cell-data" data-api="start_or_due">${startOrDue}</div>
+            </div>
+
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${mode === "recurring" ? "End Date" : "Charge Amount"}</div>
+              <div class="trans-item__cell-data" data-api="end_or_amount">${endOrAmount}</div>
+            </div>
+
+            <div class="trans-item__cell last">
+              <div class="trans-item__cell-header">${mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance"}</div>
+              <div class="trans-item__cell-data" data-api="final_value">${finalValue}</div>
             </div>
           </div>
         `;
 
-        const $item = $(html);
-        propTransContainer.append($item);
-
-        // Edit handler
-        $item.find("[api-button='edit-prop-trans']").off("click").on("click", function () {
-          updatePropertyTransaction(transactionId, mode, "property");
-        });
-
-        // Delete handler
-        $item.find(".transactions-log__bttn.delete").off("click").on("click", function () {
-          transactionToDelete = transactionId;
-        });
+        $container.append(html);
       });
     },
     complete: function () {
@@ -281,8 +276,7 @@ function loadPropertyTransactions(type) {
     },
     error: function (error) {
       console.error("Error loading property transactions:", error);
-      propTransContainer.html('<p class="error-message">Failed to load transactions.</p>');
-    },
+    }
   });
 }
 
