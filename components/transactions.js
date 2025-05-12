@@ -619,7 +619,8 @@ function updateUserTransaction(transId, transFreq) {
   const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
-  const $action = $form.find('[data-api-input="action"]');
+  const $actionAmount = $form.find('#edit-trans-amount').closest('.form__item');
+  const $action = $form.find('#edit-transaction-action').closest('.form__item');
   const $remainingBalancewrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
   const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
@@ -637,6 +638,7 @@ function updateUserTransaction(transId, transFreq) {
     $amountWrapper.show();
     $actionDescription.show();
     $actionDate.show();
+    $actionAmount.show();
     $action.closest('.form__item').show();
 
     // Hide recurring
@@ -652,10 +654,12 @@ function updateUserTransaction(transId, transFreq) {
         $amountWrapper.show();
         $actionDescription.show();
         $actionDate.show();
+        $actionAmount.show();
       } else {
         $amountWrapper.hide();
         $actionDescription.hide();
         $actionDate.hide();
+        $actionAmount.hide();
       }
     });
 
@@ -669,7 +673,7 @@ function updateUserTransaction(transId, transFreq) {
     });
 
     // Hide one-time
-    [$remainingBalancewrapper, $transDateWrapper,  $dueDateWrapper, $action, $actionDescription, $actionDate].forEach($el => {
+    [$remainingBalancewrapper, $transDateWrapper,  $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
