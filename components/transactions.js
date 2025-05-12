@@ -604,62 +604,51 @@ function loadUserTransactions(view, type) {
 }
 
 function updateUserTransaction(transId, transFreq) {
-
-  var responseData; // Variable to store response data
+  var responseData;
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
   $("#edit-transaction").show();
 
-   /*update form depending on the transaction frequency type */
+  const $form = $('form[api-form="update-transaction"]');
+  $form[0].reset();
+  $form.find('.form__item').show();
+  $form.find('[data-api-input]').val('').removeAttr('required');
 
-   if (transFreq === "one_time") {
-    // Step 1: Bind dynamic fields using data-api-input
-    const $form = $('form[api-form="update-transaction"]');
-    $form[0].reset(); // Clears all inputs to default
-    $form.find('.form__item').show(); // Ensure all fields are visible initially
-    const $description = $form.find('[data-api-input="description"]');
-    const $code = $form.find('[data-api-input="transaction_code"]');
-    const $dueDate = $form.find('[data-api-input="due_date"]');
-    const $action = $form.find('[data-api-input="action"]');
+  if (transFreq === "one_time") {
+    // One-time fields
     const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
     const $amountField = $form.find('[data-api-input="amount"]');
     const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
     const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
     const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
     const $actionDateField = $form.find('[data-api-input="action_date"]');
+    const $action = $form.find('[data-api-input="action"]');
 
-    // recurring fields 
+    // Recurring fields
     const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
-    const $startDateField = $form.find('[data-api-input="transaction_start_date"]');
     const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
-    const $endDateField = $form.find('[data-api-input="transaction_end_date"]');
     const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
-    const $transAmountField = $form.find('[data-api-input="amount"]');
 
-  
-    // Step 2: Hide and reset the amount field initially
-    $amountWrapper.hide();
-    $amountField.val('');
-    $actionDescription.hide();
-    $actionDescriptionField.val('');
-    $actionDate.hide();
-    $actionDateField.val('');
+    // Show one-time
+    $amountWrapper.show();
+    $amountField.attr('required', 'required');
+    $actionDescription.show();
+    $actionDescriptionField.attr('required', 'required');
+    $actionDate.show();
+    $actionDateField.attr('required', 'required');
+    $action.closest('.form__item').show();
+    $action.attr('required', 'required');
 
-    // hide recurring fields 
-    $startDateWrapper.hide();
-    $startDateField.val('');
-    $endDateWrapper.hide();
-    $endDateField.val('');
-    $transAmountWrapper.hide();
-    $transAmountField.val('');
-  
-  
-    // Step 3: Watch for changes to action dropdown
+    // Hide recurring
+    [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
+      $el.hide();
+      $el.find('[data-api-input]').val('').removeAttr('required');
+    });
+
+    // Dropdown change logic
     $action.off('change').on('change', function () {
       const selectedValue = $(this).val();
-  
-      // Show amount field for these specific values
       if (["charge", "payment", "credit"].includes(selectedValue)) {
         $amountWrapper.show();
         $actionDescription.show();
@@ -673,24 +662,15 @@ function updateUserTransaction(transId, transFreq) {
         $actionDateField.val('');
       }
     });
-
   } else {
-
-    // run logic for recurring transction fields ...
-
-    const $form = $('form[api-form="update-transaction"]');
-    $form[0].reset();
-    $form.find('.form__item').show();
-    $form.find('[data-api-input]').val('').removeAttr('required');
-
-    // Field wrappers & inputs
+    // Recurring fields
     const $description = $form.find('[data-api-input="description"]').closest('.form__item');
     const $code = $form.find('[data-api-input="transaction_code"]').closest('.form__item');
     const $startDate = $form.find('[data-api-input="transaction_start_date"]').closest('.form__item');
     const $endDate = $form.find('[data-api-input="transaction_end_date"]').closest('.form__item');
     const $amount = $form.find('#edit-trans-amount').closest('.form__item');
 
-    // Fields to hide
+    // One-time fields
     const $remainingBalance = $form.find('[data-api-input="remaining_transaction_balance"]').closest('.form__item');
     const $transDate = $form.find('[data-api-input="transaction_date"]').closest('.form__item');
     const $dueDate = $form.find('[data-api-input="due_date"]').closest('.form__item');
@@ -699,29 +679,23 @@ function updateUserTransaction(transId, transFreq) {
     const $actionDate = $form.find('[data-api-input="action_date"]').closest('.form__item');
     const $amountField = $form.find('[data-api-input="amount"]');
 
-    // Show and require recurring fields
-    $description.show();
-    $code.show();
-    $startDate.show();
-    $form.find('[data-api-input="transaction_start_date"]').show().attr('required', 'required');
-    $endDate.show();
-    $form.find('[data-api-input="transaction_end_date"]').show().attr('required', 'required');
-    $amount.show();
-    $form.find('[data-api-input="amount"]').show().attr('required', 'required');
+    // Show recurring
+    [$description, $code, $startDate, $endDate, $amount].forEach($el => {
+      $el.show();
+      $el.find('.w-embed').show();
+      $el.find('[data-api-input]').show().attr('required', 'required');
+    });
 
-    // Hide and clear one-time fields
+    // Hide one-time
     [$remainingBalance, $transDate, $dueDate, $action, $actionDesc, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    // Clear hidden amount field
     $amountField.val('');
-
   }
 
-
-  /* Load Selected Property Transaction */
+  // Load existing data
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -734,78 +708,59 @@ function updateUserTransaction(transId, transFreq) {
     },
     success: function (response) {
       responseData = response;
-
-      /*  Pre Populate Form Fields */
-      $("[data-api-input=description]").val(response.description);
-      $("[data-api-input=remaining_transaction_balance]").val(response.remaining_transaction_balance);
-      $("[data-api-input=transaction_code]").val(response.code);
-      $("[data-api-input=transaction_date]").val(response.transaction_date);
-      $("[data-api-input=due_date]").val(response.due_date);
-      $("[data-api-input=action]").trigger("change");
-
+      $form.find('[data-api-input="description"]').val(response.description);
+      $form.find('[data-api-input="remaining_transaction_balance"]').val(response.remaining_transaction_balance);
+      $form.find('[data-api-input="transaction_code"]').val(response.code);
+      $form.find('[data-api-input="transaction_date"]').val(response.transaction_date);
+      $form.find('[data-api-input="due_date"]').val(response.due_date);
+      $form.find('[data-api-input="action"]').trigger("change");
     },
-    complete: function (response) {
+    complete: function () {
       $(".loader").hide();
     },
   });
 
-  /* Handle Form Submission to Update Transaction */
+  $form.off("submit").on("submit", function (event) {
+    event.preventDefault();
+    $(".modal__block").hide();
+    $(".loader").css("display", "flex");
 
-  $('form[api-form="update-transaction"]')
-    .off("submit")
-    .submit(function (event) {
-      // Prevent the default form submission behavior
-      event.preventDefault();
-
-      // Handle 'Loading' State
-      $(".modal__block").hide();
-      $(".loader").css("display", "flex");
-
-      const formData = {};
-
-      // Iterate through form inputs with data-api-input attribute and collect key-value pairs
-      $(this)
-        .find("[data-api-input]")
-        .each(function () {
-          const input = $(this);
-          const key = input.data("api-input"); // Get the data attribute value
-          const value = input.val();
-          formData[key] = value;
-        });
-
-      // Add additional data to formData
-      formData["transaction_id"] = transId;
-      formData["frequency"] = transFreq;
-
-      // Make an AJAX POST request
-      $.ajax({
-        url: localStorage.baseUrl + "api:rpDXPv3x/update_user_transaction",
-        type: "POST",
-        headers: {
-          Authorization: "Bearer " + localStorage.authToken,
-        },
-        data: JSON.stringify(formData), // Convert formData to JSON
-        contentType: "application/json", // Set the content type to JSON
-        success: function (response) {
-          
-          $(".loader").hide();
-          //loadProperty();
-          $("#property-transaction-form")[0].reset();
-        },
-        complete: function () {
-          showToast("Success! Property Transaction Updated.");
-          
-          const pageId = localStorage.pageId;
-        
-          if (pageId === "unit") {
-            $("[api-button='unit-transactions']").click();
-          } else if (pageId === "profile") {
-            $("[api-button='user-transactions']").click();
-          }
-        }
-      });
+    const formData = {};
+    $form.find("[data-api-input]").each(function () {
+      const input = $(this);
+      const key = input.data("api-input");
+      const value = input.val();
+      formData[key] = value;
     });
+
+    formData["transaction_id"] = transId;
+    formData["frequency"] = transFreq;
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:rpDXPv3x/update_user_transaction",
+      type: "POST",
+      headers: {
+        Authorization: "Bearer " + localStorage.authToken,
+      },
+      data: JSON.stringify(formData),
+      contentType: "application/json",
+      success: function () {
+        $(".loader").hide();
+        $("#property-transaction-form")[0].reset();
+      },
+      complete: function () {
+        showToast("Success! Property Transaction Updated.");
+        const pageId = localStorage.pageId;
+        if (pageId === "unit") {
+          $("[api-button='unit-transactions']").click();
+        } else if (pageId === "profile") {
+          $("[api-button='user-transactions']").click();
+        }
+      },
+    });
+  });
 }
+
 
 function deleteRecurringTransaction(transId, type) {
   $(".loader").css("display", "flex");
