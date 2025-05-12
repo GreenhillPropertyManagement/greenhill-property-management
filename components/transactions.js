@@ -1115,11 +1115,11 @@ function initTransactionFormUX(form) {
       if (dueDateField) {
         if (typeField.value !== "payment" && typeField.value !== "credit") {
           dueDateField.closest(".form__item").style.display = "block";
-          dueDateField.setAttribute("required", "");
+
         } else {
           dueDateField.closest(".form__item").style.display = "none";
           dueDateField.value = "";
-          dueDateField.removeAttribute("required");
+
         }
       }
 
@@ -1164,8 +1164,7 @@ function initTransactionFormUX(form) {
         dueDateField.value = "";
         dueDateField.removeAttribute("required");
       } else if (freqField.value === "one-time") {
-        dueDateField.closest(".form__item").style.display = "block";
-        dueDateField.setAttribute("required", "");
+
       }
     }
   });
