@@ -700,7 +700,7 @@ function updateUserTransaction(transId, transFreq) {
     
       if (mode === "one_time") {
         $form.find('[data-api-input="remaining_transaction_balance"]').val(data.remaining_transaction_balance);
-        $form.find('[data-api-input="rtransaction_code"]').val(data.code);
+        $form.find('[data-api-input="transaction_code"]').val(data.code);
         $form.find('[data-api-input="transaction_date"]').val(data.transaction_date);
         $form.find('[data-api-input="due_date"]').val(data.due_date);
         $form.find('[data-api-input="action_description"]').val(data.action_description);
