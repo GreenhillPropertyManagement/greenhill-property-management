@@ -627,6 +627,15 @@ function updateUserTransaction(transId, transFreq) {
     const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
     const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
     const $actionDateField = $form.find('[data-api-input="action_date"]');
+
+    // recurring fields 
+    const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
+    const $startDateField = $form.find('[data-api-input="transaction_start_date"]');
+    const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
+    const $endDateField = $form.find('[data-api-input="transaction_end_date"]');
+    const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
+    const $transAmountField = $form.find('[data-api-input="amount"]');
+
   
     // Step 2: Hide and reset the amount field initially
     $amountWrapper.hide();
@@ -635,6 +644,15 @@ function updateUserTransaction(transId, transFreq) {
     $actionDescriptionField.val('');
     $actionDate.hide();
     $actionDateField.val('');
+
+    // hide recurring fields 
+    $startDateWrapper.hide();
+    $startDateField.val('');
+    $endDateWrapper.hide();
+    $endDateField.val('');
+    $transAmountWrapper.hide();
+    $transAmountField.val('');
+  
   
     // Step 3: Watch for changes to action dropdown
     $action.off('change').on('change', function () {
@@ -654,6 +672,8 @@ function updateUserTransaction(transId, transFreq) {
         $actionDateField.val('');
       }
     });
+  } else {
+
   }
 
 
@@ -1079,7 +1099,7 @@ function initTransactionFormUX(form) {
   const freqField = form.querySelector('[data-api-input="frequency"]');
   const typeField = form.querySelector('[data-api-input="type"]');
   const transDateField = form.querySelector('[data-api-input="transaction_date"]');
-  const startDateField = form.querySelector('[data-api-input="transaction_start_date"]');
+  const endDateField = form.querySelector('[data-api-input="transaction_start_date"]');
   const endDateField = form.querySelector('[data-api-input="transaction_end_date"]');
   const dueDateField = form.querySelector('[data-api-input="due_date"]');
 
