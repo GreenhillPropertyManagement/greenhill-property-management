@@ -535,61 +535,61 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
-      const mode = response.mode;
-      const transactions = response.transactions;
-    
-      transactions.forEach((userTrans) => {
-        const transactionId = userTrans.id;
-        const description = userTrans.description || "";
-        const frequency = userTrans.frequency === "recurring" ? "recurring" : "one-time";
-    
-        // Choose field labels and values based on mode
-        const label2 = mode === "recurring" ? "Start Date" : "Due Date";
-        const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
-        const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
-    
-        const value2 = mode === "recurring"
-          ? formatDateNoTime(userTrans.transaction_start_date)
-          : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
-    
-        const value3 = mode === "recurring"
-          ? formatDateNoTime(userTrans.transaction_end_date)
-          : `$${userTrans.amount}`;
-    
-        const value4 = mode === "recurring"
-          ? `$${userTrans.amount}`
-          : `$${userTrans.remaining_transaction_balance || 0}`;
-    
-        const html = `
-          <div class="trans-item-updated wf-grid" 
-               id="${transactionId}" 
-               data-frequency="${frequency}" 
-               style="cursor: pointer;">
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Description</div>
-              <div class="trans-item__cell-data" data-api="description">${description}</div>
-            </div>
-    
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${label2}</div>
-              <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
-            </div>
-    
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${label3}</div>
-              <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
-            </div>
-    
-            <div class="trans-item__cell last">
-              <div class="trans-item__cell-header">${label4}</div>
-              <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
-            </div>
-          </div>
-        `;
-    
-        const $html = $(html);
-        $(".dyn-container__transactions:visible").append($html);
-      });
+ const mode = response.mode;
+  const transactions = response.transactions;
+
+  transactions.forEach((userTrans) => {
+    const transactionId = userTrans.id;
+    const description = userTrans.description || "";
+    const frequency = userTrans.frequency === "recurring" ? "recurring" : "one-time";
+
+    // Choose field labels and values based on mode
+    const label2 = mode === "recurring" ? "Start Date" : "Due Date";
+    const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
+    const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
+
+    const value2 = mode === "recurring"
+      ? formatDateNoTime(userTrans.transaction_start_date)
+      : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+
+    const value3 = mode === "recurring"
+      ? formatDateNoTime(userTrans.transaction_end_date)
+      : `$${userTrans.amount}`;
+
+    const value4 = mode === "recurring"
+      ? `$${userTrans.amount}`
+      : `$${userTrans.remaining_transaction_balance || 0}`;
+
+    const html = `
+      <div class="trans-item-updated wf-grid" 
+           id="${transactionId}" 
+           data-frequency="${frequency}" 
+           style="cursor: pointer;">
+        <div class="trans-item__cell">
+          <div class="trans-item__cell-header">Description</div>
+          <div class="trans-item__cell-data" data-api="description">${description}</div>
+        </div>
+
+        <div class="trans-item__cell">
+          <div class="trans-item__cell-header">${label2}</div>
+          <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+        </div>
+
+        <div class="trans-item__cell">
+          <div class="trans-item__cell-header">${label3}</div>
+          <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
+        </div>
+
+        <div class="trans-item__cell last">
+          <div class="trans-item__cell-header">${label4}</div>
+          <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
+        </div>
+      </div>
+    `;
+
+    const $html = $(html);
+    $(".dyn-container__transactions:visible").append($html);
+  });
     },
 
     complete: function () {
@@ -603,58 +603,61 @@ function loadUserTransactions(view, type) {
 }
 
 function updateUserTransaction(transId, transFreq) {
-  var responseData;
+
+  var responseData; // Variable to store response data
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
   $("#edit-transaction").show();
 
-  const $form = $('form[api-form="update-transaction"]');
-  $form[0].reset();
-  $form.find('[data-api-input]').val('').removeAttr("required");
-  $form.find('.form__item').show();
+   /*update form depending on the transaction frequency type */
 
-  // Helpers
-  const getWrapper = (selector) => $form.find(`[data-api-input="${selector}"]`).closest('.form__item');
-  const getInput = (selector) => $form.find(`[data-api-input="${selector}"]`);
-  const showAndRequire = (selector) => {
-    getWrapper(selector).show();
-    getInput(selector).attr("required", "required");
-  };
-  const hideAndClear = (selector) => {
-    getWrapper(selector).hide();
-    getInput(selector).val('').removeAttr("required");
-  };
-
-  // Field behavior based on frequency
-  if (transFreq === "recurring") {
-    showAndRequire("description");
-    showAndRequire("transaction_code");
-    showAndRequire("transaction_start_date");
-    showAndRequire("transaction_end_date");
-    showAndRequire("amount");
-
-    hideAndClear("remaining_transaction_balance");
-    hideAndClear("transaction_date");
-    hideAndClear("due_date");
-    hideAndClear("action");
-    hideAndClear("action_description");
-    hideAndClear("action_date");
-  } else {
-    showAndRequire("description");
-    showAndRequire("remaining_transaction_balance");
-    showAndRequire("transaction_date");
-    showAndRequire("due_date");
-    showAndRequire("action");
-    showAndRequire("action_description");
-    showAndRequire("action_date");
-
-    hideAndClear("transaction_start_date");
-    hideAndClear("transaction_end_date");
-    hideAndClear("amount");
+   if (transFreq === "one-time") {
+    // Step 1: Bind dynamic fields using data-api-input
+    const $form = $('form[api-form="update-transaction"]');
+    $form[0].reset(); // Clears all inputs to default
+    $form.find('.form__item').show(); // Ensure all fields are visible initially
+    const $description = $form.find('[data-api-input="description"]');
+    const $code = $form.find('[data-api-input="transaction_code"]');
+    const $dueDate = $form.find('[data-api-input="due_date"]');
+    const $action = $form.find('[data-api-input="action"]');
+    const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+    const $amountField = $form.find('[data-api-input="amount"]');
+    const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
+    const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
+    const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
+    const $actionDateField = $form.find('[data-api-input="action_date"]');
+  
+    // Step 2: Hide and reset the amount field initially
+    $amountWrapper.hide();
+    $amountField.val('');
+    $actionDescription.hide();
+    $actionDescriptionField.val('');
+    $actionDate.hide();
+    $actionDateField.val('');
+  
+    // Step 3: Watch for changes to action dropdown
+    $action.off('change').on('change', function () {
+      const selectedValue = $(this).val();
+  
+      // Show amount field for these specific values
+      if (["charge", "payment", "credit"].includes(selectedValue)) {
+        $amountWrapper.show();
+        $actionDescription.show();
+        $actionDate.show();
+      } else {
+        $amountWrapper.hide();
+        $amountField.val('');
+        $actionDescription.hide();
+        $actionDescriptionField.val('');
+        $actionDate.hide();
+        $actionDateField.val('');
+      }
+    });
   }
 
-  // AJAX: Load selected transaction
+
+  /* Load Selected Property Transaction */
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -668,66 +671,78 @@ function updateUserTransaction(transId, transFreq) {
     success: function (response) {
       responseData = response;
 
-      // Populate form fields
-      getInput("description").val(response.description);
-      getInput("remaining_transaction_balance").val(response.remaining_transaction_balance);
-      getInput("transaction_code").val(response.code);
-      getInput("transaction_date").val(response.transaction_date);
-      getInput("due_date").val(response.due_date);
-      getInput("transaction_start_date").val(response.transaction_start_date);
-      getInput("transaction_end_date").val(response.transaction_end_date);
-      getInput("amount").val(response.amount);
-      getInput("action").val(response.action).trigger("change");
-      getInput("action_description").val(response.action_description);
-      getInput("action_date").val(response.action_date);
+      /*  Pre Populate Form Fields */
+      $("[data-api-input=description]").val(response.description);
+      $("[data-api-input=remaining_transaction_balance]").val(response.remaining_transaction_balance);
+      $("[data-api-input=transaction_code]").val(response.code);
+      $("[data-api-input=transaction_date]").val(response.transaction_date);
+      $("[data-api-input=due_date]").val(response.due_date);
+      $("[data-api-input=action]").trigger("change");
+
     },
-    complete: function () {
+    complete: function (response) {
       $(".loader").hide();
     },
   });
 
-  // AJAX: Handle form submission
-  $form.off("submit").on("submit", function (event) {
-    event.preventDefault();
-    $(".modal__block").hide();
-    $(".loader").css("display", "flex");
+  /* Handle Form Submission to Update Transaction */
 
-    const formData = {};
+  $('form[api-form="update-transaction"]')
+    .off("submit")
+    .submit(function (event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
 
-    $form.find("[data-api-input]").each(function () {
-      const $input = $(this);
-      const key = $input.data("api-input");
-      const value = $input.val();
-      formData[key] = value;
-    });
+      // Handle 'Loading' State
+      $(".modal__block").hide();
+      $(".loader").css("display", "flex");
 
-    formData["transaction_id"] = transId;
-    formData["frequency"] = transFreq;
+      const formData = {};
 
-    $.ajax({
-      url: localStorage.baseUrl + "api:rpDXPv3x/update_user_transaction",
-      type: "POST",
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      data: JSON.stringify(formData),
-      contentType: "application/json",
-      success: function () {
-        $(".loader").hide();
-      },
-      complete: function () {
-        showToast("Success! Property Transaction Updated.");
+      // Iterate through form inputs with data-api-input attribute and collect key-value pairs
+      $(this)
+        .find("[data-api-input]")
+        .each(function () {
+          const input = $(this);
+          const key = input.data("api-input"); // Get the data attribute value
+          const value = input.val();
+          formData[key] = value;
+        });
 
-        const pageId = localStorage.pageId;
-        if (pageId === "unit") {
-          $("[api-button='unit-transactions']").click();
-        } else if (pageId === "profile") {
-          $("[api-button='user-transactions']").click();
+      // Add additional data to formData
+      formData["transaction_id"] = transId;
+      formData["frequency"] = transFreq;
+
+      // Make an AJAX POST request
+      $.ajax({
+        url: localStorage.baseUrl + "api:rpDXPv3x/update_user_transaction",
+        type: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.authToken,
+        },
+        data: JSON.stringify(formData), // Convert formData to JSON
+        contentType: "application/json", // Set the content type to JSON
+        success: function (response) {
+          
+          $(".loader").hide();
+          //loadProperty();
+          $("#property-transaction-form")[0].reset();
+        },
+        complete: function () {
+          showToast("Success! Property Transaction Updated.");
+          
+          const pageId = localStorage.pageId;
+        
+          if (pageId === "unit") {
+            $("[api-button='unit-transactions']").click();
+          } else if (pageId === "profile") {
+            $("[api-button='user-transactions']").click();
+          }
         }
-      },
+      });
     });
-  });
 }
+
 function deleteRecurringTransaction(transId, type) {
   $(".loader").css("display", "flex");
   $.ajax({
