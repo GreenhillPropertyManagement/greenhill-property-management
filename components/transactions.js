@@ -691,12 +691,28 @@ function updateUserTransaction(transId, transFreq) {
     },
     success: function (response) {
       responseData = response;
-      $form.find('[data-api-input="description"]').val(response.description);
-      $form.find('[data-api-input="remaining_transaction_balance"]').val(response.remaining_transaction_balance);
-      $form.find('[data-api-input="transaction_code"]').val(response.code);
-      $form.find('[data-api-input="transaction_date"]').val(response.transaction_date);
-      $form.find('[data-api-input="due_date"]').val(response.due_date);
-      $form.find('[data-api-input="action"]').trigger("change");
+
+      const mode = response.mode;
+      const data = response.transaction;
+    
+      // Shared fields
+      $form.find('[data-api-input="description"]').val(data.description);
+    
+      if (mode === "one_time") {
+        $form.find('[data-api-input="remaining_transaction_balance"]').val(data.remaining_transaction_balance);
+        $form.find('[data-api-input="rtransaction_code"]').val(data.code);
+        $form.find('[data-api-input="transaction_date"]').val(data.transaction_date);
+        $form.find('[data-api-input="due_date"]').val(data.due_date);
+        $form.find('[data-api-input="action_description"]').val(data.action_description);
+        $form.find('[data-api-input="action_date"]').val(data.action_date);
+        $form.find('[data-api-input="action"]').val(data.action).trigger("change");
+    
+      } else if (mode === "recurring") {
+        $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
+        $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
+        $form.find('[data-api-input="transaction_code"]').val(data.transaction_code);
+        $form.find('[data-api-input="amount"]').val(data.amount);
+      }
     },
     complete: function () {
       $(".loader").hide();
