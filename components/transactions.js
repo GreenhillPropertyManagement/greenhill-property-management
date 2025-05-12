@@ -514,7 +514,6 @@ function createUserTransaction(view, form) {
 }
 
 function loadUserTransactions(view, type) {
-
   const urlParams = new URLSearchParams(window.location.search);
   let target = urlParams.get("id");
 
@@ -536,55 +535,60 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
-      response.forEach((userTrans) => {
+      const mode = response.mode;
+      const transactions = response.transactions;
+    
+      transactions.forEach((userTrans) => {
         const transactionId = userTrans.id;
         const description = userTrans.description || "";
-    
-        // Determine frequency
         const frequency = userTrans.frequency === "recurring" ? "recurring" : "one-time";
     
-        // Format date based on frequency
-        const dueDate =
-          frequency === "recurring"
-            ? `${formatDateNoTime(userTrans.transaction_start_date)} - ${formatDateNoTime(userTrans.transaction_end_date)}`
-            : formatDateNoTime(userTrans.transaction_date);
+        // Choose field labels and values based on mode
+        const label2 = mode === "recurring" ? "Start Date" : "Due Date";
+        const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
+        const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
     
-        const amount = `$${userTrans.amount}`;
-        const remaining = `$${userTrans.remaining_transaction_balance || 0}`;
+        const value2 = mode === "recurring"
+          ? formatDateNoTime(userTrans.transaction_start_date)
+          : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
     
-        // Build transaction item HTML
+        const value3 = mode === "recurring"
+          ? formatDateNoTime(userTrans.transaction_end_date)
+          : `$${userTrans.amount}`;
+    
+        const value4 = mode === "recurring"
+          ? `$${userTrans.amount}`
+          : `$${userTrans.remaining_transaction_balance || 0}`;
+    
         const html = `
-        <div class="trans-item-updated wf-grid" 
-             id="${transactionId}" 
-             data-frequency="${frequency}" 
-             style="cursor: pointer;">
-             
-          <div class="trans-item__cell">
-            <div class="trans-item__cell-header">Description</div>
-            <div class="trans-item__cell-data" data-api="description">${description}</div>
+          <div class="trans-item-updated wf-grid" 
+               id="${transactionId}" 
+               data-frequency="${frequency}" 
+               style="cursor: pointer;">
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Description</div>
+              <div class="trans-item__cell-data" data-api="description">${description}</div>
+            </div>
+    
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${label2}</div>
+              <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+            </div>
+    
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${label3}</div>
+              <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
+            </div>
+    
+            <div class="trans-item__cell last">
+              <div class="trans-item__cell-header">${label4}</div>
+              <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
+            </div>
           </div>
-          
-          <div class="trans-item__cell">
-            <div class="trans-item__cell-header">Due Date</div>
-            <div class="trans-item__cell-data" data-api="due_date">${dueDate}</div>
-          </div>
-          
-          <div class="trans-item__cell">
-            <div class="trans-item__cell-header">Charge Amount</div>
-            <div class="trans-item__cell-data" data-api="amount">${amount}</div>
-          </div>
-          
-          <div class="trans-item__cell last">
-            <div class="trans-item__cell-header">Remaining Transaction Balance</div>
-            <div class="trans-item__cell-data" data-api="remaining_transaction_balance">${remaining}</div>
-          </div>
-          
-        </div>
-      `;
+        `;
     
         const $html = $(html);
-        $(".dyn-container__transactions").append($html);
-    
+        $(".dyn-container__transactions:visible").append($html);
       });
     },
 
@@ -1162,116 +1166,3 @@ function initTransactionFormUX(form) {
   $(typeField).trigger("change");
 }
 
-
-function oldLoadUserTransactions(view, type) {
-
-  const urlParams = new URLSearchParams(window.location.search);
-  let target = urlParams.get("id");
-
-  $(".pocket-loader").css("display", "flex");
-  var userTransContainer = $(".dyn-container__transactions");
-
-  $.ajax({
-    url: localStorage.baseUrl + "api:rpDXPv3x/load_transactions_component",
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-    },
-    dataType: "json",
-    data: {
-      target: target,
-      view: view,
-      type: type,
-    },
-
-    success: function (response) {
-
-      var sampleItem = $(".prop-trans-sample-wrapper").find(
-        '[data-dyn-item="prop-trans"]',
-      );
-      userTransContainer.empty();
-
-      response.forEach((userTrans) => {
-        let userTransItem = $(sampleItem).clone().appendTo(userTransContainer);
-
-        userTransItem.attr("id", userTrans.transaction_id);
-
-        // bind data
-        userTransItem
-          .find("[data-prop-trans='description']")
-          .text(userTrans.description);
-        userTransItem
-          .find("[data-prop-trans='created-at']")
-          .text(formatDateNoTime(userTrans.created_at));
-        userTransItem
-          .find("[data-prop-trans='recipient']")
-          .text(userTrans.recipient_type);
-        userTransItem.find("[data-prop-trans='type']").text(userTrans.type);
-
-        if (type === "recurring") {
-          // update date
-          userTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(
-              formatDateNoTime(userTrans.transaction_start_date) +
-                " " +
-                "-" +
-                " " +
-                formatDateNoTime(userTrans.transaction_end_date),
-            );
-          // click handler for 'edit transaction' button
-          userTransItem
-            .find("[api-button=edit-prop-trans]")
-            .off("click")
-            .click(function () {
-              updateUserTransaction(userTransItem.attr("id"), "recurring");
-            });
-          // click handler for delete button
-          userTransItem
-            .find(".transactions-log__bttn.delete")
-            .off("click")
-            .click(function () {
-              transactionToDelete = userTransItem.attr("id");
-            });
-        } else {
-          // update date
-          userTransItem
-            .find("[data-prop-trans='created-at']")
-            .text(formatDateNoTime(userTrans.transaction_date));
-          // click handler for 'edit transaction' button
-          userTransItem
-            .find("[api-button=edit-prop-trans]")
-            .off("click")
-            .click(function () {
-              updateUserTransaction(userTransItem.attr("id"), "one-time");
-            });
-          // remove delete button
-          userTransItem.find(".transactions-log__bttn.delete").remove();
-        }
-
-        // Format amount
-        if (userTrans.type === "credit") {
-          userTransItem
-            .find("[data-prop-trans='amount']")
-            .text("-" + "$" + userTrans.amount);
-        } else {
-          userTransItem
-            .find("[data-prop-trans='amount']")
-            .text("$" + userTrans.amount);
-        }
-      });
-    },
-    complete: function () {
-      $(".pocket-loader").hide();
-      /* Delete Recurring Transaction Func */
-      $("#delete-transaction-button")
-        .off("click")
-        .click(function () {
-          deleteRecurringTransaction(transactionToDelete, "user");
-        });
-    },
-    error: function (error) {
-      // Handle errors here
-    },
-  });
-}
