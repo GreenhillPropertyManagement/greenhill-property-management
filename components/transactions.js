@@ -542,7 +542,7 @@ function loadUserTransactions(view, type) {
       transactions.forEach((userTrans) => {
         const transactionId = userTrans.id;
         const description = userTrans.description || "";
-        const frequency = userTrans.frequency || "one_time"; // or "recurring"
+        const frequency = mode; // from response.mode: "recurring" or "one_time"
 
         // Choose field labels and values based on mode
         const label2 = mode === "recurring" ? "Start Date" : "Due Date";
