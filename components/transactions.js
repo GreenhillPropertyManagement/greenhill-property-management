@@ -711,7 +711,7 @@ function updateUserTransaction(transId, transFreq) {
         $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
         $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
         $form.find('[data-api-input="transaction_code"]').val(data.transaction_code);
-        $form.find('[data-api-input="amount"]').val(data.amount);
+        $form.find('[data-api-input="recurring_amount"]').val(data.amount);
       }
     },
     complete: function () {
