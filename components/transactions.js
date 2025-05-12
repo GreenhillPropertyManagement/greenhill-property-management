@@ -535,61 +535,62 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
- const mode = response.mode;
-  const transactions = response.transactions;
 
-  transactions.forEach((userTrans) => {
-    const transactionId = userTrans.id;
-    const description = userTrans.description || "";
-    const frequency = userTrans.frequency === "recurring" ? "recurring" : "one-time";
+      const mode = response.mode;
+      const transactions = response.transactions;
 
-    // Choose field labels and values based on mode
-    const label2 = mode === "recurring" ? "Start Date" : "Due Date";
-    const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
-    const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
+      transactions.forEach((userTrans) => {
+        const transactionId = userTrans.id;
+        const description = userTrans.description || "";
+        const frequency = userTrans.frequency || "one_time"; // or "recurring"
 
-    const value2 = mode === "recurring"
-      ? formatDateNoTime(userTrans.transaction_start_date)
-      : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+        // Choose field labels and values based on mode
+        const label2 = mode === "recurring" ? "Start Date" : "Due Date";
+        const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
+        const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
 
-    const value3 = mode === "recurring"
-      ? formatDateNoTime(userTrans.transaction_end_date)
-      : `$${userTrans.amount}`;
+        const value2 = mode === "recurring"
+          ? formatDateNoTime(userTrans.transaction_start_date)
+          : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
 
-    const value4 = mode === "recurring"
-      ? `$${userTrans.amount}`
-      : `$${userTrans.remaining_transaction_balance || 0}`;
+        const value3 = mode === "recurring"
+          ? formatDateNoTime(userTrans.transaction_end_date)
+          : `$${userTrans.amount}`;
 
-    const html = `
-      <div class="trans-item-updated wf-grid" 
-           id="${transactionId}" 
-           data-frequency="${frequency}" 
-           style="cursor: pointer;">
-        <div class="trans-item__cell">
-          <div class="trans-item__cell-header">Description</div>
-          <div class="trans-item__cell-data" data-api="description">${description}</div>
-        </div>
+        const value4 = mode === "recurring"
+          ? `$${userTrans.amount}`
+          : `$${userTrans.remaining_transaction_balance || 0}`;
 
-        <div class="trans-item__cell">
-          <div class="trans-item__cell-header">${label2}</div>
-          <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
-        </div>
+        const html = `
+          <div class="trans-item-updated wf-grid" 
+              id="${transactionId}" 
+              data-frequency="${frequency}" 
+              style="cursor: pointer;">
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">Description</div>
+              <div class="trans-item__cell-data" data-api="description">${description}</div>
+            </div>
 
-        <div class="trans-item__cell">
-          <div class="trans-item__cell-header">${label3}</div>
-          <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
-        </div>
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${label2}</div>
+              <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+            </div>
 
-        <div class="trans-item__cell last">
-          <div class="trans-item__cell-header">${label4}</div>
-          <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
-        </div>
-      </div>
-    `;
+            <div class="trans-item__cell">
+              <div class="trans-item__cell-header">${label3}</div>
+              <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
+            </div>
 
-    const $html = $(html);
-    $(".dyn-container__transactions:visible").append($html);
-  });
+            <div class="trans-item__cell last">
+              <div class="trans-item__cell-header">${label4}</div>
+              <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
+            </div>
+          </div>
+        `;
+
+        const $html = $(html);
+        $(".dyn-container__transactions:visible").append($html);
+      });
     },
 
     complete: function () {
@@ -612,7 +613,7 @@ function updateUserTransaction(transId, transFreq) {
 
    /*update form depending on the transaction frequency type */
 
-   if (transFreq === "one-time") {
+   if (transFreq === "one_time") {
     // Step 1: Bind dynamic fields using data-api-input
     const $form = $('form[api-form="update-transaction"]');
     $form[0].reset(); // Clears all inputs to default
