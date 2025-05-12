@@ -700,11 +700,11 @@ function updateUserTransaction(transId, transFreq) {
     const $amountField = $form.find('[data-api-input="amount"]');
 
     // Show and require recurring fields
-    $description.show();
-    $code.show();
-    $startDate.show();
-    $endDate.show();
-    $amount.show();
+    $description.show().find('[data-api-input="description"]').show();
+    $code.show().find('[data-api-input="transaction_code"]').show();
+    $startDate.show().find('[data-api-input="transaction_start_date"]').show();
+    $endDate.show().find('[data-api-input="transaction_end_date"]').show();
+    $amount.show().find('[data-api-input="amount"]').show();
 
     // Hide and clear one-time fields
     [$remainingBalance, $transDate, $dueDate, $action, $actionDesc, $actionDate].forEach($el => {
