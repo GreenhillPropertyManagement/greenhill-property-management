@@ -617,12 +617,13 @@ function updateUserTransaction(transId, transFreq) {
 
   // one time fields 
   const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
-  const $amountField = $form.find('[data-api-input="amount"]');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
-  const $actionDescriptionField = $form.find('[data-api-input="action_description"]');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
-  const $actionDateField = $form.find('[data-api-input="action_date"]');
   const $action = $form.find('[data-api-input="action"]');
+  const $remainingBalancewrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
+  const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
+  const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
+
 
   // Recurring fields
   const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
@@ -632,14 +633,11 @@ function updateUserTransaction(transId, transFreq) {
   if (transFreq === "one_time") {
 
     // Show one-time
+    $remainingBalancewrapper.show();
     $amountWrapper.show();
-    $amountField.attr('required', 'required');
     $actionDescription.show();
-    $actionDescriptionField.attr('required', 'required');
     $actionDate.show();
-    $actionDateField.attr('required', 'required');
     $action.closest('.form__item').show();
-    $action.attr('required', 'required');
 
     // Hide recurring
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
@@ -656,11 +654,8 @@ function updateUserTransaction(transId, transFreq) {
         $actionDate.show();
       } else {
         $amountWrapper.hide();
-        $amountField.val('');
         $actionDescription.hide();
-        $actionDescriptionField.val('');
         $actionDate.hide();
-        $actionDateField.val('');
       }
     });
 
@@ -674,12 +669,12 @@ function updateUserTransaction(transId, transFreq) {
     });
 
     // Hide one-time
-    [$remainingBalance, $transDate, $dueDate, $action, $actionDescription, $actionDate].forEach($el => {
+    [$remainingBalancewrapper, $transDateWrapper,  $dueDateWrapper, $action, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    $amountField.val('');
+
   }
 
   // Load existing data
