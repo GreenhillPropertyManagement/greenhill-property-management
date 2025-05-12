@@ -648,7 +648,7 @@ function updateUserTransaction(transId, transFreq) {
     });
 
     // Dropdown change logic
-    $action.off('change').on('change', function () {
+    $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
         $amountWrapper.show();
