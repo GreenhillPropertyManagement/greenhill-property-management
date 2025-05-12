@@ -751,9 +751,9 @@ function updateUserTransaction(transId, transFreq) {
         showToast("Success! Property Transaction Updated.");
         const pageId = localStorage.pageId;
         if (pageId === "unit") {
-          $("[api-button='unit-transactions']").click();
+          loadUserTransactions("active-tenant", "all");
         } else if (pageId === "profile") {
-          $("[api-button='user-transactions']").click();
+          loadUserTransactions("profile", "all");
         }
       },
     });
