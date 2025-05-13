@@ -239,6 +239,12 @@ function loadPropertyTransactions(type) {
       const mode = response.mode;
       const transactions = response.transactions;
 
+      
+      if (!transactions.length) { // if there are no transactions...
+        showEmptyState($(".dyn-container__transactions:visible"));
+        return;
+      }
+
       transactions.forEach((item) => {
         const id = item.id;
         const description = item.description || "";
@@ -292,7 +298,6 @@ function loadPropertyTransactions(type) {
     }
   });
 }
-
 
 function updatePropertyTransaction(transId, transFreq) {
   var responseData; // Variable to store response data
@@ -522,6 +527,11 @@ function loadUserTransactions(view, type) {
       const mode = response.mode;
       const transactions = response.transactions;
 
+      if (!transactions.length) { // if there are no transactions...
+        showEmptyState($(".dyn-container__transactions:visible"));
+        return;
+      }
+
       transactions.forEach((userTrans) => {
         const transactionId = userTrans.id;
         const description = userTrans.description || "";
@@ -732,7 +742,6 @@ function updateUserTransaction(transId, transFreq) {
     });
   });
 }
-
 
 function deleteRecurringTransaction(transId, type) {
   $(".loader").css("display", "flex");
@@ -1155,6 +1164,14 @@ function initTransactionFormUX(form) {
   // Trigger initial state
   $(freqField).trigger("change");
   $(typeField).trigger("change");
+}
+
+function showEmptyState($container) {
+  $container.html(`
+    <div class="system-text__main" style="text-align: center; margin-top: 2em;">
+      There are no transactions to display
+    </div>
+  `);
 }
 
 
