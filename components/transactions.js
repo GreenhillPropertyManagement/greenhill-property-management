@@ -20,6 +20,18 @@ document.addEventListener("DOMContentLoaded", function () {
     updateUserTransaction(transactionId, frequency);
   });
 
+  // Click handler for dynamically loaded property transactions
+  $(document)
+  .off("click", ".trans-item-updated.prop-trans")
+  .on("click", ".trans-item-updated.prop-trans", function (e) {
+    e.stopPropagation(); // prevent bubbling to user handler
+    const transactionId = $(this).attr("id");
+    const frequency = $(this).data("frequency") || "one_time";
+    updatePropertyTransaction(transactionId, frequency);
+  });
+
+
+
   /* Initiate pay transactions on button click */
   $(document).on("click", '[data-api-button="pay-transactions"]', function (e) {
     e.preventDefault();
@@ -205,6 +217,7 @@ function createPropertyTransaction() {
 }
 
 function loadPropertyTransactions(type) {
+
   $(".pocket-loader").css("display", "flex");
 
   const containerId = type === "recurring" ? "#recurring-prop-trans-container" : "#prop-trans-container";
@@ -245,7 +258,7 @@ function loadPropertyTransactions(type) {
           : `$${item.remaining_transaction_balance || 0}`;
 
         const html = `
-          <div class="trans-item-updated wf-grid" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
+          <div class="trans-item-updated wf-grid prop-trans" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
             <div class="trans-item__cell">
               <div class="trans-item__cell-header">Description</div>
               <div class="trans-item__cell-data" data-api="description">${description}</div>
