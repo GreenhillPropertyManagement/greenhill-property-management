@@ -306,6 +306,36 @@ function updatePropertyTransaction(transId, transFreq) {
   $(".modal__block").show().children().hide();
   $("#edit-transaction").show();
 
+  const $form = $('form[api-form="update-transaction"]');
+  const $actionSelect = $form.find('[data-api-input="action"]');
+  const $amountWrapper = $form.find('#edit-transaction-amount').closest('.form__item');
+  const $descWrapper = $form.find('#edit-transaction-action-description').closest('.form__item');
+  const $dateWrapper = $form.find('#edit-transaction-action-date').closest('.form__item');
+
+  // Initial hide
+  $amountWrapper.hide();
+  $descWrapper.hide();
+  $dateWrapper.hide();
+
+  // Bind action dropdown logic
+  $actionSelect.off("change").on("change", function () {
+    const selected = $(this).val();
+    if (["charge", "payment", "credit"].includes(selected)) {
+      $amountWrapper.show();
+      $descWrapper.show();
+      $dateWrapper.show();
+    } else {
+      $amountWrapper.find('[data-api-input]').val('');
+      $amountWrapper.hide();
+      
+      $descWrapper.find('[data-api-input]').val('');
+      $descWrapper.hide();
+      
+      $dateWrapper.find('[data-api-input]').val('');
+      $dateWrapper.hide();
+    }
+  });
+
   /* update form depending on the transaction frequency type */
   if (transFreq === "one-time") {
     $("#edit-prop-trans-type").closest(".form__item").hide();
