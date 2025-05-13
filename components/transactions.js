@@ -808,8 +808,9 @@ function deleteRecurringTransaction(transId, type) {
     },
     success: function (response) {},
     complete: function () {
+      
       $(".modal__block").hide();
-      alert("Success! Transaction Deleted");
+      showToast("Success! Transaction Deleted");
 
       // reload transactions
       if (localStorage.pageId === "profile") {
