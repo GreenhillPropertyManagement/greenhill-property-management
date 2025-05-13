@@ -300,7 +300,17 @@ function loadPropertyTransactions(type) {
 }
 
 function updatePropertyTransaction(transId, transFreq) {
+
   var responseData; // Variable to store response data
+
+  $("#delete-trans-button").hide(); // always hide first
+
+  if (transFreq === "recurring") {
+    $("#delete-trans-button").show().off("click").on("click", function () {
+      const isProperty = localStorage.pageId === "property";
+      deleteRecurringTransaction(transId, isProperty ? "property" : "user");
+    });
+  }
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
@@ -627,7 +637,17 @@ function loadUserTransactions(view, type) {
 }
 
 function updateUserTransaction(transId, transFreq) {
+
   var responseData;
+
+  $("#delete-trans-button").hide(); // always hide first
+
+  if (transFreq === "recurring") {
+    $("#delete-trans-button").show().off("click").on("click", function () {
+      const isProperty = localStorage.pageId === "property";
+      deleteRecurringTransaction(transId, isProperty ? "property" : "user");
+    });
+  }
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
@@ -774,6 +794,7 @@ function updateUserTransaction(transId, transFreq) {
 }
 
 function deleteRecurringTransaction(transId, type) {
+
   $(".loader").css("display", "flex");
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/delete_recurring_transaction",
@@ -794,7 +815,7 @@ function deleteRecurringTransaction(transId, type) {
       if (localStorage.pageId === "profile") {
         loadUserTransactions("profile", "recurring");
       } else if (localStorage.pageId === "unit") {
-        loadUserTransactions("active-tanant", "recurring");
+        loadUserTransactions("active-tenant", "recurring");
       } else if (localStorage.pageId === "property") {
         $("[api-button='all-prop-trans']").click();
       }
