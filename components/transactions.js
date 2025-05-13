@@ -95,7 +95,7 @@ $("[api-button='unit-transactions']")
     }
   });
 
-  // Create Transaction
+
   // Create Transaction - Bind individually to each user-transaction form
   $("[api-form='user-transaction']").each(function () {
     const form = $(this);
@@ -299,7 +299,7 @@ function updatePropertyTransaction(transId, transFreq) {
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
-  $("#edit-prop-trans").show();
+  $("#edit-transaction").show();
 
   /* update form depending on the transaction frequency type */
   if (transFreq === "one-time") {
