@@ -729,9 +729,9 @@ function fetchArrearsReport(statementId) {
                 statement_id: statementId
             },
             success: function(response) {
-                if (response && response.download_url) {
+                if (typeof response === 'string' && response.startsWith('https://')) {
                     clearInterval(interval);
-                    window.open(response.download_url, '_blank');
+                    window.open(response, '_blank'); // open the URL directly
                     $('.loader').hide();
                 } else {
                     attempts++;
