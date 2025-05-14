@@ -707,7 +707,7 @@ function generateArrearsReport() {
 
 }
 
-  function fetchArrearsReport(statementId) {
+function fetchArrearsReport(statementId) {
     let attempts = 0;
     let maxAttempts = 5;
 
@@ -720,7 +720,7 @@ function generateArrearsReport() {
         }
 
         $.ajax({
-            url: localStorage.baseUrl + "api:rpDXPv3x/v4_get_arrears_report",
+            url: localStorage.baseUrl + "api:lpDO7x6s/fetch_processed_statements",
             type: 'GET',
             headers: {
                 "Authorization": "Bearer " + localStorage.authToken
