@@ -42,8 +42,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     /* Click handler for Generating Arrears Reports */
     $(document).off('click', '[api-button="arrears-report"]');
-    $(document).on('click', '[api-button="arrears-report"]', function () {
-         generateArrearsReport();
+    $(document).on('click', '[api-button="arrears-report"]', function (event) {
+
+        const pageId = localStorage.getItem('pageId');
+
+        // If we're in unit view, prevent default behavior (like tab switching)
+        if (pageId === 'unit') {
+            event.preventDefault();
+        }
+
+        generateArrearsReport();
     });
 
 });
