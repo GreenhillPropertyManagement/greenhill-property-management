@@ -720,7 +720,7 @@ function fetchArrearsReport(statementId) {
         }
 
         $.ajax({
-            url: localStorage.baseUrl + "api:lpDO7x6s/fetch_processed_statements",
+            url: localStorage.baseUrl + "api:rpDXPv3x/v4_get_arrears_report",
             type: 'GET',
             headers: {
                 "Authorization": "Bearer " + localStorage.authToken
@@ -729,9 +729,9 @@ function fetchArrearsReport(statementId) {
                 statement_id: statementId
             },
             success: function(response) {
-                if (response && response.document && response.document.download_url) {
+                if (response && response.download_url) {
                     clearInterval(interval);
-                    window.open(response.document.download_url, '_blank'); // Open in new tab
+                    window.open(response.download_url, '_blank');
                     $('.loader').hide();
                 } else {
                     attempts++;
