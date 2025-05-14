@@ -696,7 +696,7 @@ function generateArrearsReport() {
       success: function(response) {
         let statement_id = response.statement_id;
         alert("Generating your arrears report. Please do not refresh the page.");
-        fetchCustomReport(statement_id); // Reuse your fetch function if compatible
+        fetchArrearsReport(statement_id); // Reuse your fetch function if compatible
       },
       error: function(xhr, status, error) {
         console.error('Error generating arrears report:', error);
@@ -705,4 +705,43 @@ function generateArrearsReport() {
       }
     });
 
-  }
+}
+
+  function fetchArrearsReport(statementId) {
+    let attempts = 0;
+    let maxAttempts = 5;
+
+    let interval = setInterval(() => {
+        if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            $('.loader').hide();
+            alert("Arrears report generation is taking longer than expected. Please try again later.");
+            return;
+        }
+
+        $.ajax({
+            url: localStorage.baseUrl + "api:rpDXPv3x/v4_get_arrears_report",
+            type: 'GET',
+            headers: {
+                "Authorization": "Bearer " + localStorage.authToken
+            },
+            data: {
+                statement_id: statementId
+            },
+            success: function(response) {
+                if (response && response.download_url) {
+                    clearInterval(interval);
+                    window.open(response.download_url, '_blank');
+                    $('.loader').hide();
+                } else {
+                    attempts++;
+                }
+            },
+            error: function() {
+                clearInterval(interval);
+                alert("An error occurred while fetching the arrears report.");
+                $('.loader').hide();
+            }
+        });
+    }, 3000);
+}
