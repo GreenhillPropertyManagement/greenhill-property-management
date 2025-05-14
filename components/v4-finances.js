@@ -40,6 +40,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    /* Click handler for Generating Arrears Reports */
+    $(document).off('click', '[api-button="arrears-report"]');
+    $(document).on('click', '[api-button="arrears-report"]', function () {
+         generateArrearsReport();
+    });
+
 });
 
 function initLandlordFinances() {
@@ -527,6 +533,7 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
+
     $('.loader').css('display', 'flex'); // Show loader
     let transactions = [];
 
@@ -655,3 +662,47 @@ function v4formatToMonthYear(dateString) {
     const options = { month: 'short', year: 'numeric', timeZone: 'UTC' };
     return date.toLocaleDateString('en-US', options).toUpperCase(); // → "NOV 2025"
 }
+
+function generateArrearsReport() {
+
+    $('.loader').css('display', 'flex'); // Show loader
+  
+    let pageId = localStorage.getItem('pageId');
+    let user_id = null;
+  
+    if (pageId === 'profile') {
+      user_id = parseInt(localStorage.getItem('userProfileRecId'));
+    } else if (pageId === 'unit') {
+      user_id = parseInt(localStorage.getItem('activeTenantUserId'));
+    }
+  
+    if (!user_id) {
+      alert('User ID is missing or invalid.');
+      $('.loader').hide();
+      return;
+    }
+  
+    const requestData = { user_id };
+  
+    $.ajax({
+      url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_arrears_report',
+      type: 'POST',
+      dataType: 'json',
+      contentType: 'application/json',
+      headers: {
+        "Authorization": "Bearer " + localStorage.authToken
+      },
+      data: JSON.stringify(requestData),
+      success: function(response) {
+        let statement_id = response.statement_id;
+        alert("Generating your arrears report. Please do not refresh the page.");
+        fetchCustomReport(statement_id); // Reuse your fetch function if compatible
+      },
+      error: function(xhr, status, error) {
+        console.error('Error generating arrears report:', error);
+        alert('Error generating arrears report. Please try again.');
+        $('.loader').hide();
+      }
+    });
+
+  }
