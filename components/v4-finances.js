@@ -729,9 +729,9 @@ function fetchArrearsReport(statementId) {
                 statement_id: statementId
             },
             success: function(response) {
-                if (response && response.download_url) {
+                if (response && response.document && response.document.download_url) {
                     clearInterval(interval);
-                    window.open(response.download_url, '_blank');
+                    window.open(response.document.download_url, '_blank'); // Open in new tab
                     $('.loader').hide();
                 } else {
                     attempts++;
