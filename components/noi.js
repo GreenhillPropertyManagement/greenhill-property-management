@@ -7,15 +7,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // landlord dashboard on login
   $("#finance").click(function () {
    
+    /* legacy code
     $(".loader").css("display", "flex");
     $(".noi__component").show();
     $("[noi-ledger='back-button']").click();
 
     let target = localStorage.userId;
     loadNoiTransactions("user", target, "dashboard-chart");
-    loadStatements("user", target, "#landlord-dash-comp");
+    loadStatements("user", target, "#landlord-dash-comp");*/
     
-    //$('#finance-v4').click(); // init finance v4 module
+    e.preventDefault(); // Prevent the tab from opening
+    $('#finance-v4').click(); // Trigger your custom behavior
 
 
   });
