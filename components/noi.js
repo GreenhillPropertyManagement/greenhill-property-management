@@ -4,7 +4,8 @@ var selectedMonthYear = null; // Variable to store the selected month and year
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  // landlord dashboard on login
+  /*
+  // Legacy landlord dashboard on login
   $("#finance").click(function () {
    
    
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
 
 
-  });
+  }); */
 
   // landlord profile page - NOI
   $("[api-button='landlord-noi']").click(function () {
