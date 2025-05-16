@@ -344,6 +344,12 @@ function populateTransactionsTable(response, transactionType) {
     // Show "Code" column only for Admin or Employee
     const showCodeColumn = ["Admin", "Employee"].includes(localStorage.getItem("userRole"));
 
+    if (showCodeColumn) {
+        table.classList.add("has-code-col");
+    } else {
+        table.classList.remove("has-code-col");
+    }
+
     //  Clear previous content
     thead.innerHTML = "";
     tbody.innerHTML = "";
