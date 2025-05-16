@@ -362,9 +362,10 @@ function loadUserProfile(user) {
         $("[data-profile=move_in_date]")
           .text(formatDateNoTime(response.tenant_info.move_in_date))
           .val(response.tenant_info.move_in_date);
-        $("[data-profile=rent_per_sqft]")
-          .text(response.tenant_info.rent_per_sqft)
-          .val(response.tenant_info.rent_per_sqft);
+        $("[data-profile=rent_per_sqft]").text('$' + Number(response.tenant_info.rent_per_sqft).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }));
         $("[data-profile=move_out_date]")
           .text(formatDateNoTime(response.tenant_info.move_out_date))
           .val(response.tenant_info.move_out_date);
