@@ -704,19 +704,21 @@ function loadLandlordDashboardChart() {
 }
 
 function renderSimpleBarChart(containerSelector, chartData) {
-    // Clear existing chart and canvas
+    // Clear previous chart
     $(containerSelector).html('<canvas></canvas>');
     const ctx = $(containerSelector).find("canvas")[0].getContext("2d");
+
+    const totalPayments = chartData.paymentData.reduce((sum, val) => sum + val, 0);
+    const totalExpenses = chartData.expenseData.reduce((sum, val) => sum + val, 0);
 
     const chart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: chartData.labels,
+            labels: ["Payments", "Expenses"],
             datasets: [{
-                label: "NOI",
-                data: chartData.paymentData.map((p, i) => p - chartData.expenseData[i]),
-                backgroundColor: "rgba(54, 162, 235, 0.6)",
-                borderColor: "rgba(54, 162, 235, 1)",
+                data: [totalPayments, totalExpenses],
+                backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
+                borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
                 borderWidth: 1
             }]
         },
@@ -724,16 +726,46 @@ function renderSimpleBarChart(containerSelector, chartData) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        generateLabels: function (chart) {
+                            const values = chart.data.datasets[0].data;
+                            return [
+                                {
+                                    text: `Payments: $${values[0].toLocaleString()}`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[0],
+                                    strokeStyle: chart.data.datasets[0].borderColor[0],
+                                    lineWidth: 1,
+                                    index: 0
+                                },
+                                {
+                                    text: `Expenses: $${values[1].toLocaleString()}`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[1],
+                                    strokeStyle: chart.data.datasets[0].borderColor[1],
+                                    lineWidth: 1,
+                                    index: 1
+                                }
+                            ];
+                        }
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return `$${context.raw.toLocaleString()}`;
+                            const label = context.label || "";
+                            const value = context.raw || 0;
+                            return `${label}: $${value.toLocaleString()}`;
                         }
                     }
                 }
             },
             scales: {
+                x: {
+                    ticks: { display: false },
+                    grid: { display: false }
+                },
                 y: {
                     beginAtZero: true,
                     ticks: {
@@ -746,6 +778,6 @@ function renderSimpleBarChart(containerSelector, chartData) {
         }
     });
 
-    // Resize after a short delay to fix layout bugs
+    // Optional resize trigger
     setTimeout(() => chart.resize(), 100);
 }
