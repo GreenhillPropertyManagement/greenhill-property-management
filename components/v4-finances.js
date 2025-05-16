@@ -332,18 +332,38 @@ function renderChart(chartType, chartData) {
 }
 
 function populateTransactionsTable(response, transactionType) {
-    let tableBody = document.querySelector("#transactionsTable tbody");
+    const table = document.querySelector("#transactionsTable");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
 
-    if (!tableBody) {
-        console.error("Error: #transactionsTable not found in the DOM.");
+    if (!table || !thead || !tbody) {
+        console.error("Error: #transactionsTable or its sections not found in the DOM.");
         return;
     }
 
-    tableBody.innerHTML = ""; // Clear previous data
+    // Show "Code" column only for Admin or Employee
+    const showCodeColumn = ["Admin", "Employee"].includes(localStorage.getItem("userRole"));
+
+    //  Clear previous content
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    // Build header
+    const headerRow = document.createElement("tr");
+    headerRow.innerHTML = `
+        <th>Date</th>
+        <th>Name</th>
+        <th>Street</th>
+        <th>Unit</th>
+        <th>Type</th>
+        ${showCodeColumn ? "<th>Code</th>" : ""}
+        <th>Description</th>
+        <th>Amount</th>
+    `;
+    thead.appendChild(headerRow);
 
     let transactions = [];
 
-    //  Merge payments and expenses if NOI, otherwise keep it filtered
     if (transactionType === "noi") {
         transactions = [...response.payments, ...response.expenses];
     } else if (transactionType === "payments") {
@@ -352,27 +372,26 @@ function populateTransactionsTable(response, transactionType) {
         transactions = [...response.expenses];
     }
 
-    // Sort all transactions by date DESC (newest to oldest)
     transactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
 
     if (transactions.length === 0) {
         let row = document.createElement("tr");
         row.innerHTML = `
-            <td colspan="7" style="text-align: center; padding: 15px; color: #56627a;">
+            <td colspan="${showCodeColumn ? 8 : 7}" style="text-align: center; padding: 15px; color: #56627a;">
                 No transactions to display
             </td>
         `;
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
         return;
     }
 
-    // Render all transactions regardless of type
     transactions.forEach(transaction => {
         let row = document.createElement("tr");
 
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
         let transactionDescription = transaction.description || "N/A";
+        let code = transaction.code_number?.code || "—";
 
         if (transaction.type === "payment") {
             row.setAttribute("element", "modal");
@@ -390,11 +409,12 @@ function populateTransactionsTable(response, transactionType) {
             <td>${transaction.street || "N/A"}</td>
             <td>${transaction.unit_name || "N/A"}</td>
             <td>${transactionTypeText}</td>
+            ${showCodeColumn ? `<td>${code}</td>` : ""}
             <td>${transactionDescription}</td>
             <td>${formattedAmount}</td>
         `;
 
-        tableBody.appendChild(row);
+        tbody.appendChild(row);
     });
 }
 
