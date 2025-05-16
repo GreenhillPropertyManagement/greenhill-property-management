@@ -369,6 +369,9 @@ function loadUserProfile(user) {
         $("[data-profile=payment_due_in_days]")
           .text(response.tenant_info.payment_due_in_days)
           .val(response.tenant_info.payment_due_in_days);
+        $("[data-profile=base_amount]")
+          .text(response.tenant_info.base_amount)
+          .val(response.tenant_info.base_amount);
         $("[data-profile=late_fee_percentage]")
           .text(response.tenant_info.late_fee_percentage)
           .val(response.tenant_info.late_fee_percentage);
