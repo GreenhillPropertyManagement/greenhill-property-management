@@ -157,9 +157,7 @@ function loadUnitAndTenantData(unit) {
         $("[data-unit='move_in_date']").text(
           formatDateNoTime(response.active_tenant_info.move_in_date),
         );
-        $("[data-unit='payment_due_in_days']").text(
-          formatDateNoTime(response.active_tenant_info.payment_due_in_days),
-        );
+        $("[data-unit='payment_due_in_days']").text(response.active_tenant_info.payment_due_in_days);
         $("[data-unit='move_out_date']").text(
           formatDateNoTime(response.active_tenant_info.move_out_date),
         );
