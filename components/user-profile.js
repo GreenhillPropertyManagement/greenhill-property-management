@@ -627,6 +627,9 @@ function adminUpdateUser(form) {
     success: function (response) {   
       loadUserProfile(localStorage.pageRefreshParam);
     },
+    complete: function () {
+      showToast('User updated successfully!');
+    },
     error: function (error) {
       // Handle the error here
     },
