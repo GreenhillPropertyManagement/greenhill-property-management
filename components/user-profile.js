@@ -611,7 +611,7 @@ function adminUpdateUser(form) {
   formData["enable_payments"] = $('#edit_enable_payments').is(':checked');
   formData["monthly_rent"] = $("[data-api-unit='monthly_rent']").val();
   formData["insurance_doc"] = $("[data-api-input='insurance_doc']").val();
-  formData["auto_apply_late_fees"] = $("[data-api-input='auto_apply_late_fees']").val();
+  formData["auto_apply_late_fees"] = $("[data-api-input='auto_apply_late_fees']").is(":checked");
 
 
   
