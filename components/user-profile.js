@@ -582,6 +582,7 @@ function clearUserProfile() {
 }
 
 function adminUpdateUser(form) {
+  
   // Handle 'Loading' State
   $(".modal__block").hide();
   $(".loader").css("display", "flex");
