@@ -41,6 +41,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // Add .active-override only when #finance is clicked
+    $(document).on("click", "#finance", function (e) {
+        $("#finance").addClass("active-override");
+    });
+    
+    // Remove .active-override from #finance when any other tab button is clicked (excluding #finance-v4)
+    $(document).on("click", ".main-tabs__button", function (e) {
+        const isNotFinance = $(this).attr("id") !== "finance";
+        const isNotFinanceV4 = $(this).attr("id") !== "finance-v4";
+    
+        if (isNotFinance && isNotFinanceV4) {
+        $("#finance").removeClass("active-override");
+        }
+    });
+
 
     /* Click handler for Generating Arrears Reports */
     $(document).off('click', '[api-button="arrears-report"]');
