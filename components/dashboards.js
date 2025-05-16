@@ -703,91 +703,6 @@ function loadLandlordDashboardChart() {
     });
 }
 
-function renderSimpleLineChart(containerSelector, chartData) {
-    $(containerSelector).html('<canvas></canvas>');
-    const ctx = $(containerSelector).find("canvas")[0].getContext("2d");
-
-    const totalPayments = chartData.paymentData.reduce((sum, val) => sum + val, 0);
-    const totalExpenses = chartData.expenseData.reduce((sum, val) => sum + val, 0);
-
-    const chart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: ["", ""], // No visible x-axis labels
-            datasets: [
-                {
-                    label: "Payments",
-                    data: [totalPayments, null], // First point only
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    backgroundColor: "rgba(75, 192, 192, 0.2)",
-                    borderWidth: 2,
-                    tension: 0.4,
-                    yAxisID: "y-payments",
-                    pointRadius: 6,
-                    pointHoverRadius: 7,
-                    fill: false
-                },
-                {
-                    label: "Expenses",
-                    data: [null, totalExpenses], // Second point only
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    backgroundColor: "rgba(255, 99, 132, 0.2)",
-                    borderWidth: 2,
-                    tension: 0.4,
-                    yAxisID: "y-expenses",
-                    pointRadius: 6,
-                    pointHoverRadius: 7,
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: "bottom",
-                    labels: {
-                        usePointStyle: true
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { display: false },
-                    grid: { display: false }
-                },
-                "y-payments": {
-                    position: "left",
-                    beginAtZero: true,
-                    ticks: {
-                        callback: (val) => `$${val.toLocaleString()}`
-                    }
-                },
-                "y-expenses": {
-                    position: "right",
-                    beginAtZero: true,
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                        callback: (val) => `$${val.toLocaleString()}`
-                    }
-                }
-            }
-        }
-    });
-
-    setTimeout(() => chart.resize(), 100);
-}
-
-/* Bar Chart
 function renderSimpleBarChart(containerSelector, chartData) {
     $(containerSelector).html('<canvas></canvas>');
     const ctx = $(containerSelector).find("canvas")[0].getContext("2d");
@@ -861,4 +776,3 @@ function renderSimpleBarChart(containerSelector, chartData) {
 
     setTimeout(() => chart.resize(), 100);
 }
-*/
