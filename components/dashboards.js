@@ -38,7 +38,8 @@ document.addEventListener("DOMContentLoaded", function () {
       loadConvosInDashboard(localStorage.userId),
       loadWorkOrders("assigned_user", localStorage.userRecId, "", "dashboard"),
       loadPropertiesInDashboard(localStorage.userId),
-      loadActiveTenants(localStorage.userRecId)
+      loadActiveTenants(localStorage.userRecId),
+      loadLandlordDashboardChart()
     ).then(function() {
       $(".loader").hide(); // hide loader when all AJAX requests are complete
     });
@@ -667,4 +668,84 @@ function archiveUnit(unit) {
     },
   });
 
+}
+
+function loadLandlordDashboardChart() {
+    const mode = "finance"; // Or "property" if needed
+    const target = localStorage.getItem("userId"); // Use user ID as target if that's your logic
+
+    const requestData = {
+        mode: mode,
+        target: target,
+        date_range: "month_to_date",
+        graph_type: "bar",
+        transaction_type: "noi"
+    };
+
+    $.ajax({
+        url: localStorage.baseUrl + "api:rpDXPv3x/v4_landlord_finances",
+        type: "GET",
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: requestData,
+        dataType: "json",
+        success: function (response) {
+            const chartData = extractChartData(response, "noi");
+
+            // Render into landlord-dash-chart
+            renderSimpleBarChart("#landlord-dash-chart", chartData);
+        },
+        error: function (xhr, status, error) {
+            console.error("Dashboard chart error:", error);
+            $("#landlord-dash-chart").html(`<div style="color:red;">Chart failed to load</div>`);
+        }
+    });
+}
+
+function renderSimpleBarChart(containerSelector, chartData) {
+    // Clear existing chart and canvas
+    $(containerSelector).html('<canvas></canvas>');
+    const ctx = $(containerSelector).find("canvas")[0].getContext("2d");
+
+    const chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: "NOI",
+                data: chartData.paymentData.map((p, i) => p - chartData.expenseData[i]),
+                backgroundColor: "rgba(54, 162, 235, 0.6)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `$${context.raw.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return `$${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Resize after a short delay to fix layout bugs
+    setTimeout(() => chart.resize(), 100);
 }
