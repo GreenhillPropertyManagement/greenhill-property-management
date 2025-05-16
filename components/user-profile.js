@@ -366,8 +366,12 @@ function loadUserProfile(user) {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         }));
-        $("[data-profile=payment_due_in_days]").val(response.tenant_info.payment_due_in_days);
-        $("[data-profile=late_fee_percentage]").val(response.tenant_info.late_fee_percentage);
+        $("[data-profile=payment_due_in_days]")
+          .text(response.tenant_info.payment_due_in_days)
+          .val(response.tenant_info.payment_due_in_days);
+        $("[data-profile=late_fee_percentage]")
+          .text(response.tenant_info.late_fee_percentage)
+          .val(response.tenant_info.late_fee_percentage);
         $("[data-profile=move_out_date]")
           .text(formatDateNoTime(response.tenant_info.move_out_date))
           .val(response.tenant_info.move_out_date);
