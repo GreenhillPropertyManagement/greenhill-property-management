@@ -704,22 +704,36 @@ function loadLandlordDashboardChart() {
 }
 
 function renderSimpleBarChart(containerSelector, chartData) {
-    // Clear previous chart
+    // Clear chart container and insert canvas
     $(containerSelector).html('<canvas></canvas>');
     const ctx = $(containerSelector).find("canvas")[0].getContext("2d");
 
     const totalPayments = chartData.paymentData.reduce((sum, val) => sum + val, 0);
     const totalExpenses = chartData.expenseData.reduce((sum, val) => sum + val, 0);
 
+    const labels = ["Payments", "Expenses"];
+    const data = [totalPayments, totalExpenses];
+
+    const backgroundColors = [
+        "rgba(75, 192, 192, 0.5)",   // Payments
+        "rgba(255, 99, 132, 0.5)"    // Expenses
+    ];
+    const borderColors = [
+        "rgba(75, 192, 192, 1)",
+        "rgba(255, 99, 132, 1)"
+    ];
+
     const chart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: ["Payments", "Expenses"],
+            labels: labels,
             datasets: [{
-                data: [totalPayments, totalExpenses],
-                backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
-                borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
-                borderWidth: 1
+                label: "Transactions",
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1,
+                yAxisID: "y-axis-expenses"  // Attach to the right y-axis
             }]
         },
         options: {
@@ -728,56 +742,44 @@ function renderSimpleBarChart(containerSelector, chartData) {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'right',
+                    position: 'bottom',
                     labels: {
-                        generateLabels: function (chart) {
-                            const values = chart.data.datasets[0].data;
-                            return [
-                                {
-                                    text: `Payments: $${values[0].toLocaleString()}`,
-                                    fillStyle: chart.data.datasets[0].backgroundColor[0],
-                                    strokeStyle: chart.data.datasets[0].borderColor[0],
-                                    lineWidth: 1,
-                                    index: 0
-                                },
-                                {
-                                    text: `Expenses: $${values[1].toLocaleString()}`,
-                                    fillStyle: chart.data.datasets[0].backgroundColor[1],
-                                    strokeStyle: chart.data.datasets[0].borderColor[1],
-                                    lineWidth: 1,
-                                    index: 1
-                                }
-                            ];
-                        }
+                        usePointStyle: true
                     }
                 },
                 tooltip: {
                     callbacks: {
-                        label: function (context) {
-                            const label = context.label || "";
-                            const value = context.raw || 0;
-                            return `${label}: $${value.toLocaleString()}`;
+                        label: function(context) {
+                            return `${context.label}: $${context.raw.toLocaleString()}`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    ticks: { display: false },
+                    ticks: {
+                        display: true // Show "Payments" and "Expenses"
+                    },
                     grid: { display: false }
                 },
                 y: {
+                    display: false // Hide left axis completely
+                },
+                "y-axis-expenses": {
+                    position: "right",
                     beginAtZero: true,
                     ticks: {
-                        callback: function (value) {
-                            return `$${value.toLocaleString()}`;
+                        callback: function(value) {
+                            return "$" + value.toLocaleString();
                         }
+                    },
+                    grid: {
+                        drawOnChartArea: true // Show grid lines for reference
                     }
                 }
             }
         }
     });
 
-    // Optional resize trigger
     setTimeout(() => chart.resize(), 100);
 }
