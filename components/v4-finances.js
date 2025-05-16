@@ -354,9 +354,9 @@ function populateTransactionsTable(response, transactionType) {
         <th>Date</th>
         <th>Name</th>
         <th>Street</th>
-        <th>Unit</th>
-        <th>Type</th>
-        ${showCodeColumn ? "<th>Code</th>" : ""}
+        <th class="narrow-col">Unit</th>
+        <th class="narrow-col">Type</th>
+        ${showCodeColumn ? '<th class="narrow-col">Code</th>' : ""}
         <th>Description</th>
         <th>Amount</th>
     `;
@@ -407,9 +407,9 @@ function populateTransactionsTable(response, transactionType) {
             <td>${formatTransDate(transaction.transaction_date)}</td>
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
-            <td>${transaction.unit_name || "N/A"}</td>
-            <td>${transactionTypeText}</td>
-            ${showCodeColumn ? `<td>${code}</td>` : ""}
+            <td class="narrow-col">${transaction.unit_name || "N/A"}</td>
+            <td class="narrow-col">${transactionTypeText}</td>
+            ${showCodeColumn ? `<td class="narrow-col">${code}</td>` : ""}
             <td>${transactionDescription}</td>
             <td>${formattedAmount}</td>
         `;
