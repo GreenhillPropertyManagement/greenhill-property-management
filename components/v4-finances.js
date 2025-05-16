@@ -41,18 +41,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // When #finance is clicked, show it as the active tab and trigger hidden logic
-    $(document).on("click", "#finance", function (e) {
-        e.preventDefault(); // Stop Webflow/tab default behavior
-    
-        // Manually add active styles to the #finance button only
-        $(".main-tabs__button").removeClass("active-tab w--current");
-        $(this).addClass("active-tab w--current");
-    
-        // Trigger the hidden tab logic handler
-        $('[api="finance-v4"]').trigger("click");
-    });
-    
 
     /* Click handler for Generating Arrears Reports */
     $(document).off('click', '[api-button="arrears-report"]');
