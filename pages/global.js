@@ -289,41 +289,43 @@ function authUser() {
 }
 
 function urlRouting() {
-  
-
-  /* This function updates the url, and saves the current page of the user as they browse */
-
   // get all the nav links
-  let navLinks = Array.from(
-    document.getElementsByClassName("main-tabs__button")
-  ); //create an array to get all nav links
+  let navLinks = Array.from(document.getElementsByClassName("main-tabs__button"));
 
-  // loop through each nav item
   navLinks.forEach((navLink) => {
-    let navLinkId = navLink.id; // store the id of each nav link
+    let navLinkId = navLink.id;
 
-    // click handler for nav links...
     navLink.addEventListener("click", (e) => {
-      let adminPath = "/app/" + navLinkId; // add "/admin/" before the nav link ID
-      history.pushState(navLinkId, null, adminPath); // log the click history of each nav link
-      localStorage.setItem("pageId", navLinkId); // update page id storage
+      let adminPath = "/app/" + navLinkId;
+      history.pushState(navLinkId, null, adminPath);
+      localStorage.setItem("pageId", navLinkId);
       $(".main-tabs__button").removeClass("active-tab");
-      $(navLink).addClass("active-tab"); // Use `navLink` instead of `this` to add the active class
+      $(navLink).addClass("active-tab");
     });
   });
 
-  /* monitor user click history pop state */
-
   window.addEventListener("popstate", function (event) {
-    var path = window.location.pathname; // store the current URL path
+    const path = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    const state = event.state;
 
-    // click on the corresponding view every back button click
-    var view = event.state; // store the state in a 'view'
-
-    if (view) {
-      // If there's a state, update pageId in local storage
-      localStorage.setItem("pageId", view);
-      $("#" + view).click(); // click on the corresponding view on state change
+    if (path.includes("/app/property")) {
+      localStorage.setItem("pageId", "property");
+      localStorage.setItem("pageRefreshParam", id);
+      $("#property").click();
+    } else if (path.includes("/app/unit")) {
+      localStorage.setItem("pageId", "unit");
+      localStorage.setItem("pageRefreshParam", id);
+      $("#unit").click();
+    } else if (path.includes("/app/profile")) {
+      localStorage.setItem("pageId", "profile");
+      localStorage.setItem("pageRefreshParam", id);
+      $("#profile").click();
+    } else if (state) {
+      localStorage.setItem("pageId", state);
+      localStorage.removeItem("pageRefreshParam"); // clear old ID
+      $("#" + state).click();
     }
   });
 }
