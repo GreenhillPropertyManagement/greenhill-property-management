@@ -249,6 +249,13 @@ function initializeApp() {
   .on('click', '[api-button="new-task"]', function (e) {
     e.preventDefault();
     createTask();
+
+    if (localStorage.getItem("pageId") === "unit") {
+      $("#unit-overview-bttn").trigger("click");
+    } else if (localStorage.getItem("pageId") === "unit") {
+      $('[profile-tab-button=overview]').trigger("click");
+    }
+    
   });
       
 }
