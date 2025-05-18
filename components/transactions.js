@@ -621,20 +621,22 @@ function loadUserTransactions(view, type) {
           </div>
         `;
 
-          const $html = $(html);
+        const $html = $(html);
 
-          // Only bind click handler and show pointer cursor if editPermissions is true
-          if (localStorage.getItem("editPermissions") === "true") {
-            $html.css("cursor", "pointer");
-            $html.off("click").on("click", function () {
-              updateUserTransaction(transactionId, frequency);
-            });
-          } else {
-            $html.css("cursor", "default"); // make it not look clickable
-            $html.off("click"); // ensure no stray clicks
-          }
+        // If user has edit permissions, enable interaction
+        if (localStorage.getItem("editPermissions") === "true") {
+          $html.css("cursor", "pointer");
+          $html.css("pointer-events", "auto");
+          $html.off("click").on("click", function () {
+            updateUserTransaction(transactionId, frequency);
+          });
+        } else {
+          // Fully disable interaction
+          $html.css("cursor", "default");
+          $html.css("pointer-events", "none");
+        }
 
-          $(".dyn-container__transactions:visible").append($html);
+        $(".dyn-container__transactions:visible").append($html);
       });
     },
 
