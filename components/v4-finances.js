@@ -749,11 +749,6 @@ function generateArrearsReport() {
         alert("Generating your arrears report. Please do not refresh the page.");
         fetchArrearsReport(statement_id); // Reuse your fetch function if compatible
       },
-      complete: function () {
-        if (localStorage.getItem("pageId") === "unit") {
-            $("#unit-overview-bttn").trigger("click");
-        }
-      },
       error: function(xhr, status, error) {
         console.error('Error generating arrears report:', error);
         alert('Error generating arrears report. Please try again.');
@@ -791,6 +786,12 @@ function fetchArrearsReport(statementId) {
                     $('.loader').hide();
                 } else {
                     attempts++;
+                }
+            },
+            complete: function () {
+
+                if (localStorage.getItem("pageId") === "unit") {
+                    $("#unit-overview-bttn").trigger("click");
                 }
             },
             error: function() {
