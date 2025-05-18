@@ -621,15 +621,20 @@ function loadUserTransactions(view, type) {
           </div>
         `;
 
-        const $html = $(html);
-        $(".dyn-container__transactions:visible").append($html);
+          const $html = $(html);
 
-        // Conditionally bind click handler if editPermissions is true
-        if (localStorage.getItem("editPermissions") === "true") {
-          $html.off("click").on("click", function () {
-            updateUserTransaction(transactionId, frequency);
-          });
-        }
+          // Only bind click handler and show pointer cursor if editPermissions is true
+          if (localStorage.getItem("editPermissions") === "true") {
+            $html.css("cursor", "pointer");
+            $html.off("click").on("click", function () {
+              updateUserTransaction(transactionId, frequency);
+            });
+          } else {
+            $html.css("cursor", "default"); // make it not look clickable
+            $html.off("click"); // ensure no stray clicks
+          }
+
+          $(".dyn-container__transactions:visible").append($html);
       });
     },
 
