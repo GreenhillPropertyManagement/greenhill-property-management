@@ -287,7 +287,27 @@ function loadPropertyTransactions(type) {
           </div>
         `;
 
-        $container.append(html);
+        const $html = $(html);
+
+        // Conditionally bind click if editPermissions is true
+        if (localStorage.getItem("editPermissions") === "true") {
+          $html.css({
+            cursor: "pointer",
+            "pointer-events": "auto"
+          });
+
+          $html.off("click").on("click", function () {
+            updatePropertyTransaction(id, frequency); // or whatever your handler is
+          });
+
+        } else {
+          $html.css({
+            cursor: "default",
+            "pointer-events": "none"
+          });
+        }
+
+        $container.append($html);
       });
     },
     complete: function () {
