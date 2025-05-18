@@ -623,6 +623,13 @@ function loadUserTransactions(view, type) {
 
         const $html = $(html);
         $(".dyn-container__transactions:visible").append($html);
+
+        // Conditionally bind click handler if editPermissions is true
+        if (localStorage.getItem("editPermissions") === "true") {
+          $html.off("click").on("click", function () {
+            updateUserTransaction(transactionId, frequency);
+          });
+        }
       });
     },
 
