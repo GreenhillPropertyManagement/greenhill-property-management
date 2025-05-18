@@ -252,10 +252,10 @@ function initializeApp() {
 
     if (localStorage.getItem("pageId") === "unit") {
       $("#unit-overview-bttn").trigger("click");
-    } else if (localStorage.getItem("pageId") === "unit") {
+    } else if (localStorage.getItem("pageId") === "profile") {
       $('[profile-tab-button=overview]').trigger("click");
     }
-    
+
   });
       
 }
