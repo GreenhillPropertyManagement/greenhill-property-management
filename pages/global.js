@@ -289,7 +289,7 @@ function authUser() {
 }
 
 function urlRouting() {
-  // get all the nav links
+  // Get all main nav links
   let navLinks = Array.from(document.getElementsByClassName("main-tabs__button"));
 
   navLinks.forEach((navLink) => {
@@ -304,27 +304,29 @@ function urlRouting() {
     });
   });
 
+  // Handle browser back/forward buttons
   window.addEventListener("popstate", function (event) {
     const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
     const state = event.state;
 
-    if (path.includes("/app/property")) {
+    if (path.includes("/app/property") && id) {
       localStorage.setItem("pageId", "property");
       localStorage.setItem("pageRefreshParam", id);
       $("#property").click();
-    } else if (path.includes("/app/unit")) {
+    } else if (path.includes("/app/unit") && id) {
       localStorage.setItem("pageId", "unit");
       localStorage.setItem("pageRefreshParam", id);
       $("#unit").click();
-    } else if (path.includes("/app/profile")) {
+    } else if (path.includes("/app/profile") && id) {
       localStorage.setItem("pageId", "profile");
       localStorage.setItem("pageRefreshParam", id);
       $("#profile").click();
     } else if (state) {
+      // Handle main nav tabs (e.g. dashboard, finance)
       localStorage.setItem("pageId", state);
-      localStorage.removeItem("pageRefreshParam"); // clear old ID
+      localStorage.removeItem("pageRefreshParam"); // clear stale property/unit/profile ID
       $("#" + state).click();
     }
   });
