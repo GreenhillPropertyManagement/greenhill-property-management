@@ -125,6 +125,32 @@ function initializeApp() {
       });
     }
 
+      /* Bulk Clear Maintenance Notifications when user clicks maintenance tab */
+      $("#maintenance").on("click", function () {
+      let $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
+      let $counter = $("[data-api='notification-count']");
+      let $maintenanceCounter = $("[data-api='maintenance-counter']");
+
+      $workOrderNotifications.each(function () {
+          const $el = $(this);
+          const notificationId = $el.attr("data-id");
+
+          markNotificationAsSeen(notificationId); // Reuse your existing function
+          $el.remove(); // Remove the notification from the dropdown
+      });
+
+      // Update notification counter
+      let remainingNotifications = $(".notification__item-wrapper").length;
+      if (remainingNotifications === 0) {
+          $counter.hide();
+      } else {
+          $counter.text(remainingNotifications).show();
+      }
+
+      // Hide maintenance counter since all work orders are now marked as seen
+      $maintenanceCounter.hide();
+      });
+
 
   });
 
