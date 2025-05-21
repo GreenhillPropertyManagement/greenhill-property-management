@@ -29,8 +29,9 @@ steps: [
   {
     element: document.getElementById('tenant-dashboard-header'),
     intro: `
-      <h2 class="intro-heading">Get To Know Your Dashboard</h2>
-      <p class="intro-subheading">We’ll show you around and help you get comfortable.</p>
+      <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/6566c4276cfe72177e7df971_256.png" class="intro-img" alt="Intro Icon" />
+      <h2 class="intro-heading">Welcome to Your Dashboard</h2>
+      <p class="intro-subheading">We’ll take 30 seconds to show you around and help you get comfortable.</p>
     `,
     position: 'bottom'
   },
