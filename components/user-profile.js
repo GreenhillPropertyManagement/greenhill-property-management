@@ -269,18 +269,19 @@ function loadUserProfile(user) {
         $('#edit_permissions').prop('checked', response.landlord_info.edit_permissions);
       }
 
-      /* ------ Listen for click handler from legal notification (to click legal tab) ---*/
-
+      /* legal tab click if page is loading from notifications */
       if (localStorage.getItem("triggerLegalClick") === "true") {
-          const roleText = $('[data-profile="user_role"]').text().trim();
+          setTimeout(function () {
+              const roleText = $('[data-profile="user_role"]').text().trim();
 
-          if (roleText === "Landlord") {
-              $('[api-button="get-legal-case-landlord"]').trigger("click");
-          } else if (roleText === "Tenant") {
-              $('[api-button="get-legal-case-tenant"]').trigger("click");
-          }
+              if (roleText === "Landlord") {
+                  $('[api-button="get-legal-case-landlord"]').trigger("click");
+              } else if (roleText === "Tenant") {
+                  $('[api-button="get-legal-case-tenant"]').trigger("click");
+              }
 
-          localStorage.removeItem("triggerLegalClick");
+              localStorage.removeItem("triggerLegalClick");
+          }, 300); // Adjust delay as needed
       }
 
       /* --------Bind Global User Data------------ */
