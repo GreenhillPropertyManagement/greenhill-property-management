@@ -821,9 +821,13 @@ function createTask() {
 
 function clearAllWorkOrderNotifications() {
     const $workOrders = $(".notification__item-wrapper[data-type='work-order']");
-    if ($workOrders.length === 0) return;
+    const $mainCounter = $("[data-api='notification-count']");
+    const $maintenanceCounter = $("[data-api='maintenance-counter']");
+    const totalWorkOrders = $workOrders.length;
 
-    console.log("Clearing", $workOrders.length, "work-order notifications");
+    if (totalWorkOrders === 0) return;
+
+    console.log("Clearing", totalWorkOrders, "work-order notifications");
 
     let idsToClear = [];
 
@@ -834,16 +838,27 @@ function clearAllWorkOrderNotifications() {
         $el.remove(); // Remove from DOM
     });
 
-    // Call markNotificationAsSeen for all IDs
     idsToClear.forEach(id => markNotificationAsSeen(id));
 
-    // DOM updated, now recalculate counters
+    // Delay for DOM to update before recalculating
     setTimeout(() => {
-        updateNotificationAndMaintenanceCounters();
+        const remaining = $(".notification__item-wrapper").length;
+        const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
+
+        // Update counters directly
+        if (remaining > 0) {
+            $mainCounter.text(remaining).css("display", "flex");
+        } else {
+            $mainCounter.css("display", "none");
+        }
+
+        if (remainingWorkOrders > 0) {
+            $maintenanceCounter.text(remainingWorkOrders).css("display", "flex");
+        } else {
+            $maintenanceCounter.css("display", "none");
+        }
 
         const $wrapper = $("#notification-list");
-        const remaining = $(".notification__item-wrapper").length;
-
         if (remaining === 0 && $wrapper.css("display") === "block") {
             $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
         }
