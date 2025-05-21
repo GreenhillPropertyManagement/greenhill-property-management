@@ -248,7 +248,7 @@ function editCategory(categoryId, categoryTitle){
       category_id: categoryId
     },
     success: function (response) {
-      alert('Success! Category Updated');
+      showToast('Success! Category Updated');
       $('.modal__block').hide();
 
     },
@@ -312,9 +312,9 @@ function createWorkOrder () {
       contentType: 'application/json', // Set the content type to JSON
       success: function (response) {
 
-        alert('Success! Work Order Created');
+      
         $('.loader').hide();
-
+        showToast('Success! Work Order Created');
         // reset the form
         $("#new-work-order-form")[0].reset();
 
@@ -405,7 +405,7 @@ function updateWorkOrder() {
     success: function (response) {
       
       $('.modal__block').hide();
-      alert('Success! Work Order Updated!');
+      showToast('Success! Work Order Updated!');
 
     },
     complete: function() {
