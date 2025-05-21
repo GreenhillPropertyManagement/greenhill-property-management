@@ -829,25 +829,27 @@ function clearAllWorkOrderNotifications() {
 
     console.log("Clearing", totalWorkOrders, "work-order notifications");
 
-    let idsToClear = [];
-
+    // Remove work-orders from DOM and mark as seen
+    let clearedCount = 0;
     $workOrders.each(function () {
         const $el = $(this);
         const notificationId = $el.attr("data-id");
-        idsToClear.push(notificationId);
-        $el.remove(); // Remove from DOM
+        markNotificationAsSeen(notificationId);
+        $el.remove();
+        clearedCount++;
     });
 
-    idsToClear.forEach(id => markNotificationAsSeen(id));
-
-    // Delay for DOM to update before recalculating
+    // Update counters
     setTimeout(() => {
-        const remaining = $(".notification__item-wrapper").length;
+        const remainingItems = $(".notification__item-wrapper").length;
         const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
 
-        // Update counters directly
-        if (remaining > 0) {
-            $mainCounter.text(remaining).css("display", "flex");
+        // Subtract cleared from previous count if still stuck
+        const currentMainCount = parseInt($mainCounter.text()) || 0;
+        const newMainCount = Math.max(currentMainCount - clearedCount, 0);
+
+        if (newMainCount > 0) {
+            $mainCounter.text(newMainCount).css("display", "flex");
         } else {
             $mainCounter.css("display", "none");
         }
@@ -859,7 +861,7 @@ function clearAllWorkOrderNotifications() {
         }
 
         const $wrapper = $("#notification-list");
-        if (remaining === 0 && $wrapper.css("display") === "block") {
+        if (remainingItems === 0 && $wrapper.css("display") === "block") {
             $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
         }
     }, 0);
