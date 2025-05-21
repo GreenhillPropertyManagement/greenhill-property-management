@@ -124,32 +124,33 @@ function initializeApp() {
           }
       });
     }
+    // bulk clear work-order notifications 
+    $("#maintenance").on("click", function () {
+        const $counter = $("[data-api='notification-count']");
+        const $maintenanceCounter = $("[data-api='maintenance-counter']");
+        const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
 
-      /* Bulk Clear Maintenance Notifications when user clicks maintenance tab */
-      $("#maintenance").on("click", function () {
-      let $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
-      let $counter = $("[data-api='notification-count']");
-      let $maintenanceCounter = $("[data-api='maintenance-counter']");
+        // Mark each work-order notification as seen and remove from dropdown
+        $workOrderNotifications.each(function () {
+            const $el = $(this);
+            const notificationId = $el.attr("data-id");
 
-      $workOrderNotifications.each(function () {
-          const $el = $(this);
-          const notificationId = $el.attr("data-id");
+            markNotificationAsSeen(notificationId); // Send to backend
+            $el.remove(); // Remove from dropdown
+        });
 
-          markNotificationAsSeen(notificationId); // Reuse your existing function
-          $el.remove(); // Remove the notification from the dropdown
-      });
+        // Recalculate remaining notifications
+        const remainingNotifications = $(".notification__item-wrapper").length;
 
-      // Update notification counter
-      let remainingNotifications = $(".notification__item-wrapper").length;
-      if (remainingNotifications === 0) {
-          $counter.hide();
-      } else {
-          $counter.text(remainingNotifications).show();
-      }
+        if (remainingNotifications === 0) {
+            $counter.hide();
+        } else {
+            $counter.text(remainingNotifications).show();
+        }
 
-      // Hide maintenance counter since all work orders are now marked as seen
-      $maintenanceCounter.hide();
-      });
+        // Hide the small work-order bubble
+        $maintenanceCounter.hide();
+    });
 
 
   });
