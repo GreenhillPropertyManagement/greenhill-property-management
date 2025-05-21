@@ -28,7 +28,10 @@ intro.setOptions({
 steps: [
   {
     element: document.getElementById('tenant-dashboard-header'),
-    intro: 'Welcome to your tenant dashboard.',
+    intro: `
+      <h2 class="intro-heading">Get To Know Your Dashboard</h2>
+      <p class="intro-subheading">We’ll show you around and help you get comfortable.</p>
+    `,
     position: 'bottom'
   },
   {
