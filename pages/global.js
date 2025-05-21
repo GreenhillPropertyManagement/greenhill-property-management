@@ -647,7 +647,11 @@ function updateNotifications(notifications) {
 
     // Set initial counter states (on page load)
     const currentCount = $(".notification__item-wrapper").length;
-    $counter.text(currentCount).css("display", currentCount > 0 ? "flex" : "none");
+    if (currentCount > 0) {
+      $counter.text(currentCount).css("display", "flex !important");
+    } else {
+      $counter.css("display", "none !important");
+    }
     $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
 }
 
