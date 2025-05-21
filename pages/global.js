@@ -849,17 +849,16 @@ function updateNotificationAndMaintenanceCounters() {
     const remaining = $(".notification__item-wrapper").length;
     const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
 
-    // Always update the text
-    $counter.text(remaining);
+    // Top-right notification counter (only show if > 0)
     if (remaining > 0) {
-        $counter.css("display", "flex");
+        $counter.text(remaining).css("display", "flex");
     } else {
         $counter.css("display", "none");
     }
 
-    $maintenanceCounter.text(remainingWorkOrders);
+    // Maintenance tab counter (only show if > 0)
     if (remainingWorkOrders > 0) {
-        $maintenanceCounter.css("display", "flex");
+        $maintenanceCounter.text(remainingWorkOrders).css("display", "flex");
     } else {
         $maintenanceCounter.css("display", "none");
     }
