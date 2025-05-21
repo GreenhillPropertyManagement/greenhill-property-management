@@ -583,115 +583,74 @@
     });
   }
 
-  function updateNotifications(notifications) {
+function updateNotifications(notifications) {
+    const $counter = $("[data-api='notification-count']");
+    const $maintenanceCounter = $("[data-api='maintenance-counter']");
+    const $wrapper = $("#notification-list");
 
-    let $counter = $("[data-api='notification-count']");
-    let $maintenanceCounter = $("[data-api='maintenance-counter']");
-    let $wrapper = document.getElementById("notification-list");
+    $wrapper.html(""); // Clear old notifications
 
-    $wrapper.innerHTML = ""; // Clear old notifications
-
-    let workOrderCount = 0; // Track "work-order" notifications
+    let workOrderCount = 0;
 
     notifications.forEach(notification => {
-        let notificationId = notification.id;
-        let timestamp = notification.activity_record.created_at;
-        let formattedTimestamp = formatDateToLocalTimezone(timestamp);
-        let description = notification.activity_record.description;
-        let notificationType = notification.type;
+        const { id, type, user_id, activity_record } = notification;
+        const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
+        const description = activity_record.description;
 
-        // ✅ Count "work-order" notifications
-        if (notificationType === "work-order") {
-            //$maintenanceCounter.css("display","flex");
+        // Count work-orders
+        if (type === "work-order") {
             workOrderCount++;
         }
 
-        let notificationItem = document.createElement("div");
-        notificationItem.classList.add("notification__item-wrapper");
-        notificationItem.setAttribute("data-id", notificationId);
-        notificationItem.setAttribute("data-type", notificationType);
-        notificationItem.innerHTML = `
-            <div class="notification__item__text">${description}</div>
-            <div class="notification__timestamp">${formattedTimestamp}</div>
-        `;
+        const $item = $(`
+            <div class="notification__item-wrapper" data-id="${id}" data-type="${type}">
+                <div class="notification__item__text">${description}</div>
+                <div class="notification__timestamp">${formattedTimestamp}</div>
+            </div>
+        `);
 
-        // Attach click event to mark notification as seen and trigger logic based on user role
-        notificationItem.addEventListener("click", function () {
-            let userRole = localStorage.getItem("userRole"); // Get user role from localStorage
-            
-            // Handle different click actions based on notification type and userRole
-            if (notificationType === "transaction" && userRole === "Tenant") {
-                document.getElementById("pay-rent").click(); 
-            }
-            if (notificationType === "transaction" && userRole === "Landlord") {
-                document.getElementById("finance").click(); 
-            }
-            if (notificationType === "work-order") {
+        $item.on("click", function () {
+            if (type === "work-order") {
                 clearAllWorkOrderNotifications(); // mark all as seen & update counters
                 document.getElementById("maintenance").click(); // switch to Maintenance tab
+                return;
             }
-            if (notificationType === "legal") {
-                const userId = notification.user_id;
 
-                // Mark as seen first
-                markNotificationAsSeen(notificationId);
+            if (type === "transaction") {
+                const userRole = localStorage.getItem("userRole");
+                if (userRole === "Tenant") {
+                    document.getElementById("pay-rent").click();
+                } else if (userRole === "Landlord") {
+                    document.getElementById("finance").click();
+                }
+            }
 
-                // Add delay to ensure it fires before redirect
+            if (type === "legal") {
+                markNotificationAsSeen(id);
                 setTimeout(() => {
                     localStorage.setItem("triggerLegalClick", "true");
-                    window.location.href = `https://www.greenhillpropertymgmt.com/app/profile?id=${userId}`;
-                }, 150); // Small delay to ensure XHR is sent
-                return; // prevent the rest of the click handler from running
+                    window.location.href = `/app/profile?id=${user_id}`;
+                }, 150);
+                return;
             }
 
-            // Mark as seen and update UI
-            markNotificationAsSeen(notificationId);
-            this.style.opacity = "0";
-            setTimeout(() => {
-                this.remove(); // Remove from DOM
-                
-                // Update counter dynamically
-                let remainingNotifications = document.querySelectorAll(".notification__item-wrapper").length;
-                
-                // Update maintenance counter dynamically
-                if (notificationType === "work-order") {
-                    workOrderCount--;
-                }
-
-                // Hide or update maintenance counter
-                if (workOrderCount > 0) {
-                    $maintenanceCounter.text(workOrderCount).css("display", "flex");
-                } else {
-                    $maintenanceCounter.css("display", "none");
-                }
-
-                if (remainingNotifications === 0) {
-                    $counter.css("display", "none");
-                } else {
-                    $counter.text(remainingNotifications).css("display", "flex");
-                }
-            }, 300);
+            // fallback: mark as seen + remove
+            markNotificationAsSeen(id);
+            $(this).fadeOut(200, function () {
+                $(this).remove();
+                updateNotificationAndMaintenanceCounters(); // make sure both counters reflect real-time state
+            });
         });
 
-        $wrapper.appendChild(notificationItem);
+        $wrapper.append($item);
     });
 
-    // Update notification counter visibility
-    if (notifications.length === 0) {
-        $counter.css("display", "none");
-    } else {
-        $counter.text(notifications.length).css("display", "flex");
-    }
+    // Set initial counter states (on page load)
+    $counter.text(notifications.length).css("display", notifications.length ? "flex" : "none");
+    $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
+}
 
-    // Show or hide maintenance counter based on work-order notifications
-    if (workOrderCount === 0) {
-        $maintenanceCounter.css("display", "none");
-    } else {
-        $maintenanceCounter.text(workOrderCount).css("display", "flex");
-    }
-  }
-
-  function markNotificationAsSeen(notificationId) {
+function markNotificationAsSeen(notificationId) {
     $.ajax({
         url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification",
         method: "POST",
@@ -707,9 +666,9 @@
             console.error("Error marking notification as seen:", error);
         }
     });
-  }
+}
 
-  function updateNotificationCounter(change) {
+function updateNotificationCounter(change) {
     let $counter = $("[data-api='notification-count']");
     let currentCount = parseInt($counter.text()) || 0;
     let newCount = Math.max(currentCount + change, 0); // Prevent negative count
@@ -719,9 +678,9 @@
     } else {
         $counter.hide();
     }
-  }
+}
 
-  function createTask() {
+function createTask() {
 
     // load user to assign task to 
 
@@ -857,42 +816,39 @@
       });
     });
 
-  }
+}
 
-  function clearAllWorkOrderNotifications() {
-      const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
-      const totalToClear = $workOrderNotifications.length;
+function clearAllWorkOrderNotifications() {
+    const $workOrders = $(".notification__item-wrapper[data-type='work-order']");
+    if ($workOrders.length === 0) return;
 
-      if (totalToClear === 0) return;
+    console.log("Clearing", $workOrders.length, "work-order notifications");
 
-      console.log("Clearing", totalToClear, "work-order notifications");
+    $workOrders.each(function () {
+        const notificationId = $(this).attr("data-id");
+        markNotificationAsSeen(notificationId);
+        $(this).remove();
+    });
 
-      $workOrderNotifications.each(function () {
-          const $el = $(this);
-          const notificationId = $el.attr("data-id");
+    // Delay to allow DOM changes to apply before counting
+    setTimeout(() => {
+        updateNotificationAndMaintenanceCounters();
 
-          markNotificationAsSeen(notificationId);
-          $el.remove();
-      });
+        const $wrapper = $("#notification-list");
+        const remaining = $(".notification__item-wrapper").length;
 
-      // DOM update after removals
-      setTimeout(() => {
-          const $mainCounter = $("[data-api='notification-count']");
-          const remaining = $(".notification__item-wrapper").length;
+        if (remaining === 0 && $wrapper.css("display") === "block") {
+            $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
+        }
+    }, 0);
+}
 
-          if (remaining > 0) {
-              $mainCounter.text(remaining).css("display", "flex");
-          } else {
-              $mainCounter.css("display", "none");
-          }
+function updateNotificationAndMaintenanceCounters() {
+    const $counter = $("[data-api='notification-count']");
+    const $maintenanceCounter = $("[data-api='maintenance-counter']");
+    const remaining = $(".notification__item-wrapper").length;
+    const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
 
-          // Hide maintenance tab bubble
-          $("[data-api='maintenance-counter']").hide();
-
-          // Show empty message if dropdown is open and list is empty
-          const $wrapper = $("#notification-list");
-          if (remaining === 0 && $wrapper.css("display") === "block") {
-              $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
-          }
-      }, 0);
-  }
+    $counter.text(remaining).css("display", remaining ? "flex" : "none");
+    $maintenanceCounter.text(remainingWorkOrders).css("display", remainingWorkOrders ? "flex" : "none");
+}
