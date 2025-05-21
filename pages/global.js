@@ -825,13 +825,19 @@ function clearAllWorkOrderNotifications() {
 
     console.log("Clearing", $workOrders.length, "work-order notifications");
 
+    let idsToClear = [];
+
     $workOrders.each(function () {
-        const notificationId = $(this).attr("data-id");
-        markNotificationAsSeen(notificationId);
-        $(this).remove();
+        const $el = $(this);
+        const notificationId = $el.attr("data-id");
+        idsToClear.push(notificationId);
+        $el.remove(); // Remove from DOM
     });
 
-    // Delay to allow DOM changes to apply before counting
+    // Call markNotificationAsSeen for all IDs
+    idsToClear.forEach(id => markNotificationAsSeen(id));
+
+    // DOM updated, now recalculate counters
     setTimeout(() => {
         updateNotificationAndMaintenanceCounters();
 
