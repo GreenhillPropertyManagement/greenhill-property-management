@@ -548,22 +548,31 @@
     return `${formattedDate} ${formattedTime}`;
   }
 
-  function fetchNotifications() {
-    $.ajax({
-        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
-        method: "GET",
-        dataType: "json",
-        headers: {
-          Authorization: "Bearer " + localStorage.authToken,
-        },
-        success: function(response) {
-            updateNotifications(response);
-        },
-        error: function(xhr, status, error) {
-            console.error("Error fetching notifications:", error);
-        }
-    });
-  }
+function fetchNotifications() {
+  $.ajax({
+    url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
+    method: "GET",
+    dataType: "json",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    success: function(response) {
+      const $counter = $("[data-api='notification-count']");
+
+      // Top-right counter visibility
+      if (response.length > 0) {
+        $counter.text(response.length).css("display", "flex");
+      } else {
+        $counter.text("").css("display", "none");
+      }
+
+      updateNotifications(response); // Still update the dropdown content
+    },
+    error: function(xhr, status, error) {
+      console.error("Error fetching notifications:", error);
+    }
+  });
+}
 
   function setupCustomDropdown() {
     const toggleButton = document.getElementById("notification-toggle");
@@ -646,8 +655,6 @@ function updateNotifications(notifications) {
     });
 
     // Set initial counter states (on page load)
-    const currentCount = $(".notification__item-wrapper").length;
-    $counter.text(currentCount).css("display", currentCount > 0 ? "flex" : "none");
     $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
 }
 
