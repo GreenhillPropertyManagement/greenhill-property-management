@@ -140,25 +140,7 @@ function initializeApp() {
 
   /* maintnenace tab button clear notifications */
   $("#maintenance").on("click", function () {
-      const $maintenanceCounter = $("[data-api='maintenance-counter']");
-      const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
-
-      console.log("Maintenance clicked. Found", $workOrderNotifications.length, "work orders.");
-
-      $workOrderNotifications.each(function () {
-          const $el = $(this);
-          const notificationId = $el.attr("data-id");
-
-          console.log("Marking as seen:", notificationId);
-          markNotificationAsSeen(notificationId);
-          $el.remove();
-      });
-
-      // ✅ Update notification count based on how many were removed
-      const clearedCount = $workOrderNotifications.length;
-      updateNotificationCounter(-clearedCount);
-
-      $maintenanceCounter.hide();
+      clearAllWorkOrderNotifications();
   });
 
   /* ---- Modal Functionality ----- */
@@ -642,7 +624,8 @@ function updateNotifications(notifications) {
               document.getElementById("finance").click(); 
           }
           if (notificationType === "work-order") {
-              document.getElementById("maintenance").click();
+              clearAllWorkOrderNotifications(); // mark all as seen & update counters
+              document.getElementById("maintenance").click(); // switch to Maintenance tab
           }
           if (notificationType === "legal") {
               const userId = notification.user_id;
@@ -875,4 +858,40 @@ function createTask() {
     });
   });
 
+}
+
+function clearAllWorkOrderNotifications() {
+    const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
+    const totalToClear = $workOrderNotifications.length;
+
+    if (totalToClear === 0) return;
+
+    console.log("Clearing", totalToClear, "work-order notifications");
+
+    $workOrderNotifications.each(function () {
+        const $el = $(this);
+        const notificationId = $el.attr("data-id");
+
+        markNotificationAsSeen(notificationId);
+        $el.remove();
+    });
+
+    // ✅ Update top-right notification counter
+    const $mainCounter = $("[data-api='notification-count']");
+    const remaining = $(".notification__item-wrapper").length;
+
+    if (remaining > 0) {
+        $mainCounter.text(remaining).css("display", "flex");
+    } else {
+        $mainCounter.css("display", "none");
+    }
+
+    // ✅ Update maintenance tab bubble
+    $("[data-api='maintenance-counter']").hide();
+
+    // ✅ Optional: Show “all caught up” message if dropdown is open and now empty
+    const $wrapper = $("#notification-list");
+    if (remaining === 0 && $wrapper.css("display") === "block") {
+        $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
+    }
 }
