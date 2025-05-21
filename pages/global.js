@@ -154,16 +154,9 @@ function initializeApp() {
           $el.remove();
       });
 
-      // ✅ Updated notification count logic
-      const $counter = $("[data-api='notification-count']");
-      const remainingNotifications = $(".notification__item-wrapper").length;
-
-      if (remainingNotifications > 0) {
-          $counter.text(remainingNotifications);
-          $counter.css("display", "flex");
-      } else {
-          $counter.css("display", "none");
-      }
+      // ✅ Update notification count based on how many were removed
+      const clearedCount = $workOrderNotifications.length;
+      updateNotificationCounter(-clearedCount);
 
       $maintenanceCounter.hide();
   });
