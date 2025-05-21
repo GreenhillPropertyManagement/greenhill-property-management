@@ -659,10 +659,10 @@
                 }
 
                 // Hide or update maintenance counter
-                if (workOrderCount === 0) {
-                  $maintenanceCounter.css("display", "none");
+                if (workOrderCount > 0) {
+                    $maintenanceCounter.text(workOrderCount).css("display", "flex");
                 } else {
-                  $maintenanceCounter.text(workOrderCount).css("display", "flex");
+                    $maintenanceCounter.css("display", "none");
                 }
 
                 if (remainingNotifications === 0) {
