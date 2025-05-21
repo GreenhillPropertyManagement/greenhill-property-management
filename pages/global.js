@@ -821,50 +821,34 @@ function createTask() {
 
 function clearAllWorkOrderNotifications() {
     const $workOrders = $(".notification__item-wrapper[data-type='work-order']");
-    const $mainCounter = $("[data-api='notification-count']");
-    const $maintenanceCounter = $("[data-api='maintenance-counter']");
-    const totalWorkOrders = $workOrders.length;
+    const $wrapper = $("#notification-list");
 
-    if (totalWorkOrders === 0) return;
+    if ($workOrders.length === 0) return;
 
-    console.log("Clearing", totalWorkOrders, "work-order notifications");
+    console.log("Clearing", $workOrders.length, "work-order notifications");
 
-    // Remove work-orders from DOM and mark as seen
-    let clearedCount = 0;
+    let idsToClear = [];
+
     $workOrders.each(function () {
         const $el = $(this);
         const notificationId = $el.attr("data-id");
-        markNotificationAsSeen(notificationId);
+        idsToClear.push(notificationId);
         $el.remove();
-        clearedCount++;
     });
 
-    // Update counters
+    // Mark all as seen
+    idsToClear.forEach(id => markNotificationAsSeen(id));
+
+    // Re-fetch to ensure counters are accurate
     setTimeout(() => {
-        const remainingItems = $(".notification__item-wrapper").length;
-        const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
+        fetchNotifications(); // ← THIS ensures top-right + maintenance counters are 100% accurate
 
-        // Subtract cleared from previous count if still stuck
-        const currentMainCount = parseInt($mainCounter.text()) || 0;
-        const newMainCount = Math.max(currentMainCount - clearedCount, 0);
-
-        if (newMainCount > 0) {
-            $mainCounter.text(newMainCount).css("display", "flex");
-        } else {
-            $mainCounter.css("display", "none");
-        }
-
-        if (remainingWorkOrders > 0) {
-            $maintenanceCounter.text(remainingWorkOrders).css("display", "flex");
-        } else {
-            $maintenanceCounter.css("display", "none");
-        }
-
-        const $wrapper = $("#notification-list");
-        if (remainingItems === 0 && $wrapper.css("display") === "block") {
+        // If dropdown is open and no notifications remain, show empty state
+        const remaining = $(".notification__item-wrapper").length;
+        if (remaining === 0 && $wrapper.css("display") === "block") {
             $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
         }
-    }, 0);
+    }, 200);
 }
 
 function updateNotificationAndMaintenanceCounters() {
