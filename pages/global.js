@@ -140,7 +140,6 @@ function initializeApp() {
 
   /* maintnenace tab button clear notifications */
   $("#maintenance").on("click", function () {
-      const $counter = $("[data-api='notification-count']");
       const $maintenanceCounter = $("[data-api='maintenance-counter']");
       const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
 
@@ -155,12 +154,15 @@ function initializeApp() {
           $el.remove();
       });
 
+      // ✅ Updated notification count logic
+      const $counter = $("[data-api='notification-count']");
       const remainingNotifications = $(".notification__item-wrapper").length;
 
-      if (remainingNotifications === 0) {
-          $counter.hide();
+      if (remainingNotifications > 0) {
+          $counter.text(remainingNotifications);
+          $counter.css("display", "flex");
       } else {
-          $counter.text(remainingNotifications).show();
+          $counter.css("display", "none");
       }
 
       $maintenanceCounter.hide();
