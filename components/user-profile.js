@@ -272,18 +272,15 @@ function loadUserProfile(user) {
       /* ------ Listen for click handler from legal notification (to click legal tab) ---*/
 
       if (localStorage.getItem("triggerLegalClick") === "true") {
-        const roleEl = document.querySelector('[data-profile="user_role"]');
-        if (roleEl) {
-            const role = roleEl.textContent.trim();
-            if (role === "Landlord") {
-                const btn = document.querySelector('[api-button="get-legal-case-landlord"]');
-                if (btn) btn.click();
-            } else if (role === "Tenant") {
-                const btn = document.querySelector('[api-button="get-legal-case-tenant"]');
-                if (btn) btn.click();
-            }
-        }
-        localStorage.removeItem("triggerLegalClick"); // Clean up after use
+          const roleText = $('[data-profile="user_role"]').text().trim();
+
+          if (roleText === "Landlord") {
+              $('[api-button="get-legal-case-landlord"]').trigger("click");
+          } else if (roleText === "Tenant") {
+              $('[api-button="get-legal-case-tenant"]').trigger("click");
+          }
+
+          localStorage.removeItem("triggerLegalClick");
       }
 
       /* --------Bind Global User Data------------ */
