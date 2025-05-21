@@ -625,6 +625,10 @@ function updateNotifications(notifications) {
           if (notificationType === "work-order") {
               document.getElementById("maintenance").click();
           }
+          if (notificationType === "legal") {
+              const userId = notification.user_id;
+              window.location.href = `https://www.greenhillpropertymgmt.com/app/profile?id=${userId}`;
+          }
 
           // ✅ Mark as seen and update UI
           markNotificationAsSeen(notificationId);
