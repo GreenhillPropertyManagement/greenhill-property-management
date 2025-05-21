@@ -559,14 +559,13 @@ function fetchNotifications() {
     success: function(response) {
       const $counter = $("[data-api='notification-count']");
 
-      // Top-right counter visibility
       if (response.length > 0) {
         $counter.text(response.length).css("display", "flex");
       } else {
-        $counter.text("").css("display", "none");
+        $counter.text("").css("display", "none"); 
       }
 
-      updateNotifications(response); // Still update the dropdown content
+      updateNotifications(response);
     },
     error: function(xhr, status, error) {
       console.error("Error fetching notifications:", error);
