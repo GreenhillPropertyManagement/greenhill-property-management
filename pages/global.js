@@ -879,22 +879,24 @@ function clearAllWorkOrderNotifications() {
         $el.remove();
     });
 
-    // ✅ Update top-right notification counter
-    const $mainCounter = $("[data-api='notification-count']");
-    const remaining = $(".notification__item-wrapper").length;
+    // Delay counter update until DOM has updated
+    setTimeout(() => {
+        const $mainCounter = $("[data-api='notification-count']");
+        const remaining = $(".notification__item-wrapper").length;
 
-    if (remaining > 0) {
-        $mainCounter.text(remaining).css("display", "flex");
-    } else {
-        $mainCounter.css("display", "none");
-    }
+        if (remaining > 0) {
+            $mainCounter.text(remaining).css("display", "flex");
+        } else {
+            $mainCounter.css("display", "none");
+        }
 
-    // ✅ Update maintenance tab bubble
-    $("[data-api='maintenance-counter']").hide();
+        // Update maintenance tab bubble
+        $("[data-api='maintenance-counter']").hide();
 
-    // ✅ Optional: Show “all caught up” message if dropdown is open and now empty
-    const $wrapper = $("#notification-list");
-    if (remaining === 0 && $wrapper.css("display") === "block") {
-        $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
-    }
+        // Show “all caught up” if dropdown is open and empty
+        const $wrapper = $("#notification-list");
+        if (remaining === 0 && $wrapper.css("display") === "block") {
+            $wrapper.html(`<div class="notification__empty-message">You're all caught up!</div>`);
+        }
+    }, 0);
 }
