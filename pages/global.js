@@ -849,6 +849,17 @@ function updateNotificationAndMaintenanceCounters() {
     const remaining = $(".notification__item-wrapper").length;
     const remainingWorkOrders = $(".notification__item-wrapper[data-type='work-order']").length;
 
-    $counter.text(remaining).css("display", remaining ? "flex" : "none");
-    $maintenanceCounter.text(remainingWorkOrders).css("display", remainingWorkOrders ? "flex" : "none");
+    // Top-right counter: hide if 0
+    if (remaining > 0) {
+        $counter.text(remaining).css("display", "flex");
+    } else {
+        $counter.css("display", "none");
+    }
+
+    // Maintenance tab counter: show full count or hide
+    if (remainingWorkOrders > 0) {
+        $maintenanceCounter.text(remainingWorkOrders).css("display", "flex");
+    } else {
+        $maintenanceCounter.css("display", "none");
+    }
 }
