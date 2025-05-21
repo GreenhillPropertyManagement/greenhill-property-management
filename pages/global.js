@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function initializeApp() {
 
+
   $('.modal__block').hide();
   /* --- Store Base URL ---*/
 
@@ -124,33 +125,6 @@ function initializeApp() {
           }
       });
     }
-    // bulk clear work-order notifications 
-    $("#maintenance").on("click", function () {
-        const $counter = $("[data-api='notification-count']");
-        const $maintenanceCounter = $("[data-api='maintenance-counter']");
-        const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
-
-        // Mark each work-order notification as seen and remove from dropdown
-        $workOrderNotifications.each(function () {
-            const $el = $(this);
-            const notificationId = $el.attr("data-id");
-
-            markNotificationAsSeen(notificationId); // Send to backend
-            $el.remove(); // Remove from dropdown
-        });
-
-        // Recalculate remaining notifications
-        const remainingNotifications = $(".notification__item-wrapper").length;
-
-        if (remainingNotifications === 0) {
-            $counter.hide();
-        } else {
-            $counter.text(remainingNotifications).show();
-        }
-
-        // Hide the small work-order bubble
-        $maintenanceCounter.hide();
-    });
 
 
   });
@@ -166,7 +140,30 @@ function initializeApp() {
 
   /* maintnenace tab button clear notifications */
   $("#maintenance").on("click", function () {
-    $('[data-api=maintenance-counter]').hide();
+      const $counter = $("[data-api='notification-count']");
+      const $maintenanceCounter = $("[data-api='maintenance-counter']");
+      const $workOrderNotifications = $('.notification__item-wrapper[data-type="work-order"]');
+
+      console.log("Maintenance clicked. Found", $workOrderNotifications.length, "work orders.");
+
+      $workOrderNotifications.each(function () {
+          const $el = $(this);
+          const notificationId = $el.attr("data-id");
+
+          console.log("Marking as seen:", notificationId);
+          markNotificationAsSeen(notificationId);
+          $el.remove();
+      });
+
+      const remainingNotifications = $(".notification__item-wrapper").length;
+
+      if (remainingNotifications === 0) {
+          $counter.hide();
+      } else {
+          $counter.text(remainingNotifications).show();
+      }
+
+      $maintenanceCounter.hide();
   });
 
   /* ---- Modal Functionality ----- */
