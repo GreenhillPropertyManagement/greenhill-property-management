@@ -627,19 +627,28 @@ function updateNotifications(notifications) {
           }
           if (notificationType === "legal") {
               const userId = notification.user_id;
-              window.location.href = `https://www.greenhillpropertymgmt.com/app/profile?id=${userId}`;
+
+              // Mark as seen first
+              markNotificationAsSeen(notificationId);
+
+              // Add delay to ensure it fires before redirect
+              setTimeout(() => {
+                  localStorage.setItem("triggerLegalClick", "true");
+                  window.location.href = `https://www.greenhillpropertymgmt.com/app/profile?id=${userId}`;
+              }, 150); // Small delay to ensure XHR is sent
+              return; // prevent the rest of the click handler from running
           }
 
-          // ✅ Mark as seen and update UI
+          // Mark as seen and update UI
           markNotificationAsSeen(notificationId);
           this.style.opacity = "0";
           setTimeout(() => {
               this.remove(); // Remove from DOM
               
-              // ✅ Update counter dynamically
+              // Update counter dynamically
               let remainingNotifications = document.querySelectorAll(".notification__item-wrapper").length;
               
-              // ✅ Update maintenance counter dynamically
+              // Update maintenance counter dynamically
               if (notificationType === "work-order") {
                   workOrderCount--;
               }
