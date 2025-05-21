@@ -139,8 +139,11 @@ function initializeApp() {
   loadConvos(localStorage.userId, "self");
 
   /* maintnenace tab button clear notifications */
-  $("#maintenance").on("click", function () {
-      clearAllWorkOrderNotifications();
+  $("#maintenance").on("click", function (e) {
+      // Only clear if it's a *real user click*, not a programmatic one (e.g. page load)
+      if (e.originalEvent) {
+          clearAllWorkOrderNotifications();
+      }
   });
 
   /* ---- Modal Functionality ----- */
