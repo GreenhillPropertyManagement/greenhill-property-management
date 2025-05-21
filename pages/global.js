@@ -627,7 +627,6 @@ function updateNotifications(notifications) {
           }
           if (notificationType === "legal") {
               const userId = notification.user_id;
-              localStorage.setItem("triggerLegalClick", "true");
               window.location.href = `https://www.greenhillpropertymgmt.com/app/profile?id=${userId}`;
           }
 
