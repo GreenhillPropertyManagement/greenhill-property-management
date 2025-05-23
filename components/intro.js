@@ -71,4 +71,3 @@ intro.setOptions({
 
 intro.start();
 }
-
