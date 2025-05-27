@@ -828,6 +828,8 @@ function createTask() {
 
 function loadAssociatedTasks() {
 
+  let userRecId = null;
+
   if (localStorage.getItem("pageId") === "unit") {
     const userRecId = localStorage.getItem('activeTenantUserId');
   } else if (localStorage.getItem("pageId") === "profile") {
