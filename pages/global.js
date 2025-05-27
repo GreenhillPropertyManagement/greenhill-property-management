@@ -827,8 +827,13 @@ function createTask() {
 }
 
 function loadAssociatedTasks() {
-  const userRecId = localStorage.getItem('userProfileRecId');
 
+  if (localStorage.getItem("pageId") === "unit") {
+    const userRecId = localStorage.getItem('activeTenantUserId');
+  } else if (localStorage.getItem("pageId") === "profile") {
+    const userRecId = localStorage.getItem('userProfileRecId');
+  };
+  
   if (!userRecId) {
     console.error('userProfileRecId not found in localStorage');
     return;
