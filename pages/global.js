@@ -811,6 +811,7 @@ function createTask() {
           $('.modal__block').hide(); // Hide modal
           $('.loader').hide();
           showToast('Task Successfully Created!');
+          loadAssociatedTasks();
 
         },
         error: function (err) {
