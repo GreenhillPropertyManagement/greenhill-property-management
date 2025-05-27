@@ -112,7 +112,7 @@ function uploadDocument(
       page: page,
     },
     success: function (response) {
-      alert("Document Uploaded!");
+      showToastoast("Document Uploaded Successfully!");
       if (localStorage.pageId === "profile") {
         loadDocuments(localStorage.pageRefreshParam, "profile");
       } else if (localStorage.pageId === "unit") {
