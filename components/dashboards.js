@@ -381,10 +381,10 @@ function dashActivityLog(type, user, property, unit) {
           .find("[data-dash-activity-log='description']")
           .text(logItem.description);
         actLogItem
-          .find("[data-dash-activity-log='street']") //updated
+          .find("[act-item='street']") //updated
           .text(logItem.street);
         actLogItem
-          .find("[data-dash-activity-log='unit_name']")
+          .find("[act-item='unit_name']")
           .text(logItem.unit_name);
       });
       
