@@ -381,7 +381,7 @@ function dashActivityLog(type, user, property, unit) {
           .find("[data-dash-activity-log='description']")
           .text(logItem.description);
         actLogItem
-          .find("[data-dash-activity-log='user']")
+          .find("[data-dash-activity-log='user']") //updated
           .text(logItem.display_name);
         actLogItem
           .find("[data-dash-activity-log='role']")
