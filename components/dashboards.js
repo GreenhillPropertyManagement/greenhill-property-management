@@ -382,7 +382,7 @@ function dashActivityLog(type, user, property, unit) {
           .text(logItem.description);
         actLogItem
           .find("[data-dash-activity-log='user']")
-          .text(logItem.first_name + " " + logItem.last_name);
+          .text(logItem.display_name);
         actLogItem
           .find("[data-dash-activity-log='role']")
           .text(logItem.user_role);
@@ -629,7 +629,7 @@ function editUnit(unit) {
       miscellaneous: $('#edit-unit-misc').val()
     },
     success: function (response) {
-      alert("Success! Unit Updated.");
+      showToast("Success! Unit Updated.");
       loadUnitAndTenantData(unit);
       $(".loader").hide();
 
@@ -660,7 +660,7 @@ function archiveUnit(unit) {
       unit_uuid: unit,
     },
     success: function (response) {
-      alert("Success! Unit Archived.");
+      showToast("Success! Unit Archived.");
       loadUnitAndTenantData(unit);
       $(".loader").hide();    
     },
