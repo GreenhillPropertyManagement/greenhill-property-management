@@ -112,8 +112,8 @@ function newMaintenanceCategory() {
       contentType: 'application/json', // Set the content type to JSON
       success: function (response) {
 
-        alert('Success! New Category Created')
         $('.loader').hide();
+        showToast('Success! New Category Created')
         $('#new-cat-title').val('');
 
       },
@@ -216,12 +216,13 @@ function deleteMaintenanceCat(categoryId) {
         cat_id: categoryId // Use the categoryId passed as a parameter
       },
       success: function (response) {
-       alert('Success! Category Deleted');
+       
        $('.modal__block').hide();
       },
       complete: function() {
         $('.loader').hide();
         // Hide the modal
+        showToast('Success! Category Deleted');
         $('.delete-cat-wrapper').css('display', 'none');
       },
       error: function (error) {
