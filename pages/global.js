@@ -826,6 +826,158 @@ function createTask() {
 
 }
 
+function loadAssociatedTasks() {
+  const userRecId = localStorage.getItem('userProfileRecId');
+
+  if (!userRecId) {
+    console.error('userProfileRecId not found in localStorage');
+    return;
+  }
+
+  let selectedTaskId = null;
+
+  $.ajax({
+    url: localStorage.baseUrl + 'api:RqXDqOO9/get_tasks_associated_users',
+    type: 'GET',
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: {
+      user_rec_id: userRecId
+    },
+    success: function (response) {
+      const $container = $('.profile-tasks-container');
+      $container.empty(); // Clear the container
+
+      const tasks = Array.isArray(response) ? response : [response];
+
+      tasks.forEach(task => {
+        const formattedDate = task.calendar_date ? formatDateNoTime(task.calendar_date) : '';
+
+        const $task = $(`
+          <div modal="update-task" element="modal" class="profile-task-item" id="${task.id}">
+            <div data-task="date" class="system-text__small">${formattedDate}</div>
+            <div data-task="title" class="system-text__main task">${task.task_title || ''}</div>
+            <div class="profile-task__created-by">
+              <div class="system-text__small">Created By:</div>
+              <div data-task="created-by" class="system-text__small margin-left less">${task.display_name || ''}</div>
+            </div>
+          </div>
+        `);
+
+        $task.data('task', task);
+
+        // Attach click handler for this task item
+        $task.on('click', function () {
+          const clickedTask = $(this).data('task');
+        
+          selectedTaskId = clickedTask.id;
+        
+          const $form = $('[data-api-form="update-task"]');
+
+          $form.find('[data-api-input="calendar_date"]').val(clickedTask.calendar_date || '');
+          $form.find('[data-api-input="task_title"]').val(clickedTask.task_title || '');
+          $form.find('[data-api-input="task_message"]').val(clickedTask.task_message || '');
+          
+          const $userSelect = $form.find('[data-api-input="assigned_to_user"]');
+          if ($userSelect.find(`option[value="${clickedTask.assigned_to_user}"]`).length === 0) {
+            $userSelect.append(
+              $('<option>', {
+                value: clickedTask.assigned_to_user,
+                text: clickedTask.display_name,
+                selected: true
+              })
+            );
+          } else {
+            $userSelect.val(clickedTask.assigned_to_user);
+          }
+        });
+
+        $container.append($task);
+      });
+
+      // Attach submit handler for edit
+      $('[data-api-form="update-task"]').off('submit').on('submit', function (e) {
+        e.preventDefault();
+
+        $('.loader').css('display','flex');
+
+        if (!selectedTaskId) return alert("No task selected");
+
+        const $form = $('[data-api-form="update-task"]');
+
+        const formData = {
+          task_id: selectedTaskId,
+          calendar_date: $form.find('[data-api-input="calendar_date"]').val(),
+          task_title: $form.find('[data-api-input="task_title"]').val(),
+          task_message: $form.find('[data-api-input="task_message"]').val(),
+          assigned_to_user: $form.find('[data-api-input="assigned_to_user"]').val()
+        };
+
+        $.ajax({
+          url: localStorage.baseUrl + 'api:RqXDqOO9/edit_task',
+          type: 'POST',
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+          },
+          data: formData,
+          success: function () {
+            
+            selectedTaskId = null;
+            loadAssociatedTasks();
+            $('.modal__block').hide();
+            $('.loader').hide();
+            showToast('Task updated!');
+          },
+          error: function (xhr, status, error) {
+            alert('An unexpected Error Occured');
+            $('.modal__block').hide();
+            $('.loader').hide();
+
+          }
+        });
+      });
+
+      // Attach delete handler
+      $('[api-button="delete-task"]').off('click').on('click', function (e) {
+        e.preventDefault();
+        $('.loader').css('display','flex');
+
+        if (!selectedTaskId) return alert("No task selected");
+
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        $.ajax({
+          url: localStorage.baseUrl + 'api:RqXDqOO9/delete_task',
+          type: 'POST',
+          headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+          },
+          data: {
+            task_id: selectedTaskId
+          },
+          success: function () {
+            
+            selectedTaskId = null;
+            loadAssociatedTasks();
+            $('.modal__block').hide();
+            $('.loader').hide();
+            showToast('Task successfully deleted!');
+          },
+          error: function (xhr, status, error) {
+            alert('We ran into an error deleting this task');
+            $('.modal__block').hide();
+            $('.loader').hide();
+          }
+        });
+      });
+    },
+    error: function (xhr, status, error) {
+      console.error('Error fetching tasks:', error);
+    }
+  });
+}
+
 function clearAllWorkOrderNotifications() {
     const $workOrders = $(".notification__item-wrapper[data-type='work-order']");
     const $wrapper = $("#notification-list");
