@@ -379,7 +379,7 @@ function dashActivityLog(type, user, property, unit) {
           .text(formatDateToCustomFormat(logItem.created_at));
         actLogItem
           .find("[data-dash-activity-log='description']")
-          .text(logItem.description);
+          .text(logItem.street);
         actLogItem
           .find("[act-item='street']") //updated
           .text(logItem.street);
