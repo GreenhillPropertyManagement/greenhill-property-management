@@ -68,8 +68,8 @@ document.addEventListener("DOMContentLoaded", function () {
             data: dataToSend,
             success: function(response) {
       
-              alert('Success! Landlord Settings Updated.');
               $('.loader').hide();
+              showToast('Success! Landlord Settings Updated.');
       
             },
             error: function(xhr, status, error) {
@@ -145,7 +145,7 @@ function updateUserStatus(userStatus) {
       status_update: userStatus,
     },
     success: function (response) {
-      alert("Success!");
+     
       $("[data-profile=user_status]").text(response.user_status);
 
       // update the buttons to reflect the users status
@@ -168,6 +168,7 @@ function updateUserStatus(userStatus) {
     },
     complete: function () {
       $(".loader").hide();
+       showToast("Success! User's status has been updated.");
     },
     error: function (jqXHR, textStatus, errorThrown) {
       // Assuming the server is sending back a JSON response with an error message under a 'message' key
@@ -674,11 +675,11 @@ function dashActivityLog(type, user, property, unit) {
           .find("[data-dash-activity-log='description']")
           .text(logItem.description);
         actLogItem
-          .find("[data-dash-activity-log='user']")
-          .text(logItem.first_name + " " + logItem.last_name);
+          .find("[data-dash-activity-log='street']")
+          .text(logItem.street);
         actLogItem
-          .find("[data-dash-activity-log='role']")
-          .text(logItem.user_role);
+          .find("[data-dash-activity-log='unit_name']")
+          .text(logItem.unit_name);
       });
     },
     complete: function () {
@@ -725,6 +726,12 @@ function activityLog(type, user, property, unit, view) {
           actLogItem
             .find("[data-activity-log='description']")
             .text(logItem.description);
+          actLogItem
+          .find("[data-dash-activity-log='street']")
+          .text(logItem.street);
+          actLogItem
+          .find("[data-dash-activity-log='unit_name']")
+          .text(logItem.unit_name);
         });
       }
     },
@@ -751,10 +758,11 @@ function mandateBankAccount(user){
       user_uuid: user,
     },
     success: function (response) {
-      alert("Success! Mandate Successful.");
+     
     },
     complete: function () {
       $(".loader").hide();
+      showToast("Success! Mandate Successful.");
     },
     error: function (error) {},
   });
@@ -857,11 +865,12 @@ function loadAssociatedTasks() {
           },
           data: formData,
           success: function () {
-            alert('Task updated!');
+            
             selectedTaskId = null;
             loadAssociatedTasks();
             $('.modal__block').hide();
             $('.loader').hide();
+            showToast('Task updated!');
           },
           error: function (xhr, status, error) {
             alert('An unexpected Error Occured');
@@ -891,11 +900,12 @@ function loadAssociatedTasks() {
             task_id: selectedTaskId
           },
           success: function () {
-            alert('Task deleted!');
+            
             selectedTaskId = null;
             loadAssociatedTasks();
             $('.modal__block').hide();
             $('.loader').hide();
+            showToast('Task successfully deleted!');
           },
           error: function (xhr, status, error) {
             alert('We ran into an error deleting this task');
