@@ -828,13 +828,13 @@ function createTask() {
 
 function loadAssociatedTasks() {
 
-  let userRecId = null;
+let userRecId = null;
 
-  if (localStorage.getItem("pageId") === "unit") {
-    const userRecId = localStorage.getItem('activeTenantUserId');
-  } else if (localStorage.getItem("pageId") === "profile") {
-    const userRecId = localStorage.getItem('userProfileRecId');
-  };
+if (localStorage.getItem("pageId") === "unit") {
+  userRecId = localStorage.getItem('activeTenantUserId');
+} else if (localStorage.getItem("pageId") === "profile") {
+  userRecId = localStorage.getItem('userProfileRecId');
+}
   
   if (!userRecId) {
     console.error('userProfileRecId not found in localStorage');
