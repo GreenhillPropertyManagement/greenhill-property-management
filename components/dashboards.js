@@ -381,11 +381,11 @@ function dashActivityLog(type, user, property, unit) {
           .find("[data-dash-activity-log='description']")
           .text(logItem.description);
         actLogItem
-          .find("[data-dash-activity-log='user']") //updated
-          .text(logItem.display_name);
+          .find("[data-dash-activity-log='street']") //updated
+          .text(logItem.street);
         actLogItem
-          .find("[data-dash-activity-log='role']")
-          .text(logItem.user_role);
+          .find("[data-dash-activity-log='unit']")
+          .text(logItem.unit_name);
       });
       
     },
