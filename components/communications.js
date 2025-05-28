@@ -705,7 +705,7 @@ function deleteConvo() {
       conversation_id: localStorage.activeConvo,
     },
     success: function (response) {
-      alert("Success! Conversation Deleted");
+      showToast("Success! Conversation Deleted");
       var page = localStorage.getItem('pageId');
       if (page == "unit"){
         $("[api-button=tenant-convos]").click();

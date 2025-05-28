@@ -590,7 +590,7 @@ function updateAssignedUsers(selectedUserIds, userType) {
     },
     success: function (response) {},
     complete: function () {
-      alert("Success! Users Updated!");
+      showToast("Success! Users Updated!");
       $(".modal__block").hide();
       $(".loader").hide();
     },
@@ -639,8 +639,8 @@ function messageBroadcast() {
       data: JSON.stringify(formData), // Convert formData to JSON
       contentType: "application/json", // Set the content type to JSON
       success: function (response) {
-        alert("Success! Message Sent!");
         $(".loader").hide();
+        showToast("Success! Message Sent!");
       },
       complete: function () {
         // Reset Form

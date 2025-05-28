@@ -202,8 +202,9 @@ function createPropertyTransaction() {
         data: JSON.stringify(formData), // Convert formData to JSON
         contentType: "application/json", // Set the content type to JSON
         success: function (response) {
-          alert("Success! Property Transaction Created.");
+          
           $(".loader").hide();
+          showToast("Success! Property Transaction Created.");
           const urlParams = new URLSearchParams(window.location.search);
           let property_id = urlParams.get("id");
           loadProperty(property_id);
@@ -461,7 +462,7 @@ function updatePropertyTransaction(transId, transFreq) {
         data: JSON.stringify(formData), // Convert formData to JSON
         contentType: "application/json", // Set the content type to JSON
         success: function (response) {
-          alert("Success! Property Transaction Updated.");
+          showToast("Success! Property Transaction Updated.");
           $(".loader").hide();
           loadProperty();
           $("#property-transaction-form")[0].reset();
@@ -531,8 +532,9 @@ function createUserTransaction(view, form) {
     data: JSON.stringify(formData), // Convert formData to JSON
     contentType: "application/json", // Set the content type to JSON
     success: function (response) {
-      alert("Success! Unit Transaction Created.");
+      
       $(".loader").hide();
+      showToast("Success! Unit Transaction Created.");
       form[0].reset();
     },
     complete: function () {
@@ -874,10 +876,11 @@ function tenantMakesPayment(amount) {
       amount: amount,
     },
     success: function (response) {
-      $(".modal__block").hide();
-      alert(
+      showToast(
         "Success! Payment Initiated. (Payments can take up to 3-6 business days to clear)",
       );
+      $(".modal__block").hide();
+
     },
     complete: function () {
       $(".loader").hide();

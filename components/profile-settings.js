@@ -545,7 +545,7 @@ function toggleAutoPay () {
                 if (response == true) {
                   window.location.href = "/tenant/auto-pay-confirmation";
                 } else{
-                  alert ('Success! You have been unsubscribed from Auto Pay.');
+                  showToast('Success! You have been unsubscribed from Auto Pay.');
                 }
             },
             error: function(xhr, status, error) {

@@ -114,7 +114,7 @@ function saveQuillContent(mode, content, target) {
       target: target,
     }),
     success: function (response) {
-      alert("Success, Notes Saved!");
+      showToast("Success, Notes Saved!");
       $(".modal__block").hide();
       $(".loader").hide();
     },

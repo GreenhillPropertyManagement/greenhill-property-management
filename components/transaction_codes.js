@@ -121,7 +121,6 @@ function createTransCode() {
             },
             data: JSON.stringify(formData),
             success: function (response) {
-                alert('Success! Transaction Code Created.');
   
                 // Create new item
                 let $newItem = createTransactionCodeElement(response);
@@ -152,6 +151,7 @@ function createTransCode() {
             },
             complete: function () {
                 $('.loader').hide(); // Hide loader
+                showToast('Success! Transaction Code Created.');
                 reloadTransactionCodes(); // update transaction form with new codes
             }
         });
@@ -198,9 +198,10 @@ function createTransCode() {
             },
             data: JSON.stringify({ transaction_code_id: transactionId }),
             success: function () {
-                alert("Transaction Code Deleted Successfully!");
+                
                 $('.modal__block').hide();
                 $('.loader').hide();
+                showToast("Transaction Code Deleted Successfully!");
 
                 // Remove the deleted transaction from the list
                 let $deletedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);
@@ -312,8 +313,9 @@ function setupEditTransactionHandler() {
             },
             data: JSON.stringify(formData),
             success: function (response) {
-                alert("Transaction Code Updated Successfully!");
+               
                 $('.modal__block').hide(); // Hide modal
+                showToast("Transaction Code Updated Successfully!");
 
                 // Remove the old transaction from the list
                 let $updatedItem = $(`.transaction-code-item[data-id="${transactionId}"]`);

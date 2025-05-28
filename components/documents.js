@@ -305,7 +305,7 @@ function deleteDocuments() {
           documents_to_delete: selectedItems,
         },
         success: function (response) {
-          alert("Success! Documents Deleted");
+          showToast("Success! Documents Deleted");
 
           // Resetting items and UI after successful deletion
           $(".doc__select-toggle.selected").removeClass("selected"); // Reset toggles
