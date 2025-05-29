@@ -544,9 +544,9 @@ function toggleAutoPay () {
             data: { enable_autopay: isChecked },
             success: function(response) {
                 if (response == true) {
-                  window.location.href = "/tenant/auto-pay-confirmation";
+                  showToast('Success! Auto-Pay is now active.');
                 } else{
-                  showToast('Success! You have been unsubscribed from Auto Pay.');
+                  showToast('Success! Auto-Pay is no longer active.');
                 }
             },
             error: function(xhr, status, error) {
