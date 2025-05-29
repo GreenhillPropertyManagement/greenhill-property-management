@@ -22,6 +22,7 @@ function profileSettingsInit () {
   updateProfilePic();
   updateNotificationsPref();
   toggleAutoPay();
+  createOneTimeCode();
 
 }
 
@@ -568,7 +569,7 @@ function createOneTimeCode(){
           'Authorization': "Bearer " + localStorage.authToken
       },
       success: function (response) {
-        showToast("Please check your email");
+        showToast("Please check your email to continue");
       },
       error: function (error) {
           alert("Something Went Wrong");
