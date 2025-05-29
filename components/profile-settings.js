@@ -555,3 +555,26 @@ function toggleAutoPay () {
     });
 
 }
+
+function createOneTimeCode(){
+
+  $("#change-password").off("click").click(function () {
+
+    $.ajax({
+      url: localStorage.baseUrl + "api:QNBxKUuR/create_code",
+      type: "POST",
+      headers: {
+          'Content-Type': "application/json",
+          'Authorization': "Bearer " + localStorage.authToken
+      },
+      success: function (response) {
+        showToast("Please check your email");
+      },
+      error: function (error) {
+          alert("Something Went Wrong");
+      },
+    });
+
+  });
+
+}
