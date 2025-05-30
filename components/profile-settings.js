@@ -559,7 +559,7 @@ function toggleAutoPay () {
 
 function createOneTimeCode(){
 
-  $("#change-password").off("click").click(function () {
+  $("#edit-bank-link").off("click").click(function () {
 
     $.ajax({
       url: localStorage.baseUrl + "api:QNBxKUuR/create_code",
