@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     } catch (e) {
                         alert("An unexpected error occurred");
                     }
+
+                    // Reset the submit button
+                    const $submitBtn = $('#one-time-code-form').find('input[type="submit"]');
+                    $submitBtn.val("Submit");
+                    $submitBtn.css("pointer-events", "auto");
+
+                    $("#code").val(""); // if you want to clear the field
                 },
             });
         });
