@@ -17,10 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
             $(this).find('input[type="submit"]').val("Please Wait...");
             $(this).find('input[type="submit"]').css("pointer-events", "none");
 
-            // Get code input value
             const code = $("#code").val();
 
-            if (!user || !cid || !code) {
+            if (!client_api_key || !cid || !code) {
                 alert("Missing required information.");
                 return;
             }
