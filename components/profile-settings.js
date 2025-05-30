@@ -23,6 +23,15 @@ function profileSettingsInit () {
   updateNotificationsPref();
   toggleAutoPay();
   createOneTimeCode();
+  document.getElementById("change-password").addEventListener("click", function () {
+    const clientApiKey = localStorage.getItem("clientApiKey");
+
+    if (clientApiKey) {
+        window.location.href = `/app/reset-password?user=${clientApiKey}`;
+    } else {
+        alert("Missing clientApiKey in local storage.");
+    }
+});
 
 }
 
