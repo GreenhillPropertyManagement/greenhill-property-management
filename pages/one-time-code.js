@@ -19,11 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const code = $("#code").val();
 
-            if (!client_api_key || !cid || !code) {
-                alert("Missing required information.");
-                return;
-            }
-
             $.ajax({
                 url: baseUrl + "api:QNBxKUuR/submit_code",
                 type: "POST",
