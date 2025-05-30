@@ -34,8 +34,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 success: function (response) {
                     window.location.href = "/banking/choose-method";
                 },
-                error: function (error) {
-                    alert("Something Went Wrong");
+                error: function (xhr) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        const message = response.message || "Something went wrong";
+                        alert(message);
+                    } catch (e) {
+                        alert("An unexpected error occurred");
+                    }
                 },
             });
         });
