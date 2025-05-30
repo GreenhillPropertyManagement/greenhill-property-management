@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("You are not logged in");
         window.location.href = "/app/login";
     } else {
-        authUser();
+        //authUser();
 
         // Parse URL parameters
         const params = new URLSearchParams(window.location.search);
