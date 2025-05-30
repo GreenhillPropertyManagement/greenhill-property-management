@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     code: code
                 }),
                 success: function (response) {
+                    localStorage.setItem("codeVerified",true);
                     window.location.href = "/banking/choose-method";
                 },
                 error: function (xhr) {
