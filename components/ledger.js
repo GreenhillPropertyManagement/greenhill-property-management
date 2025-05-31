@@ -148,7 +148,6 @@ function updateTable(data) {
     $tbody.append(row);
   }
 
-  // Build lookup for payment_initiated
   const paymentInits = data.filter(d => d.description?.toLowerCase().includes("initiated"));
 
   function findMatchingInit(record) {
@@ -156,25 +155,36 @@ function updateTable(data) {
     if (record.payment_init_id) {
       return paymentInits.find(init => init.payment_init_id && init.payment_init_id === record.payment_init_id);
     }
-    return paymentInits.find(init => init.transaction_id === record.transaction_id && init.amount === 0);
+    const completionDate = new Date(record.transaction_date);
+    return paymentInits.find(init =>
+      init.transaction_id === record.transaction_id &&
+      init.amount === 0 &&
+      new Date(init.transaction_date) <= completionDate
+    );
   }
 
   const rowsToRender = data.filter(item => {
     if (item.type !== "payment") return true;
-    return item.description?.toLowerCase().includes("successful") || item.description?.toLowerCase().includes("failed");
+    return item.payment_successful || item.description?.toLowerCase().includes("failed");
   });
 
   rowsToRender.forEach((item, index) => {
     const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
 
-    const dateInput = matchedInit ? formatDate(matchedInit.transaction_date) : formatDate(item.transaction_date);
-    const successFailDate = item.type === "payment" ? formatDate(item.transaction_date) : "";
+    let dateInput = formatDate(item.transaction_date);
+    let completionDate = formatDate(item.transaction_date);
+
+    if (item.type === "payment" && !item.manually_entered) {
+      dateInput = matchedInit ? formatDate(matchedInit.transaction_date) : formatDate(item.transaction_date);
+      completionDate = formatDate(item.transaction_date);
+    }
+
     const billingPeriod = matchedInit ? formatBillingPeriod(matchedInit.billing_period) : formatBillingPeriod(item.billing_period);
 
     if (item.type === "charge" || item.type === "credit") {
       runningBalance += item.amount;
     } else if (item.type === "payment") {
-      runningBalance += item.amount; // amount is negative on successful payment
+      runningBalance += item.amount;
     }
 
     if (previousMonth !== null && previousMonth !== new Date(dateInput).getMonth()) {
@@ -188,7 +198,7 @@ function updateTable(data) {
       <tr class="${chargeClass}" data-file-url="${fileUrl}">
         <td>${billingPeriod}</td>
         <td>${dateInput}</td>
-        <td>${successFailDate}</td>
+        <td>${completionDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description}</td>
         <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
@@ -216,7 +226,6 @@ function updateTable(data) {
 
   $(".charge-row").css("cursor", "pointer");
 } // END updateTable
-
 
 
 
