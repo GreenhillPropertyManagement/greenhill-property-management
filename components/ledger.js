@@ -113,13 +113,16 @@ function isNewMonth(previousMonth, itemDate) {
 }
 
 function updateTable(data) {
-  console.log(`Updating table with data:`, data);
+  console.log("Updating table with hybrid payment logic");
   let runningBalance = 0;
   let previousMonth = null;
   let previousYear = null;
 
+  const $tbody = $(".styled-table tbody");
+  $tbody.empty();
+
   function formatCurrency(amount) {
-    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return amount.toLocaleString("en-US", { style: "currency", currency: "USD" });
   }
 
   function addEndOfMonthRow(month, year, balance) {
@@ -130,7 +133,7 @@ function updateTable(data) {
     const displayMonth = monthNames[month];
     const displayYear = year;
 
-    const endOfMonthRow = `
+    const row = `
       <tr style="background-color: #92EFDD;">
         <td>${displayMonth} ${displayYear}</td>
         <td></td>
@@ -138,27 +141,54 @@ function updateTable(data) {
         <td>${displayMonth} ${displayYear} Balance</td>
         <td></td>
         <td></td>
+        <td></td>
         <td>${formatCurrency(balance)}</td>
       </tr>
     `;
-    $(".styled-table tbody").append(endOfMonthRow);
+    $tbody.append(row);
   }
 
-  data.forEach((item, index) => {
-    let formattedDate = formatDate(item.transaction_date);
+  // Build lookup for payment_initiated
+  const paymentInits = data.filter(d => d.description?.toLowerCase().includes("initiated"));
 
-    runningBalance += item.amount;
+  function findMatchingInit(record) {
+    if (!record || record.type !== "payment") return null;
+    if (record.payment_init_id) {
+      return paymentInits.find(init => init.payment_init_id && init.payment_init_id === record.payment_init_id);
+    }
+    return paymentInits.find(init => init.transaction_id === record.transaction_id && init.amount === 0);
+  }
 
-    if (previousMonth !== null && isNewMonth(previousMonth, new Date(formattedDate))) {
+  const rowsToRender = data.filter(item => {
+    if (item.type !== "payment") return true;
+    return item.description?.toLowerCase().includes("successful") || item.description?.toLowerCase().includes("failed");
+  });
+
+  rowsToRender.forEach((item, index) => {
+    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
+
+    const dateInput = matchedInit ? formatDate(matchedInit.transaction_date) : formatDate(item.transaction_date);
+    const successFailDate = item.type === "payment" ? formatDate(item.transaction_date) : "";
+    const billingPeriod = matchedInit ? formatBillingPeriod(matchedInit.billing_period) : formatBillingPeriod(item.billing_period);
+
+    if (item.type === "charge" || item.type === "credit") {
+      runningBalance += item.amount;
+    } else if (item.type === "payment") {
+      runningBalance += item.amount; // amount is negative on successful payment
+    }
+
+    if (previousMonth !== null && previousMonth !== new Date(dateInput).getMonth()) {
       addEndOfMonthRow(previousMonth, previousYear, runningBalance - item.amount);
     }
 
     const chargeClass = item.type === "charge" ? "charge-row" : "";
-    const fileUrl = item.type === "charge" ? item.invoice_url : "";
-    const newRow = `
+    const fileUrl = item.invoice_url || "";
+
+    const row = `
       <tr class="${chargeClass}" data-file-url="${fileUrl}">
-        <td>${formatBillingPeriod(item.billing_period)}</td>
-        <td>${formattedDate}</td>
+        <td>${billingPeriod}</td>
+        <td>${dateInput}</td>
+        <td>${successFailDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description}</td>
         <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
@@ -166,12 +196,12 @@ function updateTable(data) {
         <td>${formatCurrency(runningBalance)}</td>
       </tr>
     `;
-    $(".styled-table tbody").append(newRow);
+    $tbody.append(row);
 
-    previousMonth = new Date(formattedDate).getMonth();
-    previousYear = new Date(formattedDate).getFullYear();
+    previousMonth = new Date(dateInput).getMonth();
+    previousYear = new Date(dateInput).getFullYear();
 
-    const isLastItem = index === data.length - 1;
+    const isLastItem = index === rowsToRender.length - 1;
     if (isLastItem) {
       addEndOfMonthRow(previousMonth, previousYear, runningBalance);
     }
@@ -185,7 +215,7 @@ function updateTable(data) {
   });
 
   $(".charge-row").css("cursor", "pointer");
-}
+} // END updateTable
 
 
 
