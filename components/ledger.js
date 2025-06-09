@@ -192,25 +192,39 @@ function updateTable(data) {
     }
 
     const chargeClass = item.type === "charge" ? "charge-row" : "";
-    const fileUrl = item.file || item.invoice_url || "";
+    const hasInvoice = !!item.invoice_url;
+    const hasFile = !!item.file;
 
-    const fileIconHTML = fileUrl
-      ? `<span style="margin-left: 6px; cursor: pointer;" title="View File">📎</span>`
-      : "";
+    let fileIconsHTML = "";
+
+    if (hasInvoice) {
+      fileIconsHTML += `<span class="file-icon" data-url="${item.invoice_url}" title="View Invoice" style="margin-left: 6px; cursor: pointer;">📄</span>`;
+    }
+
+    if (hasFile) {
+      fileIconsHTML += `<span class="file-icon" data-url="${item.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
+    }
 
     const row = `
-      <tr class="${chargeClass}" data-file-url="${fileUrl}">
+      <tr>
         <td>${billingPeriod}</td>
         <td>${dateInput}</td>
         <td>${completionDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
-        <td>${item.description || ""}${fileIconHTML}</td>
+        <td>${item.description || ""}${fileIconsHTML}</td>
         <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
         <td>${item.type !== "charge" ? formatCurrency(-item.amount) : ""}</td>
         <td>${formatCurrency(runningBalance)}</td>
       </tr>
     `;
     $tbody.append(row);
+    
+    // Enable click on file icons
+    $(".styled-table").on("click", ".file-icon", function (e) {
+      e.stopPropagation(); // Prevents triggering any parent row click
+      const url = $(this).data("url");
+      if (url) window.open(url, "_blank");
+    });
 
     previousMonth = new Date(dateInput).getMonth();
     previousYear = new Date(dateInput).getFullYear();
