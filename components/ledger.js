@@ -192,7 +192,11 @@ function updateTable(data) {
     }
 
     const chargeClass = item.type === "charge" ? "charge-row" : "";
-    const fileUrl = item.invoice_url || "";
+    const fileUrl = item.file || item.invoice_url || "";
+
+    const fileIconHTML = fileUrl
+      ? `<span style="margin-left: 6px; cursor: pointer;" title="View File">📎</span>`
+      : "";
 
     const row = `
       <tr class="${chargeClass}" data-file-url="${fileUrl}">
@@ -200,7 +204,7 @@ function updateTable(data) {
         <td>${dateInput}</td>
         <td>${completionDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
-        <td>${item.description}</td>
+        <td>${item.description || ""}${fileIconHTML}</td>
         <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
         <td>${item.type !== "charge" ? formatCurrency(-item.amount) : ""}</td>
         <td>${formatCurrency(runningBalance)}</td>
@@ -217,7 +221,7 @@ function updateTable(data) {
     }
   });
 
-  $(".charge-row").on("click", function () {
+  $("[data-file-url]").on("click", function () {
     const fileUrl = $(this).data("file-url");
     if (fileUrl) {
       window.open(fileUrl, "_blank");
@@ -225,6 +229,7 @@ function updateTable(data) {
   });
 
   $(".charge-row").css("cursor", "pointer");
+  $("[data-file-url]").css("cursor", "pointer");
 } // END updateTable
 
 
