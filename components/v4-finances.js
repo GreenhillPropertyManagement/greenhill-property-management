@@ -71,6 +71,12 @@ document.addEventListener("DOMContentLoaded", function() {
         generateArrearsReport();
     });
 
+    $(document).off("click", ".file-icon").on("click", ".file-icon", function (e) {
+        e.stopPropagation(); // Prevent interfering with row modals
+        const url = $(this).data("url");
+        if (url) window.open(url, "_blank");
+    });
+
 });
 
 function initLandlordFinances() {
@@ -397,6 +403,17 @@ function populateTransactionsTable(response, transactionType) {
         let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
         let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
         let transactionDescription = transaction.description || "N/A";
+
+        // Add invoice and file icons
+        let iconHTML = "";
+
+        if (transaction.invoice_url) {
+        iconHTML += `<span class="file-icon" data-url="${transaction.invoice_url}" title="View Invoice" style="margin-left: 6px; cursor: pointer;">📄</span>`;
+        }
+
+        if (transaction.file) {
+        iconHTML += `<span class="file-icon" data-url="${transaction.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
+        }
         let code = transaction.code_number?.code || "—";
 
         if (transaction.type === "payment") {
@@ -416,7 +433,7 @@ function populateTransactionsTable(response, transactionType) {
             <td class="narrow-col">${transaction.unit_name || "N/A"}</td>
             <td class="narrow-col">${transactionTypeText}</td>
             ${showCodeColumn ? `<td class="narrow-col">${code}</td>` : ""}
-            <td>${transactionDescription}</td>
+            <td>${transactionDescription}${iconHTML}</td>
             <td>${formattedAmount}</td>
         `;
 
