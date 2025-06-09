@@ -24,6 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
       fetchTransactions("tenant-user-ledger", localStorage.userId);
       loadBalancesPaymentPage(localStorage.userRecId);
     });
+
+  // Delegated handler to open file links, runs only once
+  $(".styled-table").off("click", ".file-icon").on("click", ".file-icon", function (e) {
+    e.stopPropagation();
+    const url = $(this).data("url");
+    if (url) window.open(url, "_blank");
+  });
 });
 
 function fetchTransactions(type, target) {
@@ -218,13 +225,6 @@ function updateTable(data) {
       </tr>
     `;
     $tbody.append(row);
-    
-    // Enable click on file icons
-    $(".styled-table").on("click", ".file-icon", function (e) {
-      e.stopPropagation(); // Prevents triggering any parent row click
-      const url = $(this).data("url");
-      if (url) window.open(url, "_blank");
-    });
 
     previousMonth = new Date(dateInput).getMonth();
     previousYear = new Date(dateInput).getFullYear();
@@ -244,6 +244,7 @@ function updateTable(data) {
 
   $(".charge-row").css("cursor", "pointer");
   $("[data-file-url]").css("cursor", "pointer");
+
 } // END updateTable
 
 
