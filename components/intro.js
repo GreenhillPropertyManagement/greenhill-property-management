@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  
+
   const hasSeenIntro = localStorage.getItem("introInitiated");
   const role = localStorage.getItem('userRole');
   const userRecId = localStorage.getItem('userRecId');
@@ -227,4 +227,4 @@ function markWalkthroughInitiated() {
 
         }
     });
-}
+} 
