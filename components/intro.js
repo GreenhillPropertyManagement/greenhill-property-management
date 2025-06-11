@@ -163,7 +163,7 @@ function startLandlordIntro() {
             },
             {
                 element: document.getElementById('profile-settings'),
-                intro: 'In Profile Settings, you can update your contact and billing info, change your bank account, and update your password. ',
+                intro: 'In Profile Settings, you can update your contact and billing info, change your bank account, and update your password and manage which type of email alerts you wish to receive ',
                 position: 'right'
             },
         ],
