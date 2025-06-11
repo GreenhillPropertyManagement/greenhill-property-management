@@ -38,7 +38,7 @@ function startTenantIntro() {
             {
                 element: document.getElementById('my-profile'),
                 intro: 'This is your profile section. Here you can view the latest activity on your account, your unit information, lease information, and contact information',
-                position: 'left' // You can change this to 'top', 'bottom', 'right', etc.
+                position: 'right' // You can change this to 'top', 'bottom', 'right', etc.
             }
         ],
         showStepNumbers: false,
