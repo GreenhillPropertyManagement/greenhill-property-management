@@ -44,7 +44,22 @@ function startTenantIntro() {
                 element: document.getElementById('pay-rent'),
                 intro: 'Here you can pay your rent, and view your transactions ledger to see all charges, payments and credits posted on your account.',
                 position: 'right'
-            }
+            },
+            {
+                element: document.getElementById('maintenance'),
+                intro: 'In Maintenance, you can create and/or view maintenance requests/work orders for your unit.',
+                position: 'right'
+            },
+            {
+                element: document.getElementById('communications'),
+                intro: 'In Communications, you can chat and view conversations with property managers',
+                position: 'right'
+            },
+            {
+                element: document.getElementById('profile-settings'),
+                intro: 'In Profile Settings, you can update your contact and billing info, change your bank account, and update your password. ',
+                position: 'right'
+            },
         ],
         showStepNumbers: false,
         exitOnOverlayClick: true,
@@ -56,6 +71,15 @@ function startTenantIntro() {
         // Trigger click on #pay-rent right before we show it
         if (targetElement.id === 'pay-rent') {
             document.getElementById('pay-rent').click();
+        }
+        if (targetElement.id === 'maintenance') {
+            document.getElementById('maintenance').click();
+        }
+        if (targetElement.id === 'communications') {
+            document.getElementById('communications').click();
+        }
+        if (targetElement.id === 'profile-settings') {
+            document.getElementById('profile-settings').click();
         }
 
         // (Optional) If your tabs need time to load/render
