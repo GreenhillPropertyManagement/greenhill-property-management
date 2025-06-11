@@ -1,27 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
-
+  
   const hasSeenIntro = localStorage.getItem("introInitiated");
+  const role = localStorage.getItem('userRole');
+  const userRecId = localStorage.getItem('userRecId');
 
   if (hasSeenIntro !== "true") {
-    // user has NOT seen the intro, so show it
-    const role = localStorage.getItem('userRole');
-    const userRecId = localStorage.getItem('userRecId');
-
+    // user has NOT seen the intro, so show it automatically
     if (role === 'Tenant' && userRecId === '272') {
       startTenantIntro();
     } else if (role === 'Landlord' && userRecId === '270') {
       startLandlordIntro();
     }
   }
-  // keep manual trigger if needed
+
+  // Manual trigger (always works regardless of localStorage)
   $('.intro-button').on('click', function () {
-    if (role === 'Tenant' && userRecId === '272') { // only for testing mode
+    if (role === 'Tenant' && userRecId === '272') {
       startTenantIntro();
-    } else if (role === 'Landlord'&& userRecId === '270') {
+    } else if (role === 'Landlord' && userRecId === '270') {
       startLandlordIntro();
     }
   });
-
 });
 
 
