@@ -36,6 +36,11 @@ function startTenantIntro() {
                 position: 'bottom'
             },
             {
+                element: document.getElementById('notifications'),
+                intro: 'Here is where your notifications will appear, showing you all recent activity on your account.',
+                position: 'left'
+            },
+            {
                 element: document.getElementById('my-profile'),
                 intro: 'This is your profile section. Here you can view the latest activity on your account, your unit information, lease information, and contact information',
                 position: 'right'
@@ -73,7 +78,9 @@ function startTenantIntro() {
     });
 
     intro.onbeforechange(function(targetElement) {
-        // Trigger click on #pay-rent right before we show it
+        if (targetElement.id === 'my-profile') {
+            document.getElementById('my-profile').click();
+        }
         if (targetElement.id === 'pay-rent') {
             document.getElementById('pay-rent').click();
         }
