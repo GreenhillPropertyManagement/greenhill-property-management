@@ -43,6 +43,8 @@ $("#login-form").submit(function (event) {
       localStorage.setItem("lastName", response.user_info.last_name);
       localStorage.setItem("email", response.user_info.email);
       localStorage.setItem("displayName", response.user_info.display_name);
+      localStorage.setItem("introInitiated", response.user_info.intro_walkthrough_intiated);
+
 
       if (response.user_info.profile_img) {
         localStorage.setItem('profileImage', response.user_info.profile_img)
