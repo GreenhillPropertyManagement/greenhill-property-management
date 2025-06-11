@@ -22,30 +22,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Tenant Tour
 function startTenantIntro() {
-const intro = introJs();
+    const intro = introJs();
 
-intro.setOptions({
-steps: [
-  {
-    element: document.getElementById('tenant-dashboard-header'),
-    intro: `
-      <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/6566c4276cfe72177e7df971_256.png" class="intro-img" alt="Intro Icon" />
-      <h2 class="intro-heading">Get To Know Your Dashboard</h2>
-      <p class="intro-subheading">We’ll show you around and help you get comfortable.</p>
-    `,
-    position: 'bottom'
-  },
-  {
-    element: document.getElementById('tenant-bills-section'),
-    intro: 'Here you can view and pay your bills.'
-  }
-],
-    showStepNumbers: false,
-    exitOnOverlayClick: true,
-    disableInteraction: false
-});
+    intro.setOptions({
+        steps: [
+            {
+                element: document.getElementById('tenant-dashboard-header'),
+                intro: `
+                    <img src="https://cdn.prod.website-files.com/64ef87a21e6d1b3957b7416b/6566c4276cfe72177e7df971_256.png" class="intro-img" alt="Intro Icon" />
+                    <h2 class="intro-heading">Get To Know Your Dashboard</h2>
+                    <p class="intro-subheading">We’ll show you around and help you get comfortable.</p>
+                `,
+                position: 'bottom'
+            },
+            {
+                element: document.getElementById('my-profile'),
+                intro: 'This is your profile section. Here you can view the latest activity on your account, your unit information, lease information, and contact information',
+                position: 'left' // You can change this to 'top', 'bottom', 'right', etc.
+            }
+        ],
+        showStepNumbers: false,
+        exitOnOverlayClick: true,
+        disableInteraction: false
+    });
 
-intro.start();
+    intro.start();
 }
 
 // Landlord Tour
