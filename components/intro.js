@@ -1,14 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-  const role = localStorage.getItem('userRole');
-  const userRecId = localStorage.getItem('userRecId');
+  const hasSeenIntro = localStorage.getItem("introInitiated");
 
-  if (role === 'Tenant' && userRecId === '272') { // only for testing mode
-    startTenantIntro();
-  } else if (role === 'Landlord'&& userRecId === '270') {
-    startLandlordIntro();
+  if (hasSeenIntro !== "true") {
+    // user has NOT seen the intro, so show it
+    const role = localStorage.getItem('userRole');
+    const userRecId = localStorage.getItem('userRecId');
+
+    if (role === 'Tenant' && userRecId === '272') {
+      startTenantIntro();
+    } else if (role === 'Landlord' && userRecId === '270') {
+      startLandlordIntro();
+    }
   }
-
   // keep manual trigger if needed
   $('.intro-button').on('click', function () {
     if (role === 'Tenant' && userRecId === '272') { // only for testing mode
@@ -109,7 +113,7 @@ function startTenantIntro() {
 
 // Landlord Tour
 function startLandlordIntro() {
-  
+
     markWalkthroughInitiated();
     const intro = introJs();
 
