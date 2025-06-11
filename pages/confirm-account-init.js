@@ -68,6 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem("userRecId", response.user_info.id); // user rec id
         localStorage.setItem("userRole", response.user_info.user_role); // user role
         localStorage.setItem("firstName", response.user_info.first_name); // first name
+        localStorage.setItem("introInitiated", response.user_info.intro_walkthrough_intiated); // first name
   
       },
       error: function (error) {
