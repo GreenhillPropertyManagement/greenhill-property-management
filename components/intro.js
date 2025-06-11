@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // keep manual trigger if needed
-  $('#start-tour-btn').on('click', function () {
+  $('.intro-button').on('click', function () {
     if (role === 'Tenant' && userRecId === '272') { // only for testing mode
       startTenantIntro();
     } else if (role === 'Landlord'&& userRecId === '270') {
