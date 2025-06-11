@@ -38,17 +38,28 @@ function startTenantIntro() {
             {
                 element: document.getElementById('my-profile'),
                 intro: 'This is your profile section. Here you can view the latest activity on your account, your unit information, lease information, and contact information',
-                position: 'right' // You can change this to 'top', 'bottom', 'right', etc.
+                position: 'right'
             },
             {
                 element: document.getElementById('pay-rent'),
                 intro: 'Here you can pay your rent, and view your transactions ledger to see all charges, payments and credits posted on your account.',
-                position: 'right' // You can change this to 'top', 'bottom', 'right', etc.
-            },
+                position: 'right'
+            }
         ],
         showStepNumbers: false,
         exitOnOverlayClick: true,
-        disableInteraction: false
+        disableInteraction: false,
+        scrollToElement: true,
+    });
+
+    intro.onbeforechange(function(targetElement) {
+        // Trigger click on #pay-rent right before we show it
+        if (targetElement.id === 'pay-rent') {
+            document.getElementById('pay-rent').click();
+        }
+
+        // (Optional) If your tabs need time to load/render
+        // you can add a slight delay here if necessary
     });
 
     intro.start();
