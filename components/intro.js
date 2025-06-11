@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Tenant Tour
 function startTenantIntro() {
+    markWalkthroughInitiated();
     const intro = introJs();
 
     intro.setOptions({
@@ -108,6 +109,8 @@ function startTenantIntro() {
 
 // Landlord Tour
 function startLandlordIntro() {
+  
+    markWalkthroughInitiated();
     const intro = introJs();
 
     intro.setOptions({
@@ -204,4 +207,21 @@ function startLandlordIntro() {
     });
 
     intro.start();
+}
+
+function markWalkthroughInitiated() {
+    $.ajax({
+        url: localStorage.baseUrl + "api:sElUkr6t/walkthrough_initiated",
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        contentType: "application/json",
+        success: function(response) {
+
+        },
+        error: function(xhr, status, error) {
+
+        }
+    });
 }
