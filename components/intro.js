@@ -47,12 +47,17 @@ function startTenantIntro() {
             },
             {
                 element: document.getElementById('maintenance'),
-                intro: 'In Maintenance, you can create and/or view maintenance requests/work orders for your unit.',
+                intro: 'In the Maintenance section, you can create or view maintenance requests/work orders for your unit.',
                 position: 'right'
             },
             {
                 element: document.getElementById('communications'),
-                intro: 'In Communications, you can chat and view conversations with property managers',
+                intro: 'Inthe Communications section, you can chat and view conversations with property managers',
+                position: 'right'
+            },
+            {
+                element: document.getElementById('documents'),
+                intro: 'In the Documents section, you can upload and view documents pertaining to your lease/unit',
                 position: 'right'
             },
             {
@@ -77,6 +82,9 @@ function startTenantIntro() {
         }
         if (targetElement.id === 'communications') {
             document.getElementById('communications').click();
+        }
+        if (targetElement.id === 'documents') {
+            document.getElementById('documents').click();
         }
         if (targetElement.id === 'profile-settings') {
             document.getElementById('profile-settings').click();
