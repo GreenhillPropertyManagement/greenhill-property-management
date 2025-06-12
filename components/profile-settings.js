@@ -578,7 +578,7 @@ function createOneTimeCode(){
           'Authorization': "Bearer " + localStorage.authToken
       },
       success: function (response) {
-        alert("Please check your email to verify your account bedore updating your bank.");
+        alert("Please check your email to verify your account before updating your bank.");
       },
       error: function (error) {
           alert("Something Went Wrong");
