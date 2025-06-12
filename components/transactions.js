@@ -924,24 +924,42 @@ function loadOutstandingTransactions() {
         hasVisibleCharges = true;
 
         const $item = $(`
-          <div class="payment__transaction-item" id="${master.id}">
+          <div class="payment__transaction-item wf-grid" id="${master.id}">
             <div class="payment-trans__cell">
               <div class="payment__trans-header">Description</div>
-              <div data-api="description" class="system-text__small">${master.description || "N/A"}</div>
+              <div data-api="description" class="system-text__small">
+                ${master.description || "N/A"}
+              </div>
             </div>
             <div class="payment-trans__cell">
-              <div class="payment__trans-header">Due Date</div>
-              <div data-api="due_date" class="system-text__small">${
-                master.due_date ? formatDateNoTime(master.due_date) : "—"
-              }</div>
+              <div class="payment-trans__amount-wrapper">
+                <div class="payment__trans-header">Billing Period</div>
+                <div data-api="transaction_date" class="system-text__small">
+                  ${master.transaction_date ? formatDateNoTime(master.transaction_date) : "—"}
+                </div>
+              </div>
             </div>
             <div class="payment-trans__cell">
-              <div class="payment__trans-header">Charge Amount</div>
-              <div data-api="amount" class="system-text__small">$${master.amount.toFixed(2)}</div>
+              <div class="payment-trans__amount-wrapper">
+                <div class="payment__trans-header">Due Date</div>
+                <div data-api="due_date" class="system-text__small">
+                  ${master.due_date ? formatDateNoTime(master.due_date) : "—"}
+                </div>
+              </div>
+            </div>
+            <div class="payment-trans__cell">
+              <div class="payment-trans__amount-wrapper">
+                <div class="payment__trans-header">Charge Amount</div>
+                <div data-api="amount" class="system-text__small">
+                  $${master.amount.toFixed(2)}
+                </div>
+              </div>
             </div>
             <div class="payment-trans__amount-wrapper">
               <div class="payment__trans-header">Remaining Balance</div>
-              <div data-api="remaining_transaction_balance" class="system-text__small">$${master.remaining_transaction_balance.toFixed(2)}</div>
+              <div data-api="remaining_transaction_balance" class="system-text__small">
+                $${master.remaining_transaction_balance.toFixed(2)}
+              </div>
             </div>
           </div>
         `);
