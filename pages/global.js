@@ -241,7 +241,7 @@
     });
 
     // conditional logic for testing (dummy tenant account)
-    if(localStorage.userId === "2d3235a8-2520-4153-8d7b-760fe7545d7d" || localStorage.userId === "f7173331-dc22-4157-88c4-f8bc507ef267") {
+    if(localStorage.userId === "2d3235a8-2520-4153-8d7b-760fe7545d7d" || localStorage.userId === "f7173331-dc22-4157-88c4-f8bc507ef267"  || localStorage.userId === "9e60fffc-5f8e-4a3d-9411-99d4df9d852c") {
       //alert('Test Mode!');
       $('[dynamic-visibility=test-mode]').show();
       $('[dynamic-visibility=test-mode-hide').hide();
