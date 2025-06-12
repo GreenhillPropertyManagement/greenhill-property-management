@@ -597,9 +597,8 @@ function loadUserTransactions(view, type) {
       transactions.forEach((userTrans) => {
         const transactionId = userTrans.id;
         const description = userTrans.description || "";
-        const frequency = mode; // from response.mode: "recurring" or "one_time"
+        const frequency = mode; // "recurring" or "one_time"
 
-        // Choose field labels and values based on mode
         const label2 = mode === "recurring" ? "Start Date" : "Due Date";
         const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
         const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
@@ -616,6 +615,16 @@ function loadUserTransactions(view, type) {
           ? `$${userTrans.amount}`
           : `$${userTrans.remaining_transaction_balance || 0}`;
 
+        // Conditionally render Billing Period cell only for one-time transactions
+        const billingPeriodCell = mode !== "recurring" ? `
+          <div class="trans-item__cell">
+            <div class="trans-item__cell-header">Billing Period</div>
+            <div class="trans-item__cell-data" data-api="transaction_date">
+              ${formatDateNoTime(userTrans.transaction_date)}
+            </div>
+          </div>
+        ` : "";
+
         const html = `
           <div class="trans-item-updated wf-grid" 
               id="${transactionId}" 
@@ -625,6 +634,8 @@ function loadUserTransactions(view, type) {
               <div class="trans-item__cell-header">Description</div>
               <div class="trans-item__cell-data" data-api="description">${description}</div>
             </div>
+
+            ${billingPeriodCell}
 
             <div class="trans-item__cell">
               <div class="trans-item__cell-header">${label2}</div>
