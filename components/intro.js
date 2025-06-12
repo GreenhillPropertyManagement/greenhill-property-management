@@ -63,7 +63,7 @@ function startTenantIntro() {
             },
             {
                 element: document.getElementById('communications'),
-                intro: 'Inthe Communications section, you can chat and view conversations with property managers',
+                intro: 'In the Communications section, you can chat and view conversations with property managers',
                 position: 'right'
             },
             {
