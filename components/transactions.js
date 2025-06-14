@@ -686,7 +686,7 @@ function loadUserTransactions(view, type) {
 function updateUserTransaction(transId, transFreq) {
   var responseData;
 
-  $("#delete-trans-button").hide(); // always hide first
+  $("#delete-trans-button").hide();
 
   if (transFreq === "recurring") {
     $("#delete-trans-button").show().off("click").on("click", function () {
@@ -704,7 +704,7 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
 
-  // one-time fields
+  // One-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
@@ -713,7 +713,7 @@ function updateUserTransaction(transId, transFreq) {
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
   const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
 
-  // recurring fields
+  // Recurring fields
   const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
   const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
   const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
@@ -726,13 +726,13 @@ function updateUserTransaction(transId, transFreq) {
     $actionAmount.show();
     $action.closest('.form__item').show();
 
-    // Hide recurring
+    // Hide recurring fields
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    // Dropdown change logic
+    // Handle action change visibility
     $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
@@ -746,7 +746,7 @@ function updateUserTransaction(transId, transFreq) {
       }
     });
 
-    // Warn if amount exceeds remaining balance
+    // Enforce amount ≤ remaining balance
     $form.find('[data-api-input="amount"]').off('input').on('input', function () {
       const action = $('#edit-transaction-action').val();
       if (action !== 'payment' && action !== 'credit') return;
@@ -755,9 +755,11 @@ function updateUserTransaction(transId, transFreq) {
       const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
 
       let $message = $('#amount-limit-warning');
-      if ($message.length === 0) {
-        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin-top: 4px;"></div>');
-        $(this).closest('.form__item').append($message);
+      const $buttonGroup = $form.find('.intake__form__bttn-wrapper.is--centered');
+
+      if ($message.length === 0 && $buttonGroup.length > 0) {
+        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin: 12px 0;"></div>');
+        $buttonGroup.before($message);
       }
 
       if (!isNaN(enteredAmount) && enteredAmount > remainingBalance) {
@@ -780,7 +782,7 @@ function updateUserTransaction(transId, transFreq) {
     });
   }
 
-  // Load existing data
+  // Load transaction data
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -818,12 +820,13 @@ function updateUserTransaction(transId, transFreq) {
     },
   });
 
+  // Submit handler
   $form.off("submit").on("submit", function (event) {
     event.preventDefault();
     $(".modal__block").hide();
     $(".loader").css("display", "flex");
 
-    // Enforce amount does not exceed remaining balance
+    // Prevent submission if amount > balance
     const actionType = $form.find('[data-api-input="action"]').val();
     const amountVal = parseFloat($form.find('[data-api-input="amount"]').val());
     const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
