@@ -1253,46 +1253,57 @@ function initTransactionFormUX(form) {
 
     if (selectedFreq === "one-time") {
       if (transDateField) {
-        transDateField.closest(".form__item").style.display = "block";
+        const wrapper = transDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "block";
         transDateField.setAttribute("required", "");
       }
 
       if (dueDateField) {
+        const wrapper = dueDateField.closest(".form__item");
         if (typeField.value !== "payment" && typeField.value !== "credit") {
-          dueDateField.closest(".form__item").style.display = "block";
+          if (wrapper) wrapper.style.display = "block";
         } else {
-          dueDateField.closest(".form__item").style.display = "none";
+          if (wrapper) wrapper.style.display = "none";
           dueDateField.value = "";
         }
+        dueDateField.removeAttribute("required"); // You could add this back if required by design
       }
 
       if (startDateField) {
-        startDateField.closest(".form__item").style.display = "none";
+        const wrapper = startDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "none";
         startDateField.removeAttribute("required");
       }
+
       if (endDateField) {
-        endDateField.closest(".form__item").style.display = "none";
+        const wrapper = endDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "none";
         endDateField.removeAttribute("required");
       }
 
     } else if (selectedFreq === "recurring") {
       if (transDateField) {
-        transDateField.closest(".form__item").style.display = "none";
+        const wrapper = transDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "none";
         transDateField.removeAttribute("required");
       }
 
       if (dueDateField) {
-        dueDateField.closest(".form__item").style.display = "none";
+        const wrapper = dueDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "none";
         dueDateField.value = "";
         dueDateField.removeAttribute("required");
       }
 
       if (startDateField) {
-        startDateField.closest(".form__item").style.display = "block";
+        const wrapper = startDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "block";
         startDateField.setAttribute("required", "");
       }
+
       if (endDateField) {
-        endDateField.closest(".form__item").style.display = "block";
+        const wrapper = endDateField.closest(".form__item");
+        if (wrapper) wrapper.style.display = "block";
         endDateField.setAttribute("required", "");
       }
     }
@@ -1304,12 +1315,13 @@ function initTransactionFormUX(form) {
 
     // Due date logic
     if (dueDateField) {
+      const wrapper = dueDateField.closest(".form__item");
       if (selectedType === "payment" || selectedType === "credit") {
-        dueDateField.closest(".form__item").style.display = "none";
+        if (wrapper) wrapper.style.display = "none";
         dueDateField.value = "";
         dueDateField.removeAttribute("required");
-      } else if (freqField.value === "one-time") {
-        dueDateField.closest(".form__item").style.display = "block";
+      } else if (freqField.value === "one-time" && wrapper) {
+        wrapper.style.display = "block";
       }
     }
 
@@ -1317,13 +1329,12 @@ function initTransactionFormUX(form) {
     if (selectedType === "payment" || selectedType === "credit") {
       freqField.value = "one-time";
       Array.from(freqField.options).forEach(option => {
-        if (option.value === "recurring") {
-          option.disabled = true;
-        } else {
-          option.disabled = false;
-        }
+        option.disabled = option.value === "recurring";
       });
-      $(freqField).trigger("change"); // Apply one-time logic
+
+      // ✅ Re-trigger frequency logic
+      $(freqField).trigger("change");
+
     } else if (selectedType === "charge") {
       Array.from(freqField.options).forEach(option => {
         option.disabled = false;
@@ -1331,11 +1342,10 @@ function initTransactionFormUX(form) {
     }
   });
 
-  // Trigger initial state
+  // Trigger initial logic on load
   $(freqField).trigger("change");
   $(typeField).trigger("change");
 }
-
 function showEmptyState($container) {
   $container.html(`
     <div class="system-text__main" style="text-align: center; margin-top: 2em;">
