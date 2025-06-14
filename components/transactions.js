@@ -1232,12 +1232,18 @@ function initTransactionFormUX(form) {
   const transDateField = form.querySelector('[data-api-input="transaction_date"]');
   const startDateField = form.querySelector('[data-api-input="transaction_start_date"]');
   const endDateField = form.querySelector('[data-api-input="transaction_end_date"]');
-  const dueDateField = form.querySelector('[data-api-input="due_date"]');
 
-  // Helpers
+  if (!freqField || !typeField) return;
+
+  // Helpers to show/hide fields
   function showField(field) {
     const wrapper = field?.closest('.form__item');
-    if (wrapper) wrapper.style.removeProperty('display');
+    if (wrapper) {
+      wrapper.style.removeProperty('display');
+      if (getComputedStyle(wrapper).display === 'none') {
+        wrapper.style.display = 'flex'; // or 'block' depending on layout
+      }
+    }
   }
 
   function hideField(field) {
@@ -1245,104 +1251,68 @@ function initTransactionFormUX(form) {
     if (wrapper) wrapper.style.display = 'none';
   }
 
-  // Exit early if required fields are missing
-  if (!freqField || !typeField) return;
-
-  // Hide all date fields initially and remove 'required'
-  [transDateField, startDateField, endDateField, dueDateField].forEach(function (field) {
-    if (field) {
-      hideField(field);
-      field.removeAttribute("required");
+  function setRequired(field, isRequired) {
+    if (!field) return;
+    if (isRequired) {
+      field.setAttribute('required', '');
+    } else {
+      field.removeAttribute('required');
     }
-  });
+  }
 
-  // Frequency change logic
+  function updateDateFieldsByFrequency(freqValue) {
+    if (freqValue === 'one-time') {
+      showField(transDateField);
+      setRequired(transDateField, true);
+
+      hideField(startDateField);
+      hideField(endDateField);
+      setRequired(startDateField, false);
+      setRequired(endDateField, false);
+    }
+
+    if (freqValue === 'recurring') {
+      hideField(transDateField);
+      setRequired(transDateField, false);
+
+      showField(startDateField);
+      showField(endDateField);
+      setRequired(startDateField, true);
+      setRequired(endDateField, true);
+    }
+  }
+
+  // Handle frequency change
   freqField.addEventListener("change", function () {
-    const selectedFreq = freqField.value;
-
-    if (selectedFreq === "one-time") {
-      if (transDateField) {
-        showField(transDateField);
-        transDateField.setAttribute("required", "");
-      }
-
-      if (dueDateField) {
-        if (typeField.value !== "payment" && typeField.value !== "credit") {
-          showField(dueDateField);
-        } else {
-          hideField(dueDateField);
-          dueDateField.value = "";
-        }
-        dueDateField.removeAttribute("required");
-      }
-
-      if (startDateField) {
-        hideField(startDateField);
-        startDateField.removeAttribute("required");
-      }
-
-      if (endDateField) {
-        hideField(endDateField);
-        endDateField.removeAttribute("required");
-      }
-
-    } else if (selectedFreq === "recurring") {
-      if (transDateField) {
-        hideField(transDateField);
-        transDateField.removeAttribute("required");
-      }
-
-      if (dueDateField) {
-        hideField(dueDateField);
-        dueDateField.value = "";
-        dueDateField.removeAttribute("required");
-      }
-
-      if (startDateField) {
-        showField(startDateField);
-        startDateField.setAttribute("required", "");
-      }
-
-      if (endDateField) {
-        showField(endDateField);
-        endDateField.setAttribute("required", "");
-      }
-    }
+    updateDateFieldsByFrequency(freqField.value);
   });
 
-  // Transaction type change logic
+  // Handle type change
   typeField.addEventListener("change", function () {
     const selectedType = typeField.value;
 
-    if (dueDateField) {
-      if (selectedType === "payment" || selectedType === "credit") {
-        hideField(dueDateField);
-        dueDateField.value = "";
-        dueDateField.removeAttribute("required");
-      } else if (freqField.value === "one-time") {
-        showField(dueDateField);
-      }
-    }
-
-    // Frequency logic override for payment/credit
     if (selectedType === "payment" || selectedType === "credit") {
+      // Force one-time and disable recurring
       freqField.value = "one-time";
       Array.from(freqField.options).forEach(option => {
         option.disabled = option.value === "recurring";
       });
 
-      // Re-trigger frequency logic after forcing one-time
-      $(freqField).trigger("change");
-
+      // Update visibility/requirements for one-time
+      updateDateFieldsByFrequency("one-time");
     } else if (selectedType === "charge") {
+      // Re-enable all frequency options
       Array.from(freqField.options).forEach(option => {
         option.disabled = false;
       });
+
+      // Re-trigger logic in case user just switched type back
+      updateDateFieldsByFrequency(freqField.value);
     }
   });
 
-  // Initial state
-  $(freqField).trigger("change");
+  // Trigger on load
+  updateDateFieldsByFrequency(freqField.value);
   $(typeField).trigger("change");
 }
 
