@@ -703,6 +703,7 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('[data-api-input]').val('').removeAttr('required');
 
   const $submitBtn = $form.find('input[type="submit"]');
+  const $errorMsg = $form.find('.update-trans-error-message');
 
   // One-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
@@ -732,7 +733,7 @@ function updateUserTransaction(transId, transFreq) {
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    // Action dropdown logic
+    // Action change visibility logic
     $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
@@ -745,30 +746,27 @@ function updateUserTransaction(transId, transFreq) {
         $actionDate.hide();
       }
 
-      // Trigger input check again in case action changes from payment/credit to charge
-      $form.find('[data-api-input="amount"]').trigger('input');
+      $form.find('[data-api-input="amount"]').trigger('input'); // revalidate on action change
     });
 
-    // Real-time validation for amount vs remaining balance
+    // Amount field validation
     $form.find('[data-api-input="amount"]').off('input').on('input', function () {
       const action = $('#edit-transaction-action').val();
       const enteredAmount = parseFloat($(this).val());
       const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
 
-      let $message = $('#amount-limit-warning');
-      const $wrapper = $(this).closest('.w-embed');
-
-      if ($message.length === 0) {
-        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin-top: 6px;"></div>');
-        $wrapper.after($message);
-      }
-
-      if (["payment", "credit"].includes(action) && !isNaN(enteredAmount) && enteredAmount > remainingBalance) {
-        $message.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
-        $submitBtn.css({ pointerEvents: "none", opacity: 0.5 });
+      if (
+        ["payment", "credit"].includes(action) &&
+        !isNaN(enteredAmount) &&
+        enteredAmount > remainingBalance
+      ) {
+        $errorMsg.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
+        $errorMsg.css('display', 'block');
+        $submitBtn.css({ pointerEvents: 'none', opacity: 0.5 });
       } else {
-        $message.text('');
-        $submitBtn.css({ pointerEvents: "", opacity: "" });
+        $errorMsg.text('');
+        $errorMsg.css('display', 'none');
+        $submitBtn.css({ pointerEvents: '', opacity: '' });
       }
     });
 
@@ -810,7 +808,6 @@ function updateUserTransaction(transId, transFreq) {
         $form.find('[data-api-input="action_description"]').val(data.action_description);
         $form.find('[data-api-input="action_date"]').val(data.action_date);
         $form.find('[data-api-input="action"]').val(data.action).trigger("change");
-
       } else if (mode === "recurring") {
         $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
         $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
@@ -823,7 +820,7 @@ function updateUserTransaction(transId, transFreq) {
     },
   });
 
-  // Handle form submission
+  // Submit handler
   $form.off("submit").on("submit", function (event) {
     event.preventDefault();
     $(".modal__block").hide();
