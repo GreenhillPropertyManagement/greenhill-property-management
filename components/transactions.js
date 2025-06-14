@@ -126,9 +126,12 @@ $("[api-button='unit-transactions']")
     loadPropertyTransactions("recurring");
   });
 
-  $("[modal='property-transaction']").click(function () {
-    $("[api-button='all-prop-trans']").click();
-  });
+$("[modal='property-transaction']").click(function () {
+  $("[api-button='all-prop-trans']").click();
+
+  // Load codes when the property transaction modal opens
+  loadTransactionCodesInForm();
+});
 
   /* ----- Tenant Makes Payment ----*/
 
