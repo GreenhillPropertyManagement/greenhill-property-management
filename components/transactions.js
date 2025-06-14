@@ -1205,6 +1205,7 @@ function initTransactionFormUX(form) {
   // Exit if any of the required fields are missing (prevent errors)
   if (!freqField || !typeField) return;
 
+  // Hide all date fields initially and remove 'required'
   [transDateField, startDateField, endDateField, dueDateField].forEach(function (field) {
     if (field) {
       const wrapper = field.closest(".form__item");
@@ -1213,6 +1214,7 @@ function initTransactionFormUX(form) {
     }
   });
 
+  // Frequency change logic
   freqField.addEventListener("change", function () {
     const selectedFreq = freqField.value;
 
@@ -1225,11 +1227,9 @@ function initTransactionFormUX(form) {
       if (dueDateField) {
         if (typeField.value !== "payment" && typeField.value !== "credit") {
           dueDateField.closest(".form__item").style.display = "block";
-
         } else {
           dueDateField.closest(".form__item").style.display = "none";
           dueDateField.value = "";
-
         }
       }
 
@@ -1265,17 +1265,36 @@ function initTransactionFormUX(form) {
     }
   });
 
+  // Transaction type change logic
   typeField.addEventListener("change", function () {
     const selectedType = typeField.value;
 
+    // Due date logic
     if (dueDateField) {
       if (selectedType === "payment" || selectedType === "credit") {
         dueDateField.closest(".form__item").style.display = "none";
         dueDateField.value = "";
         dueDateField.removeAttribute("required");
       } else if (freqField.value === "one-time") {
-
+        dueDateField.closest(".form__item").style.display = "block";
       }
+    }
+
+    // Frequency logic based on type
+    if (selectedType === "payment" || selectedType === "credit") {
+      freqField.value = "one-time";
+      Array.from(freqField.options).forEach(option => {
+        if (option.value === "recurring") {
+          option.disabled = true;
+        } else {
+          option.disabled = false;
+        }
+      });
+      $(freqField).trigger("change"); // Apply one-time logic
+    } else if (selectedType === "charge") {
+      Array.from(freqField.options).forEach(option => {
+        option.disabled = false;
+      });
     }
   });
 
