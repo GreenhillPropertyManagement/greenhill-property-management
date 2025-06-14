@@ -1212,15 +1212,17 @@ function initTransactionFormUX(form) {
     const wrapper = field?.closest('.form__item');
     if (wrapper) {
       wrapper.style.removeProperty('display');
-      if (window.getComputedStyle(wrapper).display === 'none') {
-        wrapper.style.display = 'flex'; // fallback
+      if (getComputedStyle(wrapper).display === 'none') {
+        wrapper.style.display = 'flex';
       }
     }
   }
 
   function hideField(field) {
     const wrapper = field?.closest('.form__item');
-    if (wrapper) wrapper.style.display = 'none';
+    if (wrapper) {
+      wrapper.style.display = 'none';
+    }
   }
 
   function setRequired(field, isRequired) {
@@ -1232,10 +1234,19 @@ function initTransactionFormUX(form) {
     }
   }
 
-  function updateDateFields() {
-    const freq = freqField.value;
+  // Hide all date fields initially
+  [transDateField, startDateField, endDateField].forEach(field => {
+    if (field) {
+      hideField(field);
+      setRequired(field, false);
+    }
+  });
 
-    if (freq === "one-time") {
+  // Only triggered when frequency field is changed by user
+  freqField.addEventListener('change', function () {
+    const selected = freqField.value;
+
+    if (selected === 'one-time') {
       showField(transDateField);
       setRequired(transDateField, true);
 
@@ -1243,7 +1254,9 @@ function initTransactionFormUX(form) {
       hideField(endDateField);
       setRequired(startDateField, false);
       setRequired(endDateField, false);
-    } else if (freq === "recurring") {
+    }
+
+    if (selected === 'recurring') {
       hideField(transDateField);
       setRequired(transDateField, false);
 
@@ -1252,33 +1265,31 @@ function initTransactionFormUX(form) {
       setRequired(startDateField, true);
       setRequired(endDateField, true);
     }
-  }
+  });
 
-  // Handle frequency changes only (controls date fields)
-  freqField.addEventListener("change", updateDateFields);
-
-  // Handle type logic: restrict frequency options
-  typeField.addEventListener("change", function () {
+  // Handle type logic — only restrict frequency options
+  typeField.addEventListener('change', function () {
     const selectedType = typeField.value;
 
-    if (selectedType === "payment" || selectedType === "credit") {
-      freqField.value = "one-time";
+    if (selectedType === 'payment' || selectedType === 'credit') {
+      freqField.value = 'one-time';
       Array.from(freqField.options).forEach(option => {
-        option.disabled = option.value === "recurring";
+        option.disabled = option.value === 'recurring';
       });
 
-      $(freqField).trigger("change"); // make sure frequency logic runs
-    } else if (selectedType === "charge") {
+      // Manually trigger frequency change to ensure field logic applies
+      freqField.dispatchEvent(new Event('change'));
+    } else if (selectedType === 'charge') {
       Array.from(freqField.options).forEach(option => {
         option.disabled = false;
       });
     }
   });
 
-  // Initial trigger
-  $(typeField).trigger("change"); // apply type restrictions
-  $(freqField).trigger("change"); // apply date visibility based on selected frequency
+  // ⚠️ DO NOT auto-trigger field visibility on load.
+  // Wait for user to interact with frequency dropdown.
 }
+
 function showEmptyState($container) {
   $container.html(`
     <div class="system-text__main" style="text-align: center; margin-top: 2em;">
