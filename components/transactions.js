@@ -1198,34 +1198,6 @@ function makeGeneralBalancePayment() {
   });
 }
 
-function loadTransactionCodesInForm() {
-  $.ajax({
-    url: localStorage.baseUrl + "api:ehsPQykn/load_transaction_codes_form",
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken,
-      "Content-Type": "application/json"
-    },
-    success: function (response) {
-      const $select = $('[data-api-input="transaction_code"]');
-
-      $select.empty();
-      $select.append('<option selected disabled value="">Select Transaction Code...</option>');
-
-      response.forEach(item => {
-        const option = `<option value="${item.id}">${item.code} - ${item.title}</option>`;
-        $select.append(option);
-      });
-    },
-    error: function (xhr) {
-      console.error("Error loading transaction codes:", xhr.responseText);
-    },
-    complete: function () {
-      console.log("Transaction codes loaded.");
-    }
-  });
-}
-
 function initTransactionFormUX(form) {
   const freqField = form.querySelector('[data-api-input="frequency"]');
   const typeField = form.querySelector('[data-api-input="type"]');
@@ -1235,13 +1207,13 @@ function initTransactionFormUX(form) {
 
   if (!freqField || !typeField) return;
 
-  // Helpers to show/hide fields
+  // Helpers
   function showField(field) {
     const wrapper = field?.closest('.form__item');
     if (wrapper) {
       wrapper.style.removeProperty('display');
-      if (getComputedStyle(wrapper).display === 'none') {
-        wrapper.style.display = 'flex'; // or 'block' depending on layout
+      if (window.getComputedStyle(wrapper).display === 'none') {
+        wrapper.style.display = 'flex'; // fallback
       }
     }
   }
@@ -1260,8 +1232,10 @@ function initTransactionFormUX(form) {
     }
   }
 
-  function updateDateFieldsByFrequency(freqValue) {
-    if (freqValue === 'one-time') {
+  function updateDateFields() {
+    const freq = freqField.value;
+
+    if (freq === "one-time") {
       showField(transDateField);
       setRequired(transDateField, true);
 
@@ -1269,9 +1243,7 @@ function initTransactionFormUX(form) {
       hideField(endDateField);
       setRequired(startDateField, false);
       setRequired(endDateField, false);
-    }
-
-    if (freqValue === 'recurring') {
+    } else if (freq === "recurring") {
       hideField(transDateField);
       setRequired(transDateField, false);
 
@@ -1282,40 +1254,31 @@ function initTransactionFormUX(form) {
     }
   }
 
-  // Handle frequency change
-  freqField.addEventListener("change", function () {
-    updateDateFieldsByFrequency(freqField.value);
-  });
+  // Handle frequency changes only (controls date fields)
+  freqField.addEventListener("change", updateDateFields);
 
-  // Handle type change
+  // Handle type logic: restrict frequency options
   typeField.addEventListener("change", function () {
     const selectedType = typeField.value;
 
     if (selectedType === "payment" || selectedType === "credit") {
-      // Force one-time and disable recurring
       freqField.value = "one-time";
       Array.from(freqField.options).forEach(option => {
         option.disabled = option.value === "recurring";
       });
 
-      // Update visibility/requirements for one-time
-      updateDateFieldsByFrequency("one-time");
+      $(freqField).trigger("change"); // make sure frequency logic runs
     } else if (selectedType === "charge") {
-      // Re-enable all frequency options
       Array.from(freqField.options).forEach(option => {
         option.disabled = false;
       });
-
-      // Re-trigger logic in case user just switched type back
-      updateDateFieldsByFrequency(freqField.value);
     }
   });
 
-  // Trigger on load
-  updateDateFieldsByFrequency(freqField.value);
-  $(typeField).trigger("change");
+  // Initial trigger
+  $(typeField).trigger("change"); // apply type restrictions
+  $(freqField).trigger("change"); // apply date visibility based on selected frequency
 }
-
 function showEmptyState($container) {
   $container.html(`
     <div class="system-text__main" style="text-align: center; margin-top: 2em;">
