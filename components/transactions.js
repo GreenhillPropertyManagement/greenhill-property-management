@@ -684,7 +684,6 @@ function loadUserTransactions(view, type) {
 }
 
 function updateUserTransaction(transId, transFreq) {
-
   var responseData;
 
   $("#delete-trans-button").hide(); // always hide first
@@ -720,7 +719,7 @@ function updateUserTransaction(transId, transFreq) {
   const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
 
   if (transFreq === "one_time") {
-    // Show one-time
+    // Show one-time fields
     $remainingBalancewrapper.show();
     $actionDescription.show();
     $actionDate.show();
@@ -747,13 +746,34 @@ function updateUserTransaction(transId, transFreq) {
       }
     });
 
+    // Warn if amount exceeds remaining balance
+    $form.find('[data-api-input="amount"]').off('input').on('input', function () {
+      const action = $('#edit-transaction-action').val();
+      if (action !== 'payment' && action !== 'credit') return;
+
+      const enteredAmount = parseFloat($(this).val());
+      const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
+
+      let $message = $('#amount-limit-warning');
+      if ($message.length === 0) {
+        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin-top: 4px;"></div>');
+        $(this).after($message);
+      }
+
+      if (!isNaN(enteredAmount) && enteredAmount > remainingBalance) {
+        $message.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
+      } else {
+        $message.text('');
+      }
+    });
+
   } else {
-    // Show recurring
+    // Show recurring fields
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.show();
     });
 
-    // Hide one-time
+    // Hide one-time fields
     [$remainingBalancewrapper, $transDateWrapper, $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
@@ -802,6 +822,17 @@ function updateUserTransaction(transId, transFreq) {
     event.preventDefault();
     $(".modal__block").hide();
     $(".loader").css("display", "flex");
+
+    // Enforce amount does not exceed remaining balance
+    const actionType = $form.find('[data-api-input="action"]').val();
+    const amountVal = parseFloat($form.find('[data-api-input="amount"]').val());
+    const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
+
+    if (["payment", "credit"].includes(actionType) && amountVal > remainingBalance) {
+      $(".loader").hide();
+      showToast("Entered amount exceeds remaining balance.");
+      return;
+    }
 
     const formData = {};
     $form.find("[data-api-input]").each(function () {
