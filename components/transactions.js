@@ -684,8 +684,6 @@ function loadUserTransactions(view, type) {
 }
 
 function updateUserTransaction(transId, transFreq) {
-  var responseData;
-
   $("#delete-trans-button").hide();
 
   if (transFreq === "recurring") {
@@ -703,6 +701,8 @@ function updateUserTransaction(transId, transFreq) {
   $form[0].reset();
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
+
+  const $submitBtn = $form.find('input[type="submit"]');
 
   // One-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
@@ -732,7 +732,7 @@ function updateUserTransaction(transId, transFreq) {
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    // Handle action change visibility
+    // Action dropdown logic
     $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
@@ -744,28 +744,31 @@ function updateUserTransaction(transId, transFreq) {
         $actionDescription.hide();
         $actionDate.hide();
       }
+
+      // Trigger input check again in case action changes from payment/credit to charge
+      $form.find('[data-api-input="amount"]').trigger('input');
     });
 
-    // Enforce amount ≤ remaining balance
+    // Real-time validation for amount vs remaining balance
     $form.find('[data-api-input="amount"]').off('input').on('input', function () {
       const action = $('#edit-transaction-action').val();
-      if (action !== 'payment' && action !== 'credit') return;
-
       const enteredAmount = parseFloat($(this).val());
       const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
 
       let $message = $('#amount-limit-warning');
-      const $buttonGroup = $form.find('.intake__form__bttn-wrapper.is--centered');
+      const $wrapper = $(this).closest('.w-embed');
 
-      if ($message.length === 0 && $buttonGroup.length > 0) {
-        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin: 12px 0;"></div>');
-        $buttonGroup.before($message);
+      if ($message.length === 0) {
+        $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin-top: 6px;"></div>');
+        $wrapper.after($message);
       }
 
-      if (!isNaN(enteredAmount) && enteredAmount > remainingBalance) {
+      if (["payment", "credit"].includes(action) && !isNaN(enteredAmount) && enteredAmount > remainingBalance) {
         $message.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
+        $submitBtn.css({ pointerEvents: "none", opacity: 0.5 });
       } else {
         $message.text('');
+        $submitBtn.css({ pointerEvents: "", opacity: "" });
       }
     });
 
@@ -782,7 +785,7 @@ function updateUserTransaction(transId, transFreq) {
     });
   }
 
-  // Load transaction data
+  // Load existing transaction data
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -820,13 +823,12 @@ function updateUserTransaction(transId, transFreq) {
     },
   });
 
-  // Submit handler
+  // Handle form submission
   $form.off("submit").on("submit", function (event) {
     event.preventDefault();
     $(".modal__block").hide();
     $(".loader").css("display", "flex");
 
-    // Prevent submission if amount > balance
     const actionType = $form.find('[data-api-input="action"]').val();
     const amountVal = parseFloat($form.find('[data-api-input="amount"]').val());
     const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
