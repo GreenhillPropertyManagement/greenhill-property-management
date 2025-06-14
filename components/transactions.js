@@ -757,7 +757,7 @@ function updateUserTransaction(transId, transFreq) {
       let $message = $('#amount-limit-warning');
       if ($message.length === 0) {
         $message = $('<div id="amount-limit-warning" class="form__error" style="color: red; font-size: 13px; margin-top: 4px;"></div>');
-        $(this).after($message);
+        $(this).closest('.form__item').append($message);
       }
 
       if (!isNaN(enteredAmount) && enteredAmount > remainingBalance) {
