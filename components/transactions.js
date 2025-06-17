@@ -425,6 +425,7 @@ function updatePropertyTransaction(transId, transFreq) {
         // Pre Populate Form Fields
         $("[data-api-input=description]").val(response.description);
         $("[data-api-input=type]").val(response.type);
+        $("[data-api-input=transaction_code]").val(response.transaction_code);
         $("[data-api-input=recipient]").val(response.recipient_type);
         $("[data-api-input=frequency]").val(response.frequency);
         $("[data-api-input=transaction_date]").val(response.transaction_date);
