@@ -411,6 +411,14 @@ function updatePropertyTransaction(transId, transFreq) {
     $("#edit-prop-trans-amount").attr("required", "required");
   }
 
+  //Reset shared field before loading new transaction
+  const $sharedField = $('#edit-remaining-trans-balance');
+  const $sharedFieldWrapper = $sharedField.closest('.form__item');
+  $sharedFieldWrapper.show();
+  $sharedFieldWrapper.find('.form__label').text('Remaining Transaction Balance');
+  $sharedField.attr('data-api-input', 'remaining_transaction_balance').val('');
+  $sharedField.removeAttr('required');
+
   /* Load Selected Property Transaction */
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_property_transaction",
