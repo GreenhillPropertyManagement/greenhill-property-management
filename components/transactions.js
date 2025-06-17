@@ -218,7 +218,6 @@ function createPropertyTransaction() {
 }
 
 function loadPropertyTransactions(type) {
-
   $(".pocket-loader").css("display", "flex");
 
   const containerId = type === "recurring" ? "#recurring-prop-trans-container" : "#prop-trans-container";
@@ -240,8 +239,7 @@ function loadPropertyTransactions(type) {
       const mode = response.mode;
       const transactions = response.transactions;
 
-      
-      if (!transactions.length) { // if there are no transactions...
+      if (!transactions.length) {
         showEmptyState($(".dyn-container__transactions:visible"));
         return;
       }
@@ -252,45 +250,60 @@ function loadPropertyTransactions(type) {
         const amount = `$${item.amount}`;
         const frequency = mode;
 
-        const startOrDue = mode === "recurring"
-          ? formatDateNoTime(item.transaction_start_date)
-          : formatDateNoTime(item.transaction_date);
+        let html = '';
 
-        const endOrAmount = mode === "recurring"
-          ? formatDateNoTime(item.transaction_end_date)
-          : amount;
+        if (mode === "recurring") {
+          const startDate = formatDateNoTime(item.transaction_start_date);
+          const endDate = formatDateNoTime(item.transaction_end_date);
 
-        const finalValue = mode === "recurring"
-          ? amount
-          : `$${item.remaining_transaction_balance || 0}`;
+          html = `
+            <div class="trans-item-updated wf-grid prop-trans" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Description</div>
+                <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
 
-        const html = `
-          <div class="trans-item-updated wf-grid prop-trans" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Description</div>
-              <div class="trans-item__cell-data" data-api="description">${description}</div>
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Start Date</div>
+                <div class="trans-item__cell-data" data-api="start_date">${startDate}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">End Date</div>
+                <div class="trans-item__cell-data" data-api="end_date">${endDate}</div>
+              </div>
+
+              <div class="trans-item__cell last">
+                <div class="trans-item__cell-header">Charge Amount</div>
+                <div class="trans-item__cell-data" data-api="amount">${amount}</div>
+              </div>
             </div>
+          `;
+        } else {
+          const billingPeriod = formatDateNoTime(item.transaction_date);
 
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${mode === "recurring" ? "Start Date" : "Due Date"}</div>
-              <div class="trans-item__cell-data" data-api="start_or_due">${startOrDue}</div>
-            </div>
+          html = `
+            <div class="trans-item-updated wf-grid prop-trans" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Description</div>
+                <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
 
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${mode === "recurring" ? "End Date" : "Charge Amount"}</div>
-              <div class="trans-item__cell-data" data-api="end_or_amount">${endOrAmount}</div>
-            </div>
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Billing Period</div>
+                <div class="trans-item__cell-data" data-api="billing_period">${billingPeriod}</div>
+              </div>
 
-            <div class="trans-item__cell last">
-              <div class="trans-item__cell-header">${mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance"}</div>
-              <div class="trans-item__cell-data" data-api="final_value">${finalValue}</div>
+              <div class="trans-item__cell last">
+                <div class="trans-item__cell-header">Charge Amount</div>
+                <div class="trans-item__cell-data" data-api="amount">${amount}</div>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
 
         const $html = $(html);
 
-        // Conditionally bind click if editPermissions is true
         if (localStorage.getItem("editPermissions") === "true") {
           $html.css({
             cursor: "pointer",
@@ -298,9 +311,8 @@ function loadPropertyTransactions(type) {
           });
 
           $html.off("click").on("click", function () {
-            updatePropertyTransaction(id, frequency); // or whatever your handler is
+            updatePropertyTransaction(id, frequency);
           });
-
         } else {
           $html.css({
             cursor: "default",
