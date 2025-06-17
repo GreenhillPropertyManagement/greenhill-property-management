@@ -527,7 +527,7 @@ function updatePropertyTransaction(transId, transFreq) {
         success: function (response) {
           showToast("Success! Property Transaction Updated.");
           $(".loader").hide();
-          loadProperty();
+          //loadProperty();
           $('[api-form="update-transaction"]')[0].reset();
         },
         complete: function () {
