@@ -442,6 +442,10 @@ function updatePropertyTransaction(transId, transFreq) {
         // Hide fields for property transactions
         $("#edit-remaining-trans-balance").closest(".form__item").hide();
         $("#edit-remaining-trans-balance").removeAttr("required");
+        $("#edit-transaction-due-date").closest(".form__item").hide();
+        $("#edit-transaction-due-date").removeAttr("required");
+        $("#edit-transaction-action").closest(".form__item").hide();
+        $("#edit-transaction-action").removeAttr("required");
 
         // Update the label text
         $fieldWrapper.find('.form__label').text('Transaction Amount');
