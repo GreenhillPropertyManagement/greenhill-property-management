@@ -481,7 +481,7 @@ function updatePropertyTransaction(transId, transFreq) {
   });
 
   /* Handle Form Submission to Update Transaction */
-  $('form[api-form="update-transaction"]')
+  $('[api-form="update-transaction"]')
     .off("submit")
     .submit(function (event) {
       // Prevent the default form submission behavior
@@ -520,7 +520,7 @@ function updatePropertyTransaction(transId, transFreq) {
           showToast("Success! Property Transaction Updated.");
           $(".loader").hide();
           loadProperty();
-          $("#property-transaction-form")[0].reset();
+          $('[api-form="update-transaction"]')[0].reset();
         },
         complete: function () {
           $("[api-button='all-prop-trans']").click();
