@@ -531,7 +531,7 @@ function updatePropertyTransaction(transId, transFreq) {
           $('[api-form="update-transaction"]')[0].reset();
         },
         complete: function () {
-          $("[api-button='all-prop-trans']").click();
+          //$("[api-button='all-prop-trans']").click();
         },
       });
     });
