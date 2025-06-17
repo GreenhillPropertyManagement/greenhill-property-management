@@ -503,10 +503,10 @@ function updatePropertyTransaction(transId, transFreq) {
 
       // Iterate through form inputs with data-api-input attribute and collect key-value pairs
       $(this)
-        .find("[data-api-input]")
+        .find("input[data-api-input], select[data-api-input], textarea[data-api-input]")
         .each(function () {
           const input = $(this);
-          const key = input.data("api-input"); // Get the data attribute value
+          const key = input.data("api-input");
           const value = input.val();
           formData[key] = value;
         });
