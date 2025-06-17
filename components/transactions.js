@@ -338,6 +338,7 @@ function loadPropertyTransactions(type) {
 
 function updatePropertyTransaction(transId, transFreq) {
 
+
   var responseData; // Variable to store response data
 
   $("#delete-trans-button").hide(); // always hide first
@@ -480,7 +481,7 @@ function updatePropertyTransaction(transId, transFreq) {
   });
 
   /* Handle Form Submission to Update Transaction */
-  $("#edit-prop-trans-form")
+  $('form[api-form="update-transaction"]')
     .off("submit")
     .submit(function (event) {
       // Prevent the default form submission behavior
