@@ -432,23 +432,36 @@ function updatePropertyTransaction(transId, transFreq) {
         $("[data-api-input=transaction_end_date]").val(response.transaction_end_date);
         $("[data-api-input=amount]").val(response.amount);
 
-        // Check if is_property_trans key exists and is true
-        if ('is_property_trans' in response && response.is_property_trans === true) {
-          const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+      // Check if is_property_trans key exists and is true
+      if ('is_property_trans' in response && response.is_property_trans === true) {
+        const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
 
-          // Update the label text
-          $fieldWrapper.find('.form__label').text('Transaction Amount');
+        // Update the label text
+        $fieldWrapper.find('.form__label').text('Transaction Amount');
 
-          // Update the input to reflect new binding and value
-          $('#edit-remaining-trans-balance')
-            .attr('data-api-input', 'transaction_amount')
-            .val(response.amount);
+        // Update the input to reflect new binding and value
+        $('#edit-remaining-trans-balance')
+          .attr('data-api-input', 'transaction_amount')
+          .val(response.amount);
 
-          // Unbind the original "amount" field so it doesn’t conflict
-          $("[data-api-input='amount']")
-            .removeAttr('data-api-input')
-            .val(''); // Optional: clear value if you want to visually reset the field
-        }
+        // Unbind the original "amount" field
+        $("[data-api-input='amount']")
+          .removeAttr('data-api-input')
+          .val('');
+      } else {
+        const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+
+        // Restore the label to "Remaining Transaction Balance"
+        $fieldWrapper.find('.form__label').text('Remaining Transaction Balance');
+
+        // Reset input binding back to default
+        $('#edit-remaining-trans-balance')
+          .attr('data-api-input', 'remaining_transaction_balance')
+          .val(''); // optionally keep this .val('') or set to the appropriate value
+
+        // Restore original amount field if needed
+        $("[data-api-input='amount']").val(response.amount); // if still in use elsewhere
+      }
     },
     complete: function (response) {
       $(".loader").hide();
@@ -731,6 +744,13 @@ function updateUserTransaction(transId, transFreq) {
   $form[0].reset();
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
+
+  // Reset label and input binding for shared field
+  const $sharedFieldWrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
+  $sharedFieldWrapper.find('.form__label').text('Remaining Transaction Balance');
+  $form.find('#edit-remaining-trans-balance')
+    .attr('data-api-input', 'remaining_transaction_balance')
+    .val('');
 
   const $submitBtn = $form.find('input[type="submit"]');
   const $errorMsg = $form.find('.update-trans-error-message');
