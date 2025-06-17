@@ -439,10 +439,15 @@ function updatePropertyTransaction(transId, transFreq) {
           // Update the label text
           $fieldWrapper.find('.form__label').text('Transaction Amount');
 
-          // Update the input attribute
+          // Update the input to reflect new binding and value
           $('#edit-remaining-trans-balance')
             .attr('data-api-input', 'transaction_amount')
             .val(response.amount);
+
+          // Unbind the original "amount" field so it doesn’t conflict
+          $("[data-api-input='amount']")
+            .removeAttr('data-api-input')
+            .val(''); // Optional: clear value if you want to visually reset the field
         }
     },
     complete: function (response) {
