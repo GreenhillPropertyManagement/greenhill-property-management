@@ -240,7 +240,11 @@ function loadPropertyTransactions(type) {
       const transactions = response.transactions;
 
       if (!transactions.length) {
-        showEmptyState($(".dyn-container__transactions:visible"));
+        const $emptyTarget = type === "recurring"
+          ? $("#recurring-prop-trans-container").closest(".dyn-container__transactions")
+          : $("#prop-trans-container").closest(".dyn-container__transactions");
+
+        showEmptyState($emptyTarget);
         return;
       }
 
