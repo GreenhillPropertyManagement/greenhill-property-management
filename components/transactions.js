@@ -395,8 +395,8 @@ function updatePropertyTransaction(transId, transFreq) {
     $("#edit-prop-trans-end-date").removeAttr("required");
     $("#edit-prop-trans-amount").closest(".form__item").hide();
     $("#edit-prop-trans-amount").removeAttr("required");
-    $("#edit-remaining-trans-balance").closest(".form__item").hide();
-    $("#edit-remaining-trans-balance").removeAttr("required");
+
+
   } else {
     $("#edit-prop-trans-type").closest(".form__item").show();
     $("#edit-prop-trans-type").attr("required", "required");
@@ -438,6 +438,10 @@ function updatePropertyTransaction(transId, transFreq) {
       // Check if is_property_trans key exists and is true
       if ('is_property_trans' in response && response.is_property_trans === true) {
         const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+
+        // Hide fields for property transactions
+        $("#edit-remaining-trans-balance").closest(".form__item").hide();
+        $("#edit-remaining-trans-balance").removeAttr("required");
 
         // Update the label text
         $fieldWrapper.find('.form__label').text('Transaction Amount');
