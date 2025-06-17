@@ -422,19 +422,28 @@ function updatePropertyTransaction(transId, transFreq) {
     success: function (response) {
       responseData = response;
 
-      /*  Pre Populate Form Fields */
-      $("[data-api-input=description]").val(response.description);
-      $("[data-api-input=type]").val(response.type);
-      $("[data-api-input=recipient]").val(response.recipient_type);
-      $("[data-api-input=frequency]").val(response.frequency);
-      $("[data-api-input=transaction_date]").val(response.transaction_date);
-      $("[data-api-input=transaction_start_date]").val(
-        response.transaction_start_date,
-      );
-      $("[data-api-input=transaction_end_date]").val(
-        response.transaction_end_date,
-      );
-      $("[data-api-input=amount]").val(response.amount);
+        // Pre Populate Form Fields
+        $("[data-api-input=description]").val(response.description);
+        $("[data-api-input=type]").val(response.type);
+        $("[data-api-input=recipient]").val(response.recipient_type);
+        $("[data-api-input=frequency]").val(response.frequency);
+        $("[data-api-input=transaction_date]").val(response.transaction_date);
+        $("[data-api-input=transaction_start_date]").val(response.transaction_start_date);
+        $("[data-api-input=transaction_end_date]").val(response.transaction_end_date);
+        $("[data-api-input=amount]").val(response.amount);
+
+        // Check if is_property_trans key exists and is true
+        if ('is_property_trans' in response && response.is_property_trans === true) {
+          const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+
+          // Update the label text
+          $fieldWrapper.find('.form__label').text('Transaction Amount');
+
+          // Update the input attribute
+          $('#edit-remaining-trans-balance')
+            .attr('data-api-input', 'transaction_amount')
+            .val(response.amount);
+        }
     },
     complete: function (response) {
       $(".loader").hide();
