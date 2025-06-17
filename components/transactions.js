@@ -395,6 +395,8 @@ function updatePropertyTransaction(transId, transFreq) {
     $("#edit-prop-trans-end-date").removeAttr("required");
     $("#edit-prop-trans-amount").closest(".form__item").hide();
     $("#edit-prop-trans-amount").removeAttr("required");
+    $("#edit-remaining-trans-balance").closest(".form__item").hide();
+    $("#edit-remaining-trans-balance").removeAttr("required");
   } else {
     $("#edit-prop-trans-type").closest(".form__item").show();
     $("#edit-prop-trans-type").attr("required", "required");
