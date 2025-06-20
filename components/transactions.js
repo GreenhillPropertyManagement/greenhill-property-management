@@ -53,6 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
   /* Run form ui when modal opens */
   $('[modal="create-transaction"]').on("click", function () {
     const form = document.querySelector('form[api-form="user-transaction"]');
+
+    // Ensure amount field is always bound
+    $('#prop-trans-amount').attr('data-api-input', 'amount');
+
     if (form && !form.dataset.initialized) {
       initTransactionFormUX(form);
       form.dataset.initialized = "true";
@@ -165,44 +169,40 @@ $("[api-button='unit-transactions']")
 });
 
 function createPropertyTransaction() {
-  /* Api Call on Form Submission */
-
   $("#property-transaction-form")
     .off("submit")
     .submit(function (event) {
-      // Prevent the default form submission behavior
       event.preventDefault();
 
-      // Handle 'Loading' State
       $(".modal__block").hide();
       $(".loader").css("display", "flex");
 
       const formData = {};
 
-      // Iterate through form inputs with data-api-input attribute and collect key-value pairs
+      // Ensure amount field is still correctly bound
+      $('#prop-trans-amount').attr('data-api-input', 'amount');
+
+      // Collect form data
       $(this)
         .find("[data-api-input]")
         .each(function () {
           const input = $(this);
-          const key = input.data("api-input"); // Get the data attribute value
+          const key = input.data("api-input");
           const value = input.val();
           formData[key] = value;
         });
 
-      // Add additional data to formData
       formData["property_id"] = localStorage.propertyRecId;
 
-      // Make an AJAX POST request
       $.ajax({
         url: localStorage.baseUrl + "api:rpDXPv3x/create_property_transaction",
         type: "POST",
         headers: {
           Authorization: "Bearer " + localStorage.authToken,
         },
-        data: JSON.stringify(formData), // Convert formData to JSON
-        contentType: "application/json", // Set the content type to JSON
+        data: JSON.stringify(formData),
+        contentType: "application/json",
         success: function (response) {
-          
           $(".loader").hide();
           showToast("Success! Property Transaction Created.");
           const urlParams = new URLSearchParams(window.location.search);
