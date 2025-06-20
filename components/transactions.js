@@ -356,16 +356,9 @@ function loadPropertyTransactions(type) {
 }
 
 function updatePropertyTransaction(transId, transFreq) {
-  var responseData; // Variable to store response data
+  var responseData;
 
-  $("#delete-trans-button").hide(); // always hide first
-
-  if (transFreq === "recurring") {
-    $("#delete-trans-button").show().off("click").on("click", function () {
-      const isProperty = localStorage.pageId === "property";
-      deleteRecurringTransaction(transId, isProperty ? "property" : "user");
-    });
-  }
+  $("#delete-trans-button").hide(); // hide by default
 
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
@@ -390,22 +383,18 @@ function updatePropertyTransaction(transId, transFreq) {
       $amountWrapper.show();
       $descWrapper.show();
       $dateWrapper.show();
-
-      // Add data-api-input if not already set
       $amountInput.attr("data-api-input", "amount");
     } else {
       $amountInput.removeAttr("data-api-input").val('');
       $amountWrapper.hide();
-
       $descWrapper.find('[data-api-input]').val('').removeAttr("data-api-input");
       $descWrapper.hide();
-
       $dateWrapper.find('[data-api-input]').val('').removeAttr("data-api-input");
       $dateWrapper.hide();
     }
   });
 
-  // Update form visibility depending on transaction frequency
+  // Show/hide recurring fields
   if (transFreq === "one-time") {
     $("#edit-prop-trans-type").closest(".form__item").hide().removeAttr("required");
     $("#edit-prop-trans-recipient").closest(".form__item").hide().removeAttr("required");
@@ -420,7 +409,7 @@ function updatePropertyTransaction(transId, transFreq) {
     $("#edit-prop-trans-amount").closest(".form__item").show().attr("required", "required");
   }
 
-  // Reset shared field before loading transaction
+  // Reset shared field
   const $sharedField = $('#edit-remaining-trans-balance');
   const $sharedFieldWrapper = $sharedField.closest('.form__item');
   $sharedFieldWrapper.show();
@@ -428,7 +417,7 @@ function updatePropertyTransaction(transId, transFreq) {
   $sharedField.attr('data-api-input', 'remaining_transaction_balance').val('');
   $sharedField.removeAttr('required');
 
-  /* Load Selected Property Transaction */
+  // Load transaction
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_property_transaction",
     type: "GET",
@@ -442,7 +431,20 @@ function updatePropertyTransaction(transId, transFreq) {
     success: function (response) {
       responseData = response;
 
-      // Pre Populate Form Fields
+      // Show delete button if frequency is recurring OR recipient is landlord
+      if (
+        response.frequency === "recurring" ||
+        response.recipient_type === "landlord"
+      ) {
+        $("#delete-trans-button").show().off("click").on("click", function () {
+          const isProperty = localStorage.pageId === "property";
+          deleteRecurringTransaction(transId, isProperty ? "property" : "user");
+        });
+      } else {
+        $("#delete-trans-button").hide();
+      }
+
+      // Pre-fill form
       $("[data-api-input=description]").val(response.description);
       $("[data-api-input=type]").val(response.type);
       $("[data-api-input=transaction_code]").val(response.transaction_code);
@@ -457,17 +459,15 @@ function updatePropertyTransaction(transId, transFreq) {
       const $dueDateWrapper = $('#edit-transaction-due-date').closest('.form__item');
       const $actionWrapper = $('#edit-transaction-action').closest('.form__item');
 
-      if ('is_property_trans' in response && response.is_property_trans === true) {
+      if (response.is_property_trans === true) {
         const recipient = response.recipient_type;
 
         if (recipient === 'landlord') {
-          // Show action and balance, hide due date
           $balanceWrapper.show().attr("required", "required");
           $actionWrapper.show().attr("required", "required");
           $dueDateWrapper.hide().removeAttr("required");
 
           $balanceWrapper.find('.form__label').text('Transaction Amount');
-
           $('#edit-remaining-trans-balance')
             .attr('data-api-input', 'transaction_amount')
             .val(response.amount);
@@ -476,39 +476,33 @@ function updatePropertyTransaction(transId, transFreq) {
             .removeAttr('data-api-input')
             .val('');
         } else if (recipient === 'tenant') {
-          // Hide all 3
           $balanceWrapper.hide().removeAttr("required");
           $actionWrapper.hide().removeAttr("required");
           $dueDateWrapper.hide().removeAttr("required");
 
-          // Still update label in case it's visible again later
           $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
-
-          // Ensure proper binding reset
           $('#edit-remaining-trans-balance')
             .attr('data-api-input', 'remaining_transaction_balance')
             .val('');
         }
       } else {
-        // Restore defaults for non-property transactions
+        // Not a property transaction
         $balanceWrapper.show().attr("required", "required");
         $actionWrapper.show().attr("required", "required");
         $dueDateWrapper.show().attr("required", "required");
 
         $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
-
         $('#edit-remaining-trans-balance')
           .attr('data-api-input', 'remaining_transaction_balance')
           .val(response.remaining_transaction_balance || '');
       }
-
     },
     complete: function () {
       $(".loader").hide();
     }
   });
 
-  /* Handle Form Submission to Update Transaction */
+  // Handle form submission
   $('[api-form="update-transaction"]')
     .off("submit")
     .submit(function (event) {
@@ -539,14 +533,13 @@ function updatePropertyTransaction(transId, transFreq) {
         },
         data: JSON.stringify(formData),
         contentType: "application/json",
-        success: function (response) {
+        success: function () {
           showToast("Success! Property Transaction Updated.");
           $(".loader").hide();
           $('[api-form="update-transaction"]')[0].reset();
         },
         complete: function () {
-          // Optionally trigger reload
-          // $("[api-button='all-prop-trans']").click();
+          // Optional: reload data if needed
         },
       });
     });
