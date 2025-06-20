@@ -356,8 +356,6 @@ function loadPropertyTransactions(type) {
 }
 
 function updatePropertyTransaction(transId, transFreq) {
-
-
   var responseData; // Variable to store response data
 
   $("#delete-trans-button").hide(); // always hide first
@@ -394,43 +392,31 @@ function updatePropertyTransaction(transId, transFreq) {
     } else {
       $amountWrapper.find('[data-api-input]').val('');
       $amountWrapper.hide();
-      
+
       $descWrapper.find('[data-api-input]').val('');
       $descWrapper.hide();
-      
+
       $dateWrapper.find('[data-api-input]').val('');
       $dateWrapper.hide();
     }
   });
 
-  /* update form depending on the transaction frequency type */
+  // Update form visibility depending on transaction frequency
   if (transFreq === "one-time") {
-    $("#edit-prop-trans-type").closest(".form__item").hide();
-    $("#edit-prop-trans-type").removeAttr("required");
-    $("#edit-prop-trans-recipient").closest(".form__item").hide();
-    $("#edit-prop-trans-recipient").removeAttr("required");
-    $("#edit-prop-trans-start-date").closest(".form__item").hide();
-    $("#edit-prop-trans-start-date").removeAttr("required");
-    $("#edit-prop-trans-end-date").closest(".form__item").hide();
-    $("#edit-prop-trans-end-date").removeAttr("required");
-    $("#edit-prop-trans-amount").closest(".form__item").hide();
-    $("#edit-prop-trans-amount").removeAttr("required");
-
-
+    $("#edit-prop-trans-type").closest(".form__item").hide().removeAttr("required");
+    $("#edit-prop-trans-recipient").closest(".form__item").hide().removeAttr("required");
+    $("#edit-prop-trans-start-date").closest(".form__item").hide().removeAttr("required");
+    $("#edit-prop-trans-end-date").closest(".form__item").hide().removeAttr("required");
+    $("#edit-prop-trans-amount").closest(".form__item").hide().removeAttr("required");
   } else {
-    $("#edit-prop-trans-type").closest(".form__item").show();
-    $("#edit-prop-trans-type").attr("required", "required");
-    $("#edit-prop-trans-recipient").closest(".form__item").show();
-    $("#edit-prop-trans-recipient").attr("required", "required");
-    $("#edit-prop-trans-start-date").closest(".form__item").show();
-    $("#edit-prop-trans-start-date").attr("required", "required");
-    $("#edit-prop-trans-end-date").closest(".form__item").show();
-    $("#edit-prop-trans-end-date").attr("required", "required");
-    $("#edit-prop-trans-amount").closest(".form__item").show();
-    $("#edit-prop-trans-amount").attr("required", "required");
+    $("#edit-prop-trans-type").closest(".form__item").show().attr("required", "required");
+    $("#edit-prop-trans-recipient").closest(".form__item").show().attr("required", "required");
+    $("#edit-prop-trans-start-date").closest(".form__item").show().attr("required", "required");
+    $("#edit-prop-trans-end-date").closest(".form__item").show().attr("required", "required");
+    $("#edit-prop-trans-amount").closest(".form__item").show().attr("required", "required");
   }
 
-  //Reset shared field before loading new transaction
+  // Reset shared field before loading transaction
   const $sharedField = $('#edit-remaining-trans-balance');
   const $sharedFieldWrapper = $sharedField.closest('.form__item');
   $sharedFieldWrapper.show();
@@ -452,75 +438,62 @@ function updatePropertyTransaction(transId, transFreq) {
     success: function (response) {
       responseData = response;
 
-        // Pre Populate Form Fields
-        $("[data-api-input=description]").val(response.description);
-        $("[data-api-input=type]").val(response.type);
-        $("[data-api-input=transaction_code]").val(response.transaction_code);
-        $("[data-api-input=recipient]").val(response.recipient_type);
-        $("[data-api-input=frequency]").val(response.frequency);
-        $("[data-api-input=transaction_date]").val(response.transaction_date);
-        $("[data-api-input=transaction_start_date]").val(response.transaction_start_date);
-        $("[data-api-input=transaction_end_date]").val(response.transaction_end_date);
-        $("[data-api-input=amount]").val(response.amount);
+      // Pre Populate Form Fields
+      $("[data-api-input=description]").val(response.description);
+      $("[data-api-input=type]").val(response.type);
+      $("[data-api-input=transaction_code]").val(response.transaction_code);
+      $("[data-api-input=recipient]").val(response.recipient_type);
+      $("[data-api-input=frequency]").val(response.frequency);
+      $("[data-api-input=transaction_date]").val(response.transaction_date);
+      $("[data-api-input=transaction_start_date]").val(response.transaction_start_date);
+      $("[data-api-input=transaction_end_date]").val(response.transaction_end_date);
+      $("[data-api-input=amount]").val(response.amount);
 
-      // Check if is_property_trans key exists and is true
+      // Conditional field visibility based on property transaction + recipient
+      const $balanceWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+      const $dueDateWrapper = $('#edit-transaction-due-date').closest('.form__item');
+      const $actionWrapper = $('#edit-transaction-action').closest('.form__item');
+
       if ('is_property_trans' in response && response.is_property_trans === true) {
-        const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
+        const recipient = response.recipient_type;
 
-        // Hide fields for property transactions
-        $("#edit-remaining-trans-balance").closest(".form__item").hide();
-        $("#edit-remaining-trans-balance").removeAttr("required");
-        $("#edit-transaction-due-date").closest(".form__item").hide();
-        $("#edit-transaction-due-date").removeAttr("required");
-        $("#edit-transaction-action").closest(".form__item").hide();
-        $("#edit-transaction-action").removeAttr("required");
-
-        // Update the label text
-        $fieldWrapper.find('.form__label').text('Transaction Amount');
-
-        // Update the input to reflect new binding and value
-       /* $('#edit-remaining-trans-balance')
-          .attr('data-api-input', 'transaction_amount')
-          .val(response.amount);
-
-        // Unbind the original "amount" field
-        $("[data-api-input='amount']")
-          .removeAttr('data-api-input')
-          .val('');*/
+        if (recipient === 'landlord') {
+          // Show action and balance, hide due date
+          $balanceWrapper.show().attr("required", "required");
+          $actionWrapper.show().attr("required", "required");
+          $dueDateWrapper.hide().removeAttr("required");
+          $balanceWrapper.find('.form__label').text('Transaction Amount');
+        } else if (recipient === 'tenant') {
+          // Show only balance, hide others
+          $balanceWrapper.show().attr("required", "required");
+          $actionWrapper.hide().removeAttr("required");
+          $dueDateWrapper.hide().removeAttr("required");
+          $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
+        }
       } else {
-        const $fieldWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
-
-        // Restore the label to "Remaining Transaction Balance"
-        $fieldWrapper.find('.form__label').text('Remaining Transaction Balance');
-
-        // Reset input binding back to default
-       /* $('#edit-remaining-trans-balance')
-          .attr('data-api-input', 'remaining_transaction_balance')
-          .val(''); // optionally keep this .val('') or set to the appropriate value
-
-        // Restore original amount field if needed
-        $("[data-api-input='amount']").val(response.amount); // if still in use elsewhere*/
+        // Restore all fields
+        $balanceWrapper.show().attr("required", "required");
+        $actionWrapper.show().attr("required", "required");
+        $dueDateWrapper.show().attr("required", "required");
+        $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
       }
     },
-    complete: function (response) {
+    complete: function () {
       $(".loader").hide();
-    },
+    }
   });
 
   /* Handle Form Submission to Update Transaction */
   $('[api-form="update-transaction"]')
     .off("submit")
     .submit(function (event) {
-      // Prevent the default form submission behavior
       event.preventDefault();
 
-      // Handle 'Loading' State
       $(".modal__block").hide();
       $(".loader").css("display", "flex");
 
       const formData = {};
 
-      // Iterate through form inputs with data-api-input attribute and collect key-value pairs
       $(this)
         .find("input[data-api-input], select[data-api-input], textarea[data-api-input]")
         .each(function () {
@@ -530,27 +503,25 @@ function updatePropertyTransaction(transId, transFreq) {
           formData[key] = value;
         });
 
-      // Add additional data to formData
       formData["property_id"] = localStorage.propertyRecId;
       formData["transaction_id"] = transId;
 
-      // Make an AJAX POST request
       $.ajax({
         url: localStorage.baseUrl + "api:rpDXPv3x/update_property_transaction",
         type: "POST",
         headers: {
           Authorization: "Bearer " + localStorage.authToken,
         },
-        data: JSON.stringify(formData), // Convert formData to JSON
-        contentType: "application/json", // Set the content type to JSON
+        data: JSON.stringify(formData),
+        contentType: "application/json",
         success: function (response) {
           showToast("Success! Property Transaction Updated.");
           $(".loader").hide();
-          //loadProperty();
           $('[api-form="update-transaction"]')[0].reset();
         },
         complete: function () {
-          //$("[api-button='all-prop-trans']").click();
+          // Optionally trigger reload
+          // $("[api-button='all-prop-trans']").click();
         },
       });
     });
