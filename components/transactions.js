@@ -382,21 +382,25 @@ function updatePropertyTransaction(transId, transFreq) {
   $descWrapper.hide();
   $dateWrapper.hide();
 
-  // Bind action dropdown logic
   $actionSelect.off("change").on("change", function () {
     const selected = $(this).val();
+    const $amountInput = $('#edit-transaction-amount');
+
     if (["charge", "payment", "credit"].includes(selected)) {
       $amountWrapper.show();
       $descWrapper.show();
       $dateWrapper.show();
+
+      // Add data-api-input if not already set
+      $amountInput.attr("data-api-input", "amount");
     } else {
-      $amountWrapper.find('[data-api-input]').val('');
+      $amountInput.removeAttr("data-api-input").val('');
       $amountWrapper.hide();
 
-      $descWrapper.find('[data-api-input]').val('');
+      $descWrapper.find('[data-api-input]').val('').removeAttr("data-api-input");
       $descWrapper.hide();
 
-      $dateWrapper.find('[data-api-input]').val('');
+      $dateWrapper.find('[data-api-input]').val('').removeAttr("data-api-input");
       $dateWrapper.hide();
     }
   });
