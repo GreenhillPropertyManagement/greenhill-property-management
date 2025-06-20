@@ -449,7 +449,6 @@ function updatePropertyTransaction(transId, transFreq) {
       $("[data-api-input=transaction_end_date]").val(response.transaction_end_date);
       $("[data-api-input=amount]").val(response.amount);
 
-      // Conditional field visibility based on property transaction + recipient
       const $balanceWrapper = $('#edit-remaining-trans-balance').closest('.form__item');
       const $dueDateWrapper = $('#edit-transaction-due-date').closest('.form__item');
       const $actionWrapper = $('#edit-transaction-action').closest('.form__item');
@@ -462,21 +461,43 @@ function updatePropertyTransaction(transId, transFreq) {
           $balanceWrapper.show().attr("required", "required");
           $actionWrapper.show().attr("required", "required");
           $dueDateWrapper.hide().removeAttr("required");
+
           $balanceWrapper.find('.form__label').text('Transaction Amount');
+
+          $('#edit-remaining-trans-balance')
+            .attr('data-api-input', 'transaction_amount')
+            .val(response.amount);
+
+          $("[data-api-input='amount']")
+            .removeAttr('data-api-input')
+            .val('');
         } else if (recipient === 'tenant') {
-          // Show only balance, hide others
-          $balanceWrapper.show().attr("required", "required");
+          // Hide all 3
+          $balanceWrapper.hide().removeAttr("required");
           $actionWrapper.hide().removeAttr("required");
           $dueDateWrapper.hide().removeAttr("required");
+
+          // Still update label in case it's visible again later
           $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
+
+          // Ensure proper binding reset
+          $('#edit-remaining-trans-balance')
+            .attr('data-api-input', 'remaining_transaction_balance')
+            .val('');
         }
       } else {
-        // Restore all fields
+        // Restore defaults for non-property transactions
         $balanceWrapper.show().attr("required", "required");
         $actionWrapper.show().attr("required", "required");
         $dueDateWrapper.show().attr("required", "required");
+
         $balanceWrapper.find('.form__label').text('Remaining Transaction Balance');
+
+        $('#edit-remaining-trans-balance')
+          .attr('data-api-input', 'remaining_transaction_balance')
+          .val(response.remaining_transaction_balance || '');
       }
+
     },
     complete: function () {
       $(".loader").hide();
