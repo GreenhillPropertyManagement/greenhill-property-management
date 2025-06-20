@@ -432,17 +432,21 @@ function updatePropertyTransaction(transId, transFreq) {
       responseData = response;
 
       // Show delete button if frequency is recurring OR recipient is landlord
-      if (
-        response.frequency === "recurring" ||
-        response.recipient_type === "landlord"
-      ) {
-        $("#delete-trans-button").show().off("click").on("click", function () {
-          const isProperty = localStorage.pageId === "property";
-          deleteRecurringTransaction(transId, isProperty ? "property" : "user");
-        });
-      } else {
-        $("#delete-trans-button").hide();
-      }
+    if (
+      response.frequency === "recurring" ||
+      response.recipient_type === "landlord"
+    ) {
+      $("#delete-trans-button").show().off("click").on("click", function () {
+        const isProperty = localStorage.pageId === "property";
+        deleteRecurringTransaction(
+          transId,
+          isProperty ? "property" : "user",
+          response.frequency 
+        );
+      });
+    } else {
+      $("#delete-trans-button").hide();
+    }
 
       // Pre-fill form
       $("[data-api-input=description]").val(response.description);
@@ -524,6 +528,7 @@ function updatePropertyTransaction(transId, transFreq) {
 
       formData["property_id"] = localStorage.propertyRecId;
       formData["transaction_id"] = transId;
+      formData["frequency"] = responseData.frequency; 
 
       $.ajax({
         url: localStorage.baseUrl + "api:rpDXPv3x/update_property_transaction",
@@ -951,9 +956,9 @@ function updateUserTransaction(transId, transFreq) {
   });
 }
 
-function deleteRecurringTransaction(transId, type) {
-
+function deleteRecurringTransaction(transId, type, frequency) {
   $(".loader").css("display", "flex");
+
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/delete_recurring_transaction",
     type: "POST",
@@ -963,10 +968,10 @@ function deleteRecurringTransaction(transId, type) {
     data: {
       transaction_id: transId,
       type: type,
+      frequency: frequency, 
     },
     success: function (response) {},
     complete: function () {
-      
       $(".modal__block").hide();
       showToast("Success! Transaction Deleted");
 
