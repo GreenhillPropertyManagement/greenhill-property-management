@@ -817,13 +817,6 @@ function loadUserTransactions(view, type) {
 function updateUserTransaction(transId, transFreq) {
   $("#delete-trans-button").hide();
 
-  if (transFreq === "recurring") {
-    $("#delete-trans-button").show().off("click").on("click", function () {
-      const isProperty = localStorage.pageId === "property";
-      deleteRecurringTransaction(transId, isProperty ? "property" : "user");
-    });
-  }
-
   $(".loader").css("display", "flex");
   $(".modal__block").show().children().hide();
   $("#edit-transaction").show();
@@ -833,95 +826,22 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
 
-  // Reset label and input binding for shared field
-  const $sharedFieldWrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
-  $sharedFieldWrapper.find('.form__label').text('Remaining Transaction Balance');
-  $form.find('#edit-remaining-trans-balance')
-    .attr('data-api-input', 'remaining_transaction_balance')
-    .val('');
-
+  const $sharedField = $('#edit-remaining-trans-balance');
+  const $sharedFieldWrapper = $sharedField.closest('.form__item');
   const $submitBtn = $form.find('input[type="submit"]');
   const $errorMsg = $form.find('.update-trans-error-message');
 
-  // One-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
   const $action = $form.find('#edit-transaction-action').closest('.form__item');
-  const $remainingBalancewrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
+  const $remainingBalancewrapper = $sharedFieldWrapper;
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
   const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
-
-  // Recurring fields
   const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
   const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
   const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
 
-  if (transFreq === "one_time") {
-    // Show one-time fields
-    $remainingBalancewrapper.show();
-    $actionDescription.show();
-    $actionDate.show();
-    $actionAmount.show();
-    $action.closest('.form__item').show();
-
-    // Hide recurring fields
-    [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
-      $el.hide();
-      $el.find('[data-api-input]').val('').removeAttr('required');
-    });
-
-    // Action change visibility logic
-    $('#edit-transaction-action').off('change').on('change', function () {
-      const selectedValue = $(this).val();
-      if (["charge", "payment", "credit"].includes(selectedValue)) {
-        $actionAmount.show();
-        $actionDescription.show();
-        $actionDate.show();
-      } else {
-        $actionAmount.hide();
-        $actionDescription.hide();
-        $actionDate.hide();
-      }
-
-      $form.find('[data-api-input="amount"]').trigger('input'); // revalidate on action change
-    });
-
-    // Amount field validation
-    $form.find('[data-api-input="amount"]').off('input').on('input', function () {
-      const action = $('#edit-transaction-action').val();
-      const enteredAmount = parseFloat($(this).val());
-      const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
-
-      if (
-        ["payment", "credit"].includes(action) &&
-        !isNaN(enteredAmount) &&
-        enteredAmount > remainingBalance
-      ) {
-        $errorMsg.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
-        $errorMsg.css('display', 'block');
-        $submitBtn.css({ pointerEvents: 'none', opacity: 0.5 });
-      } else {
-        $errorMsg.text('');
-        $errorMsg.css('display', 'none');
-        $submitBtn.css({ pointerEvents: '', opacity: '' });
-      }
-    });
-
-  } else {
-    // Show recurring fields
-    [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
-      $el.show();
-    });
-
-    // Hide one-time fields
-    [$remainingBalancewrapper, $transDateWrapper, $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
-      $el.hide();
-      $el.find('[data-api-input]').val('').removeAttr('required');
-    });
-  }
-
-  // Load existing transaction data
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -935,24 +855,114 @@ function updateUserTransaction(transId, transFreq) {
     success: function (response) {
       const mode = response.mode;
       const data = response.transaction;
+      const recipient = data.recipient_type;
 
       $form.find('[data-api-input="description"]').val(data.description);
+      $form.find('[data-api-input="transaction_code"]').val(data.code);
+      $form.find('[data-api-input="transaction_date"]').val(data.transaction_date);
 
-      if (mode === "one_time") {
+      if (recipient === "landlord") {
+        // LANDLORD LOGIC
+        $sharedFieldWrapper.show().attr("required", "required");
+        $sharedFieldWrapper.find(".form__label").text("Transaction Amount");
+        $sharedField
+          .attr("data-api-input", "transaction_amount")
+          .val(data.amount);
+
+        // Remove "amount" input binding to avoid duplicate
+        $form.find("#edit-transaction-amount").removeAttr("data-api-input").val("");
+
+        // Hide action-related fields
+        [$action, $actionAmount, $actionDescription, $actionDate, $dueDateWrapper].forEach($el => {
+          $el.hide().find('[data-api-input]').val('').removeAttr('required');
+        });
+
+        // Hide recurring fields
+        [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
+          $el.hide().find('[data-api-input]').val('').removeAttr('required');
+        });
+
+      } else if (mode === "one_time") {
+        //  TENANT ONE-TIME
         $form.find('[data-api-input="remaining_transaction_balance"]').val(data.remaining_transaction_balance);
-        $form.find('[data-api-input="transaction_code"]').val(data.code);
-        $form.find('[data-api-input="transaction_date"]').val(data.transaction_date);
         $form.find('[data-api-input="due_date"]').val(data.due_date);
         $form.find('[data-api-input="action_description"]').val(data.action_description);
         $form.find('[data-api-input="action_date"]').val(data.action_date);
         $form.find('[data-api-input="action"]').val(data.action).trigger("change");
+
+        $remainingBalancewrapper.show();
+        $action.show();
+        $actionAmount.show();
+        $actionDescription.show();
+        $actionDate.show();
+
+        [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
+          $el.hide().find('[data-api-input]').val('').removeAttr('required');
+        });
+
+        // Action change logic
+        $('#edit-transaction-action').off('change').on('change', function () {
+          const selectedValue = $(this).val();
+          if (["charge", "payment", "credit"].includes(selectedValue)) {
+            $actionAmount.show();
+            $actionDescription.show();
+            $actionDate.show();
+          } else {
+            $actionAmount.hide();
+            $actionDescription.hide();
+            $actionDate.hide();
+          }
+
+          $form.find('[data-api-input="amount"]').trigger('input');
+        });
+
+        // Amount validation
+        $form.find('[data-api-input="amount"]').off('input').on('input', function () {
+          const action = $('#edit-transaction-action').val();
+          const enteredAmount = parseFloat($(this).val());
+          const remainingBalance = parseFloat($form.find('[data-api-input="remaining_transaction_balance"]').val());
+
+          if (
+            ["payment", "credit"].includes(action) &&
+            !isNaN(enteredAmount) &&
+            enteredAmount > remainingBalance
+          ) {
+            $errorMsg.text(`Amount cannot exceed remaining balance of $${remainingBalance.toFixed(2)}`);
+            $errorMsg.css('display', 'block');
+            $submitBtn.css({ pointerEvents: 'none', opacity: 0.5 });
+          } else {
+            $errorMsg.text('');
+            $errorMsg.css('display', 'none');
+            $submitBtn.css({ pointerEvents: '', opacity: '' });
+          }
+        });
+
       } else if (mode === "recurring") {
+        // TENANT RECURRING
         $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
         $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
-        $form.find('[data-api-input="transaction_code"]').val(data.transaction_code);
         $form.find('[data-api-input="amount"]').val(data.amount);
+
+        [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
+          $el.show();
+        });
+
+        [$remainingBalancewrapper, $transDateWrapper, $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
+          $el.hide().find('[data-api-input]').val('').removeAttr('required');
+        });
+      }
+
+      // Show delete button if recurring
+      if (mode === "recurring") {
+        $("#delete-trans-button").show().off("click").on("click", function () {
+          const isProperty = localStorage.pageId === "property";
+          deleteRecurringTransaction(transId, isProperty ? "property" : "user", mode);
+        });
+      } else {
+        $("#delete-trans-button").hide();
       }
     },
+
     complete: function () {
       $(".loader").hide();
     },
