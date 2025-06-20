@@ -261,10 +261,19 @@ function loadPropertyTransactions(type) {
           const endDate = formatDateNoTime(item.transaction_end_date);
 
           html = `
-            <div class="trans-item-updated wf-grid prop-trans" id="${id}" data-frequency="${frequency}" style="cursor: pointer;">
               <div class="trans-item__cell">
                 <div class="trans-item__cell-header">Description</div>
                 <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Type</div>
+                <div class="trans-item__cell-data" data-api="type">${item.type}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Recipient</div>
+                <div class="trans-item__cell-data" data-api="recipient">${item.recipient_type}</div>
               </div>
 
               <div class="trans-item__cell">
@@ -291,6 +300,16 @@ function loadPropertyTransactions(type) {
               <div class="trans-item__cell">
                 <div class="trans-item__cell-header">Description</div>
                 <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Type</div>
+                <div class="trans-item__cell-data" data-api="type">${item.type}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Recipient</div>
+                <div class="trans-item__cell-data" data-api="recipient">${item.recipient_type}</div>
               </div>
 
               <div class="trans-item__cell">
