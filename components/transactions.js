@@ -833,17 +833,11 @@ function updateUserTransaction(transId, transFreq) {
   $form.find('.form__item').show();
   $form.find('[data-api-input]').val('').removeAttr('required');
 
-  // Reset label and input binding for shared field
-  const $sharedFieldWrapper = $form.find('#edit-remaining-trans-balance').closest('.form__item');
-  $sharedFieldWrapper.find('.form__label').text('Remaining Transaction Balance');
-  $form.find('#edit-remaining-trans-balance')
-    .attr('data-api-input', 'remaining_transaction_balance')
-    .val('');
-
+  const $sharedField = $('#edit-remaining-trans-balance');
+  const $sharedFieldWrapper = $sharedField.closest('.form__item');
   const $submitBtn = $form.find('input[type="submit"]');
   const $errorMsg = $form.find('.update-trans-error-message');
 
-  // One-time fields
   const $actionAmount = $form.find('#edit-transaction-amount').closest('.form__item');
   const $actionDescription = $form.find('#edit-transaction-action-description').closest('.form__item');
   const $actionDate = $form.find('#edit-transaction-action-date').closest('.form__item');
@@ -852,26 +846,22 @@ function updateUserTransaction(transId, transFreq) {
   const $transDateWrapper = $form.find('#edit-transaction-date').closest('.form__item');
   const $dueDateWrapper = $form.find('#edit-transaction-due-date').closest('.form__item');
 
-  // Recurring fields
   const $startDateWrapper = $form.find('#edit-transaction-start-date').closest('.form__item');
   const $endDateWrapper = $form.find('#edit-transaction-end-date').closest('.form__item');
   const $transAmountWrapper = $form.find('#edit-trans-amount').closest('.form__item');
 
   if (transFreq === "one_time") {
-    // Show one-time fields
     $remainingBalancewrapper.show();
     $actionDescription.show();
     $actionDate.show();
     $actionAmount.show();
     $action.closest('.form__item').show();
 
-    // Hide recurring fields
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
 
-    // Action change visibility logic
     $('#edit-transaction-action').off('change').on('change', function () {
       const selectedValue = $(this).val();
       if (["charge", "payment", "credit"].includes(selectedValue)) {
@@ -884,10 +874,9 @@ function updateUserTransaction(transId, transFreq) {
         $actionDate.hide();
       }
 
-      $form.find('[data-api-input="amount"]').trigger('input'); // revalidate on action change
+      $form.find('[data-api-input="amount"]').trigger('input');
     });
 
-    // Amount field validation
     $form.find('[data-api-input="amount"]').off('input').on('input', function () {
       const action = $('#edit-transaction-action').val();
       const enteredAmount = parseFloat($(this).val());
@@ -909,19 +898,16 @@ function updateUserTransaction(transId, transFreq) {
     });
 
   } else {
-    // Show recurring fields
     [$startDateWrapper, $endDateWrapper, $transAmountWrapper].forEach($el => {
       $el.show();
     });
 
-    // Hide one-time fields
     [$remainingBalancewrapper, $transDateWrapper, $dueDateWrapper, $action, $actionAmount, $actionDescription, $actionDate].forEach($el => {
       $el.hide();
       $el.find('[data-api-input]').val('').removeAttr('required');
     });
   }
 
-  // Load existing transaction data
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/get_single_user_transaction",
     type: "GET",
@@ -935,17 +921,34 @@ function updateUserTransaction(transId, transFreq) {
     success: function (response) {
       const mode = response.mode;
       const data = response.transaction;
+      const recipient = data.recipient_type;
 
       $form.find('[data-api-input="description"]').val(data.description);
+
+      if (recipient === "landlord") {
+        // ✅ Update label and bind amount
+        $sharedFieldWrapper.find('.form__label').text('Transaction Amount');
+        $sharedField
+          .attr('data-api-input', 'transaction_amount')
+          .val(data.amount);
+
+        // ✅ Hide due date field
+        $dueDateWrapper.hide().find('[data-api-input]').val('').removeAttr('required');
+      }
 
       if (mode === "one_time") {
         $form.find('[data-api-input="remaining_transaction_balance"]').val(data.remaining_transaction_balance);
         $form.find('[data-api-input="transaction_code"]').val(data.code);
         $form.find('[data-api-input="transaction_date"]').val(data.transaction_date);
-        $form.find('[data-api-input="due_date"]').val(data.due_date);
+
+        if (recipient !== "landlord") {
+          $form.find('[data-api-input="due_date"]').val(data.due_date);
+        }
+
         $form.find('[data-api-input="action_description"]').val(data.action_description);
         $form.find('[data-api-input="action_date"]').val(data.action_date);
         $form.find('[data-api-input="action"]').val(data.action).trigger("change");
+
       } else if (mode === "recurring") {
         $form.find('[data-api-input="transaction_start_date"]').val(data.transaction_start_date);
         $form.find('[data-api-input="transaction_end_date"]').val(data.transaction_end_date);
@@ -958,7 +961,6 @@ function updateUserTransaction(transId, transFreq) {
     },
   });
 
-  // Submit handler
   $form.off("submit").on("submit", function (event) {
     event.preventDefault();
     $(".modal__block").hide();
