@@ -693,14 +693,15 @@ function loadUserTransactions(view, type) {
               </div>
 
               <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Type</div>
+                <div class="trans-item__cell-data" data-api="type">${type}</div>
+              </div>
+
+              <div class="trans-item__cell">
                 <div class="trans-item__cell-header">Billing Period</div>
                 <div class="trans-item__cell-data" data-api="transaction_date">${billingPeriod}</div>
               </div>
 
-              <div class="trans-item__cell">
-                <div class="trans-item__cell-header">Type</div>
-                <div class="trans-item__cell-data" data-api="type">${type}</div>
-              </div>
 
               <div class="trans-item__cell last">
                 <div class="trans-item__cell-header">Transaction Amount</div>
