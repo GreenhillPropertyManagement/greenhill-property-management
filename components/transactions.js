@@ -645,7 +645,7 @@ function loadUserTransactions(view, type) {
 
   $(".pocket-loader").css("display", "flex");
   const userTransContainer = $(".dyn-container__transactions");
-  userTransContainer.empty(); // clear existing transactions
+  userTransContainer.empty();
 
   $.ajax({
     url: localStorage.baseUrl + "api:rpDXPv3x/load_transactions_component",
@@ -674,13 +674,13 @@ function loadUserTransactions(view, type) {
         const description = userTrans.description || "";
         const frequency = mode;
         const recipient = userTrans.recipient_type || "tenant";
+        const type = userTrans.type || "";
+        const amount = `$${parseFloat(userTrans.amount || 0).toFixed(2)}`;
 
         let html = "";
 
         if (recipient === "landlord") {
           const billingPeriod = formatDateNoTime(userTrans.transaction_date);
-          const amount = `$${parseFloat(userTrans.amount || 0).toFixed(2)}`;
-          const type = userTrans.type || "";
 
           html = `
             <div class="trans-item-updated wf-grid" 
@@ -702,7 +702,6 @@ function loadUserTransactions(view, type) {
                 <div class="trans-item__cell-data" data-api="type">${type}</div>
               </div>
 
-
               <div class="trans-item__cell last">
                 <div class="trans-item__cell-header">Transaction Amount</div>
                 <div class="trans-item__cell-data" data-api="amount">${amount}</div>
@@ -710,59 +709,81 @@ function loadUserTransactions(view, type) {
             </div>
           `;
         } else {
-          const label2 = mode === "recurring" ? "Start Date" : "Due Date";
-          const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
-          const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
+          // Tenant transaction
+          if (mode === "recurring") {
+            // Recurring layout stays unchanged
+            const label2 = "Start Date";
+            const label3 = "End Date";
+            const label4 = "Charge Amount";
 
-          const value2 = mode === "recurring"
-            ? formatDateNoTime(userTrans.transaction_start_date)
-            : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+            const value2 = formatDateNoTime(userTrans.transaction_start_date);
+            const value3 = formatDateNoTime(userTrans.transaction_end_date);
+            const value4 = `$${userTrans.amount}`;
 
-          const value3 = mode === "recurring"
-            ? formatDateNoTime(userTrans.transaction_end_date)
-            : `$${userTrans.amount}`;
+            html = `
+              <div class="trans-item-updated wf-grid" 
+                  id="${transactionId}" 
+                  data-frequency="${frequency}" 
+                  style="cursor: pointer;">
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">Description</div>
+                  <div class="trans-item__cell-data" data-api="description">${description}</div>
+                </div>
 
-          const value4 = mode === "recurring"
-            ? `$${userTrans.amount}`
-            : `$${userTrans.remaining_transaction_balance || 0}`;
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">${label2}</div>
+                  <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+                </div>
 
-          const billingPeriodCell = mode !== "recurring" ? `
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Billing Period</div>
-              <div class="trans-item__cell-data" data-api="transaction_date">
-                ${formatDateNoTime(userTrans.transaction_date)}
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">${label3}</div>
+                  <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
+                </div>
+
+                <div class="trans-item__cell last">
+                  <div class="trans-item__cell-header">${label4}</div>
+                  <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
+                </div>
               </div>
-            </div>
-          ` : "";
+            `;
+          } else {
+            // One-time tenant transaction with Type column
+            const billingPeriod = formatDateNoTime(userTrans.transaction_date);
+            const dueDate = formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+            const remainingBalance = `$${userTrans.remaining_transaction_balance || 0}`;
 
-          html = `
-            <div class="trans-item-updated wf-grid" 
-                id="${transactionId}" 
-                data-frequency="${frequency}" 
-                style="cursor: pointer;">
-              <div class="trans-item__cell">
-                <div class="trans-item__cell-header">Description</div>
-                <div class="trans-item__cell-data" data-api="description">${description}</div>
+            html = `
+              <div class="trans-item-updated wf-grid" 
+                  id="${transactionId}" 
+                  data-frequency="${frequency}" 
+                  style="cursor: pointer;">
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">Description</div>
+                  <div class="trans-item__cell-data" data-api="description">${description}</div>
+                </div>
+
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">Type</div>
+                  <div class="trans-item__cell-data" data-api="type">${type}</div>
+                </div>
+
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">Billing Period</div>
+                  <div class="trans-item__cell-data" data-api="transaction_date">${billingPeriod}</div>
+                </div>
+
+                <div class="trans-item__cell">
+                  <div class="trans-item__cell-header">Due Date</div>
+                  <div class="trans-item__cell-data" data-api="start_or_due">${dueDate}</div>
+                </div>
+
+                <div class="trans-item__cell last">
+                  <div class="trans-item__cell-header">Remaining Transaction Balance</div>
+                  <div class="trans-item__cell-data" data-api="final_value">${remainingBalance}</div>
+                </div>
               </div>
-
-              ${billingPeriodCell}
-
-              <div class="trans-item__cell">
-                <div class="trans-item__cell-header">${label2}</div>
-                <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
-              </div>
-
-              <div class="trans-item__cell">
-                <div class="trans-item__cell-header">${label3}</div>
-                <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
-              </div>
-
-              <div class="trans-item__cell last">
-                <div class="trans-item__cell-header">${label4}</div>
-                <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
-              </div>
-            </div>
-          `;
+            `;
+          }
         }
 
         const $html = $(html);
