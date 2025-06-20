@@ -820,7 +820,7 @@ function updateUserTransaction(transId, transFreq) {
   if (transFreq === "recurring") {
     $("#delete-trans-button").show().off("click").on("click", function () {
       const isProperty = localStorage.pageId === "property";
-      deleteRecurringTransaction(transId, isProperty ? "property" : "user");
+      deleteRecurringTransaction(transId, isProperty ? "property" : "user", transFreq);
     });
   }
 
@@ -923,16 +923,24 @@ function updateUserTransaction(transId, transFreq) {
       const data = response.transaction;
       const recipient = data.recipient_type;
 
+      // ✅ Show delete button for landlords only
+      if (recipient === "landlord") {
+        $("#delete-trans-button").show().off("click").on("click", function () {
+          const isProperty = localStorage.pageId === "property";
+          deleteRecurringTransaction(transId, isProperty ? "property" : "user", transFreq);
+        });
+      } else {
+        $("#delete-trans-button").hide();
+      }
+
       $form.find('[data-api-input="description"]').val(data.description);
 
       if (recipient === "landlord") {
-        // ✅ Update label and bind amount
         $sharedFieldWrapper.find('.form__label').text('Transaction Amount');
         $sharedField
           .attr('data-api-input', 'transaction_amount')
           .val(data.amount);
 
-        // ✅ Hide due date field
         $dueDateWrapper.hide().find('[data-api-input]').val('').removeAttr('required');
       }
 
@@ -1012,7 +1020,6 @@ function updateUserTransaction(transId, transFreq) {
     });
   });
 }
-
 function deleteRecurringTransaction(transId, type, frequency) {
   $(".loader").css("display", "flex");
 
