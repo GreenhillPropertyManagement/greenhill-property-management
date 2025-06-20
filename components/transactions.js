@@ -287,7 +287,7 @@ function loadPropertyTransactions(type) {
               </div>
 
               <div class="trans-item__cell last">
-                <div class="trans-item__cell-header">Charge Amount</div>
+                <div class="trans-item__cell-header">Transaction Amount</div>
                 <div class="trans-item__cell-data" data-api="amount">${amount}</div>
               </div>
             </div>
@@ -318,7 +318,7 @@ function loadPropertyTransactions(type) {
               </div>
 
               <div class="trans-item__cell last">
-                <div class="trans-item__cell-header">Charge Amount</div>
+                <div class="trans-item__cell-header">Transaction Amount</div>
                 <div class="trans-item__cell-data" data-api="amount">${amount}</div>
               </div>
             </div>
@@ -661,11 +661,10 @@ function loadUserTransactions(view, type) {
     },
 
     success: function (response) {
-
-      const mode = response.mode;
+      const mode = response.mode; // "recurring" or "one_time"
       const transactions = response.transactions;
 
-      if (!transactions.length) { // if there are no transactions...
+      if (!transactions.length) {
         showEmptyState($(".dyn-container__transactions:visible"));
         return;
       }
@@ -673,66 +672,100 @@ function loadUserTransactions(view, type) {
       transactions.forEach((userTrans) => {
         const transactionId = userTrans.id;
         const description = userTrans.description || "";
-        const frequency = mode; // "recurring" or "one_time"
+        const frequency = mode;
+        const recipient = userTrans.recipient_type || "tenant";
 
-        const label2 = mode === "recurring" ? "Start Date" : "Due Date";
-        const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
-        const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
+        let html = "";
 
-        const value2 = mode === "recurring"
-          ? formatDateNoTime(userTrans.transaction_start_date)
-          : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+        if (recipient === "landlord") {
+          const billingPeriod = formatDateNoTime(userTrans.transaction_date);
+          const amount = `$${parseFloat(userTrans.amount || 0).toFixed(2)}`;
+          const type = userTrans.type || "";
 
-        const value3 = mode === "recurring"
-          ? formatDateNoTime(userTrans.transaction_end_date)
-          : `$${userTrans.amount}`;
+          html = `
+            <div class="trans-item-updated wf-grid" 
+                id="${transactionId}" 
+                data-frequency="${frequency}" 
+                style="cursor: pointer;">
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Description</div>
+                <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
 
-        const value4 = mode === "recurring"
-          ? `$${userTrans.amount}`
-          : `$${userTrans.remaining_transaction_balance || 0}`;
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Type</div>
+                <div class="trans-item__cell-data" data-api="type">${type}</div>
+              </div>
 
-        // Conditionally render Billing Period cell only for one-time transactions
-        const billingPeriodCell = mode !== "recurring" ? `
-          <div class="trans-item__cell">
-            <div class="trans-item__cell-header">Billing Period</div>
-            <div class="trans-item__cell-data" data-api="transaction_date">
-              ${formatDateNoTime(userTrans.transaction_date)}
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Billing Period</div>
+                <div class="trans-item__cell-data" data-api="transaction_date">${billingPeriod}</div>
+              </div>
+
+              <div class="trans-item__cell last">
+                <div class="trans-item__cell-header">Transaction Amount</div>
+                <div class="trans-item__cell-data" data-api="amount">${amount}</div>
+              </div>
             </div>
-          </div>
-        ` : "";
+          `;
+        } else {
+          const label2 = mode === "recurring" ? "Start Date" : "Due Date";
+          const label3 = mode === "recurring" ? "End Date" : "Charge Amount";
+          const label4 = mode === "recurring" ? "Charge Amount" : "Remaining Transaction Balance";
 
-        const html = `
-          <div class="trans-item-updated wf-grid" 
-              id="${transactionId}" 
-              data-frequency="${frequency}" 
-              style="cursor: pointer;">
+          const value2 = mode === "recurring"
+            ? formatDateNoTime(userTrans.transaction_start_date)
+            : formatDateNoTime(userTrans.due_date || userTrans.transaction_date);
+
+          const value3 = mode === "recurring"
+            ? formatDateNoTime(userTrans.transaction_end_date)
+            : `$${userTrans.amount}`;
+
+          const value4 = mode === "recurring"
+            ? `$${userTrans.amount}`
+            : `$${userTrans.remaining_transaction_balance || 0}`;
+
+          const billingPeriodCell = mode !== "recurring" ? `
             <div class="trans-item__cell">
-              <div class="trans-item__cell-header">Description</div>
-              <div class="trans-item__cell-data" data-api="description">${description}</div>
+              <div class="trans-item__cell-header">Billing Period</div>
+              <div class="trans-item__cell-data" data-api="transaction_date">
+                ${formatDateNoTime(userTrans.transaction_date)}
+              </div>
             </div>
+          ` : "";
 
-            ${billingPeriodCell}
+          html = `
+            <div class="trans-item-updated wf-grid" 
+                id="${transactionId}" 
+                data-frequency="${frequency}" 
+                style="cursor: pointer;">
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">Description</div>
+                <div class="trans-item__cell-data" data-api="description">${description}</div>
+              </div>
 
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${label2}</div>
-              <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+              ${billingPeriodCell}
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">${label2}</div>
+                <div class="trans-item__cell-data" data-api="start_or_due">${value2}</div>
+              </div>
+
+              <div class="trans-item__cell">
+                <div class="trans-item__cell-header">${label3}</div>
+                <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
+              </div>
+
+              <div class="trans-item__cell last">
+                <div class="trans-item__cell-header">${label4}</div>
+                <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
+              </div>
             </div>
-
-            <div class="trans-item__cell">
-              <div class="trans-item__cell-header">${label3}</div>
-              <div class="trans-item__cell-data" data-api="end_or_amount">${value3}</div>
-            </div>
-
-            <div class="trans-item__cell last">
-              <div class="trans-item__cell-header">${label4}</div>
-              <div class="trans-item__cell-data" data-api="final_value">${value4}</div>
-            </div>
-          </div>
-        `;
+          `;
+        }
 
         const $html = $(html);
 
-        // If user has edit permissions, enable interaction
         if (localStorage.getItem("editPermissions") === "true") {
           $html.css("cursor", "pointer");
           $html.css("pointer-events", "auto");
@@ -740,7 +773,6 @@ function loadUserTransactions(view, type) {
             updateUserTransaction(transactionId, frequency);
           });
         } else {
-          // Fully disable interaction
           $html.css("cursor", "default");
           $html.css("pointer-events", "none");
         }
