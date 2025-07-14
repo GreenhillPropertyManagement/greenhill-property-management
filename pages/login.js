@@ -20,7 +20,10 @@ $("#login-form").submit(function (event) {
     .find("input, select, textarea")
     .each(function () {
       const input = $(this);
-      formData[input.attr("id")] = input.val();
+      const id = input.attr("id");
+      if (id) {
+        formData[id] = input.val();
+      }
     });
 
   // Make an login AJAX POST request
