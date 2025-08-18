@@ -616,85 +616,89 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
+  $('.loader').css('display', 'flex'); // Show loader
 
-    $('.loader').css('display', 'flex'); // Show loader
-    let transactions = [];
+  let transactions = [];
 
-    $('#transactionsTable tbody tr').each(function () {
-        const cols = $(this).find('td');
+  $('#transactionsTable tbody tr').each(function () {
+    const cols = $(this).find('td');
 
-        let transaction = {
-            transaction_date: cols.eq(0).text(),
-            display_name: cols.eq(1).text(),
-            street: cols.eq(2).text(),
-            unit_name: cols.eq(3).text(),
-            type: cols.eq(4).text().toLowerCase(),
-            description: cols.eq(5).text(),
-            amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
-        };
+    // Read the visible date text, normalize to ISO for sorting/transport
+    const dateText = cols.eq(0).text().trim();
+    const iso = toISOFromAny(dateText);
 
-        transactions.push(transaction);
-    });
-
-    // Extract the first and last transaction dates
-    let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
-    let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
-
-    // Get the selected sector text
-    let sector = $('#sector option:selected').text().trim();
-
-    // Get the selected report type text (NOI, Payments, Expenses)
-    let reportType = $('#type option:selected').text().trim();
-
-    // Get the selected date range text (Last 3 months, Quarter to date, etc.)
-    let dateRangeText = $('#date_range option:selected').text().trim();
-
-    let fileName = '';
-
-    if (dateRangeText.toLowerCase() === 'custom') {
-        let startDate = $('#start_date').val();
-        let endDate = $('#end_date').val();
-
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates.');
-            $('.loader').hide();
-            return;
-        }
-
-        fileName = `Custom ${startDate} - ${endDate}`;
-    } else {
-        fileName = firstDate && lastDate
-            ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
-            : `${sector} ${dateRangeText}`;
-    }
-
-    // Explicitly structured payload
-    let requestData = {
-        transactions: transactions,
-        file_name: fileName,
-        report_type: reportType // Uses the selected text (NOI, Payments, Expenses)
+    let transaction = {
+      transaction_date: iso, // <-- send ISO to backend/PDFMonkey
+      display_name: cols.eq(1).text(),
+      street: cols.eq(2).text(),
+      unit_name: cols.eq(3).text(),
+      type: cols.eq(4).text().toLowerCase(),
+      description: cols.eq(5).text(),
+      amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
     };
 
-    $.ajax({
-        url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
-        type: 'POST',
-        dataType: "json",
-        contentType: 'application/json',
-        headers: {
-            "Authorization": "Bearer " + localStorage.authToken
-        },
-        data: JSON.stringify(requestData),
-        success: function (response) {
-            let statement_id = response.statement_id; // Store the statement ID
-            alert("Generating your report. Please do not refresh the page.");
-            fetchCustomReport(statement_id);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error generating report:', error);
-            alert('Error generating report. Please try again.');
-            $('.loader').hide();
-        }
-    });
+    transactions.push(transaction);
+  });
+
+  // Sort ASC (oldest -> newest) for the PDF
+  transactions.sort((a, b) => (a.transaction_date < b.transaction_date ? -1 : a.transaction_date > b.transaction_date ? 1 : 0));
+
+  // Extract first and last (now reliable)
+  const firstISO = transactions.length ? transactions[0].transaction_date : null;
+  const lastISO  = transactions.length ? transactions[transactions.length - 1].transaction_date : null;
+
+  // Form file name
+  const sector = $('#sector option:selected').text().trim();
+  const reportType = $('#type option:selected').text().trim();
+  const dateRangeText = $('#date_range option:selected').text().trim();
+
+  let fileName = '';
+  if (dateRangeText.toLowerCase() === 'custom') {
+    const startDate = $('#start_date').val();
+    const endDate = $('#end_date').val();
+    if (!startDate || !endDate) {
+      alert('Please select both start and end dates.');
+      $('.loader').hide();
+      return;
+    }
+    // you might keep these as raw picker values
+    fileName = `Custom ${startDate} - ${endDate}`;
+  } else {
+    // Use MM/DD/YYYY for display title, derived from ISO bounds
+    const startMDY = firstISO ? isoToMDY(firstISO) : null;
+    const endMDY   = lastISO ? isoToMDY(lastISO) : null;
+    fileName = (startMDY && endMDY)
+      ? `${sector} ${dateRangeText}: ${startMDY} - ${endMDY}`
+      : `${sector} ${dateRangeText}`;
+  }
+
+  // Final payload
+  const requestData = {
+    transactions,      // dates are ISO now (YYYY-MM-DD)
+    file_name: fileName,
+    report_type: reportType
+  };
+
+  $.ajax({
+    url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
+    type: 'POST',
+    dataType: "json",
+    contentType: 'application/json',
+    headers: {
+      "Authorization": "Bearer " + localStorage.authToken
+    },
+    data: JSON.stringify(requestData),
+    success: function (response) {
+      let statement_id = response.statement_id;
+      alert("Generating your report. Please do not refresh the page.");
+      fetchCustomReport(statement_id);
+    },
+    error: function (xhr, status, error) {
+      console.error('Error generating report:', error);
+      alert('Error generating report. Please try again.');
+      $('.loader').hide();
+    }
+  });
 }
 
 function fetchCustomReport(statementId) {
