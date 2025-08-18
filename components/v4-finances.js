@@ -174,72 +174,87 @@ function formatTransDate(dateString) {
 }
 
 function extractChartData(response, transactionType) {
-    let labels = [];
-    let paymentData = {};
-    let expenseData = [];
+  // Decide grouping: by day (YYYY-MM-DD) or by month (YYYY-MM)
+  let allISO = [];
 
-    // Combine payments and expenses to get all dates
-    let allDates = [];
+  function pushISO(list) {
+    list.forEach(t => {
+      const iso = toISOFromAny(t.transaction_date);
+      if (iso) allISO.push(iso);
+    });
+  }
 
-    if (transactionType === "noi") {
-        allDates = [...response.payments, ...response.expenses].map(t => t.transaction_date);
-    } else if (transactionType === "payments") {
-        allDates = response.payments.map(t => t.transaction_date);
-    } else if (transactionType === "expenses") {
-        allDates = response.expenses.map(t => t.transaction_date);
+  if (transactionType === "noi") {
+    pushISO(response.payments || []);
+    pushISO(response.expenses || []);
+  } else if (transactionType === "payments") {
+    pushISO(response.payments || []);
+  } else if (transactionType === "expenses") {
+    pushISO(response.expenses || []);
+  }
+
+  if (allISO.length === 0) return { labels: [], paymentData: [], expenseData: [] };
+
+  allISO.sort(); // ISO strings sort chronologically
+
+  const firstISO = allISO[0];
+  const lastISO  = allISO[allISO.length - 1];
+
+  const spanMonths = firstISO.slice(0, 7) !== lastISO.slice(0, 7); // compare YYYY-MM
+
+  // Key builders
+  const keyForDay = (iso) => iso;                 // YYYY-MM-DD
+  const keyForMonth = (iso) => iso.slice(0, 7);   // YYYY-MM
+
+  const paymentBuckets = {};
+  const expenseBuckets = {};
+
+  function addTo(buckets, key, amt) {
+    if (!buckets[key]) buckets[key] = 0;
+    buckets[key] += amt;
+  }
+
+  function process(list, isPayment) {
+    (list || []).forEach(item => {
+      const iso = toISOFromAny(item.transaction_date);
+      if (!iso) return;
+      const key = spanMonths ? keyForMonth(iso) : keyForDay(iso);
+      if (isPayment) {
+        addTo(paymentBuckets, key, Math.abs(item.amount));
+      } else {
+        addTo(expenseBuckets, key, item.amount);
+      }
+    });
+  }
+
+  if (transactionType === "noi") {
+    process(response.payments, true);
+    process(response.expenses, false);
+  } else if (transactionType === "payments") {
+    process(response.payments, true);
+  } else if (transactionType === "expenses") {
+    process(response.expenses, false);
+  }
+
+  // Sorted keys (ISO) → display labels
+  const isoKeys = [...new Set([...Object.keys(paymentBuckets), ...Object.keys(expenseBuckets)])];
+  isoKeys.sort(); // lexicographic sort works for YYYY-MM and YYYY-MM-DD
+
+  const labels = isoKeys.map(k => {
+    if (k.length === 7) {
+      // YYYY-MM -> "MON YYYY"
+      const dt = new Date(k + "-01T00:00:00Z");
+      return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
+    } else {
+      // YYYY-MM-DD -> "M/D/YY"
+      return isoToMDYshort(k);
     }
+  });
 
-    // Sort and determine time span
-    allDates.sort();
-    const firstDate = new Date(allDates[0]);
-    const lastDate = new Date(allDates[allDates.length - 1]);
-    const spanMonths = firstDate.getUTCFullYear() !== lastDate.getUTCFullYear() ||
-                       firstDate.getUTCMonth() !== lastDate.getUTCMonth();
+  const paymentData = isoKeys.map(k => paymentBuckets[k] || 0);
+  const expenseData = isoKeys.map(k => expenseBuckets[k] || 0);
 
-    // Choose grouping function
-    const groupFn = spanMonths ? v4formatToMonthYear : formatTransDate;
-
-    // Initialize grouped buckets
-    const paymentBuckets = {};
-    const expenseBuckets = {};
-
-    // Helper to add amounts to the correct bucket
-    function addToBucket(buckets, date, amount) {
-        if (!buckets[date]) buckets[date] = 0;
-        buckets[date] += amount;
-    }
-
-    if (transactionType === "noi") {
-        let transactions = [...response.payments, ...response.expenses];
-        transactions.forEach(item => {
-            let groupKey = groupFn(item.transaction_date);
-            if (item.type === "payment") {
-                addToBucket(paymentBuckets, groupKey, Math.abs(item.amount));
-            } else {
-                addToBucket(expenseBuckets, groupKey, item.amount);
-            }
-        });
-    } else if (transactionType === "payments") {
-        response.payments.forEach(payment => {
-            let groupKey = groupFn(payment.transaction_date);
-            addToBucket(paymentBuckets, groupKey, Math.abs(payment.amount));
-        });
-    } else if (transactionType === "expenses") {
-        response.expenses.forEach(expense => {
-            let groupKey = groupFn(expense.transaction_date);
-            addToBucket(expenseBuckets, groupKey, expense.amount);
-        });
-    }
-
-    // Combine labels from both buckets and sort
-    labels = [...new Set([...Object.keys(paymentBuckets), ...Object.keys(expenseBuckets)])];
-    labels.sort((a, b) => new Date(a) - new Date(b));
-
-    // Build final chart arrays
-    const paymentArray = labels.map(label => paymentBuckets[label] || 0);
-    const expenseArray = labels.map(label => expenseBuckets[label] || 0);
-
-    return { labels, paymentData: paymentArray, expenseData: expenseArray };
+  return { labels, paymentData, expenseData };
 }
 
 function renderChart(chartType, chartData) {
@@ -818,4 +833,54 @@ function fetchArrearsReport(statementId) {
             }
         });
     }, 3000);
+}
+
+// --- Date helpers ---
+function toISOFromAny(dateString) {
+  // Accepts "YYYY-MM-DD" or "M/D/YY" or "MM/DD/YYYY"
+  if (!dateString) return null;
+
+  // Already ISO?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
+  // Try M/D/YY or MM/DD/YYYY
+  // Split on "/"
+  if (dateString.includes("/")) {
+    const parts = dateString.split("/");
+    if (parts.length === 3) {
+      let m = parseInt(parts[0], 10);
+      let d = parseInt(parts[1], 10);
+      let y = parts[2].trim();
+
+      // Normalize year: "25" => 2025; "2025" stays 2025
+      if (y.length === 2) {
+        const yy = parseInt(y, 10);
+        y = (yy >= 70 ? 1900 + yy : 2000 + yy).toString(); // adjust if you need a different pivot
+      }
+      const mm = String(m).padStart(2, "0");
+      const dd = String(d).padStart(2, "0");
+      return `${y}-${mm}-${dd}`;
+    }
+  }
+
+  // Last resort: Date parse
+  const d = new Date(dateString);
+  if (isNaN(d)) return null;
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isoToMDY(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y}`;
+}
+
+// Display for table (M/D/YY) from ISO
+function isoToMDYshort(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y.slice(-2)}`;
 }
