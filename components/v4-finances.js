@@ -626,13 +626,16 @@ function generateCustomReport() {
   let reportType    = $('#type option:selected').text().trim();
   let dateRangeText = $('#date_range option:selected').text().trim();
 
-  // Totals from UI (already shown on page)
+  // Totals from UI
   let totalRentCollected = $('[data-api="total_rent_collected"]').text().replace(/[$,]/g, '') || "0";
   let totalExpenses      = $('[data-api="total_expenses"]').text().replace(/[$,]/g, '') || "0";
   let noi                = $('[data-api="noi"]').text().replace(/[$,]/g, '') || "0";
 
-  // Property name from the page
+  // Property name
   let propertyName = $('.noi-name').text().trim();
+
+  // ---- NEW: User name from localStorage ----
+  let userName = localStorage.getItem("displayName") || "";
 
   // Build file name
   let fileName = '';
@@ -651,9 +654,8 @@ function generateCustomReport() {
       : `${sector} ${dateRangeText}`;
   }
 
-  // ---- NEW: capture the current chart as base64 ----
-  const dataUrl = captureChartDataURL(); // "data:image/png;base64,AAAA..."
-  // Send just the base64 payload; your Liquid can re-prefix if needed
+  // Capture chart
+  const dataUrl = captureChartDataURL(); // "data:image/png;base64,..."
   const chartImageBase64 = dataUrl ? dataUrl.replace(/^data:image\/\w+;base64,/, '') : null;
 
   // Payload
@@ -665,7 +667,8 @@ function generateCustomReport() {
     total_expenses: parseFloat(totalExpenses),
     noi: parseFloat(noi),
     property_name: propertyName,
-    chart_image: chartImageBase64 // <-- include chart image
+    user_name: userName,     
+    chart_image: chartImageBase64
   };
 
   $.ajax({
