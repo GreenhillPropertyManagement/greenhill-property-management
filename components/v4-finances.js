@@ -816,3 +816,4 @@ function fetchArrearsReport(statementId) {
         });
     }, 3000);
 }
+
