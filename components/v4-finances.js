@@ -442,7 +442,7 @@ function populateTransactionsTable(response, transactionType) {
         }
 
         row.innerHTML = `
-            <td>${formatTransDate(transaction.transaction_date)}</td>
+            <td>${isoToMDYshort(toISOFromAny(transaction.transaction_date))}</td>
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td class="narrow-col">${transaction.unit_name || "N/A"}</td>
