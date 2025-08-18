@@ -1,4 +1,3 @@
-
 let chartInstance = null; // Store chart instance globally
 let latestApiResponse = null; // Declare it globally before using
 
@@ -6,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     initLandlordFinances();           // init finance component
     setupChartTypeListener();         // Allow users to change chart type dynamically
-
 
     // Event listener to trigger report generation
     $('#download-report').off('click').on('click', function() {
@@ -55,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function() {
         $("#finance").removeClass("active-override");
         }
     });
-
 
     /* Click handler for Generating Arrears Reports */
     $(document).off('click', '[api-button="arrears-report"]');
@@ -174,87 +171,72 @@ function formatTransDate(dateString) {
 }
 
 function extractChartData(response, transactionType) {
-  // Decide grouping: by day (YYYY-MM-DD) or by month (YYYY-MM)
-  let allISO = [];
+    let labels = [];
+    let paymentData = {};
+    let expenseData = [];
 
-  function pushISO(list) {
-    list.forEach(t => {
-      const iso = toISOFromAny(t.transaction_date);
-      if (iso) allISO.push(iso);
-    });
-  }
+    // Combine payments and expenses to get all dates
+    let allDates = [];
 
-  if (transactionType === "noi") {
-    pushISO(response.payments || []);
-    pushISO(response.expenses || []);
-  } else if (transactionType === "payments") {
-    pushISO(response.payments || []);
-  } else if (transactionType === "expenses") {
-    pushISO(response.expenses || []);
-  }
-
-  if (allISO.length === 0) return { labels: [], paymentData: [], expenseData: [] };
-
-  allISO.sort(); // ISO strings sort chronologically
-
-  const firstISO = allISO[0];
-  const lastISO  = allISO[allISO.length - 1];
-
-  const spanMonths = firstISO.slice(0, 7) !== lastISO.slice(0, 7); // compare YYYY-MM
-
-  // Key builders
-  const keyForDay = (iso) => iso;                 // YYYY-MM-DD
-  const keyForMonth = (iso) => iso.slice(0, 7);   // YYYY-MM
-
-  const paymentBuckets = {};
-  const expenseBuckets = {};
-
-  function addTo(buckets, key, amt) {
-    if (!buckets[key]) buckets[key] = 0;
-    buckets[key] += amt;
-  }
-
-  function process(list, isPayment) {
-    (list || []).forEach(item => {
-      const iso = toISOFromAny(item.transaction_date);
-      if (!iso) return;
-      const key = spanMonths ? keyForMonth(iso) : keyForDay(iso);
-      if (isPayment) {
-        addTo(paymentBuckets, key, Math.abs(item.amount));
-      } else {
-        addTo(expenseBuckets, key, item.amount);
-      }
-    });
-  }
-
-  if (transactionType === "noi") {
-    process(response.payments, true);
-    process(response.expenses, false);
-  } else if (transactionType === "payments") {
-    process(response.payments, true);
-  } else if (transactionType === "expenses") {
-    process(response.expenses, false);
-  }
-
-  // Sorted keys (ISO) → display labels
-  const isoKeys = [...new Set([...Object.keys(paymentBuckets), ...Object.keys(expenseBuckets)])];
-  isoKeys.sort(); // lexicographic sort works for YYYY-MM and YYYY-MM-DD
-
-  const labels = isoKeys.map(k => {
-    if (k.length === 7) {
-      // YYYY-MM -> "MON YYYY"
-      const dt = new Date(k + "-01T00:00:00Z");
-      return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
-    } else {
-      // YYYY-MM-DD -> "M/D/YY"
-      return isoToMDYshort(k);
+    if (transactionType === "noi") {
+        allDates = [...response.payments, ...response.expenses].map(t => t.transaction_date);
+    } else if (transactionType === "payments") {
+        allDates = response.payments.map(t => t.transaction_date);
+    } else if (transactionType === "expenses") {
+        allDates = response.expenses.map(t => t.transaction_date);
     }
-  });
 
-  const paymentData = isoKeys.map(k => paymentBuckets[k] || 0);
-  const expenseData = isoKeys.map(k => expenseBuckets[k] || 0);
+    // Sort and determine time span
+    allDates.sort();
+    const firstDate = new Date(allDates[0]);
+    const lastDate = new Date(allDates[allDates.length - 1]);
+    const spanMonths = firstDate.getUTCFullYear() !== lastDate.getUTCFullYear() ||
+                       firstDate.getUTCMonth() !== lastDate.getUTCMonth();
 
-  return { labels, paymentData, expenseData };
+    // Choose grouping function
+    const groupFn = spanMonths ? v4formatToMonthYear : formatTransDate;
+
+    // Initialize grouped buckets
+    const paymentBuckets = {};
+    const expenseBuckets = {};
+
+    // Helper to add amounts to the correct bucket
+    function addToBucket(buckets, date, amount) {
+        if (!buckets[date]) buckets[date] = 0;
+        buckets[date] += amount;
+    }
+
+    if (transactionType === "noi") {
+        let transactions = [...response.payments, ...response.expenses];
+        transactions.forEach(item => {
+            let groupKey = groupFn(item.transaction_date);
+            if (item.type === "payment") {
+                addToBucket(paymentBuckets, groupKey, Math.abs(item.amount));
+            } else {
+                addToBucket(expenseBuckets, groupKey, item.amount);
+            }
+        });
+    } else if (transactionType === "payments") {
+        response.payments.forEach(payment => {
+            let groupKey = groupFn(payment.transaction_date);
+            addToBucket(paymentBuckets, groupKey, Math.abs(payment.amount));
+        });
+    } else if (transactionType === "expenses") {
+        response.expenses.forEach(expense => {
+            let groupKey = groupFn(expense.transaction_date);
+            addToBucket(expenseBuckets, groupKey, expense.amount);
+        });
+    }
+
+    // Combine labels from both buckets and sort
+    labels = [...new Set([...Object.keys(paymentBuckets), ...Object.keys(expenseBuckets)])];
+    labels.sort((a, b) => new Date(a) - new Date(b));
+
+    // Build final chart arrays
+    const paymentArray = labels.map(label => paymentBuckets[label] || 0);
+    const expenseArray = labels.map(label => expenseBuckets[label] || 0);
+
+    return { labels, paymentData: paymentArray, expenseData: expenseArray };
 }
 
 function renderChart(chartType, chartData) {
@@ -442,7 +424,7 @@ function populateTransactionsTable(response, transactionType) {
         }
 
         row.innerHTML = `
-            <td>${isoToMDYshort(toISOFromAny(transaction.transaction_date))}</td>
+            <td>${formatTransDate(transaction.transaction_date)}</td>
             <td>${transaction.display_name || "N/A"}</td>
             <td>${transaction.street || "N/A"}</td>
             <td class="narrow-col">${transaction.unit_name || "N/A"}</td>
@@ -616,89 +598,85 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
-  $('.loader').css('display', 'flex'); // Show loader
 
-  let transactions = [];
+    $('.loader').css('display', 'flex'); // Show loader
+    let transactions = [];
 
-  $('#transactionsTable tbody tr').each(function () {
-    const cols = $(this).find('td');
+    $('#transactionsTable tbody tr').each(function () {
+        const cols = $(this).find('td');
 
-    // Read the visible date text, normalize to ISO for sorting/transport
-    const dateText = cols.eq(0).text().trim();
-    const iso = toISOFromAny(dateText);
+        let transaction = {
+            transaction_date: cols.eq(0).text(),
+            display_name: cols.eq(1).text(),
+            street: cols.eq(2).text(),
+            unit_name: cols.eq(3).text(),
+            type: cols.eq(4).text().toLowerCase(),
+            description: cols.eq(5).text(),
+            amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
+        };
 
-    let transaction = {
-      transaction_date: iso, // <-- send ISO to backend/PDFMonkey
-      display_name: cols.eq(1).text(),
-      street: cols.eq(2).text(),
-      unit_name: cols.eq(3).text(),
-      type: cols.eq(4).text().toLowerCase(),
-      description: cols.eq(5).text(),
-      amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
+        transactions.push(transaction);
+    });
+
+    // Extract the first and last transaction dates
+    let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
+    let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
+
+    // Get the selected sector text
+    let sector = $('#sector option:selected').text().trim();
+
+    // Get the selected report type text (NOI, Payments, Expenses)
+    let reportType = $('#type option:selected').text().trim();
+
+    // Get the selected date range text (Last 3 months, Quarter to date, etc.)
+    let dateRangeText = $('#date_range option:selected').text().trim();
+
+    let fileName = '';
+
+    if (dateRangeText.toLowerCase() === 'custom') {
+        let startDate = $('#start_date').val();
+        let endDate = $('#end_date').val();
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            $('.loader').hide();
+            return;
+        }
+
+        fileName = `Custom ${startDate} - ${endDate}`;
+    } else {
+        fileName = firstDate && lastDate
+            ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
+            : `${sector} ${dateRangeText}`;
+    }
+
+    // Explicitly structured payload
+    let requestData = {
+        transactions: transactions,
+        file_name: fileName,
+        report_type: reportType // Uses the selected text (NOI, Payments, Expenses)
     };
 
-    transactions.push(transaction);
-  });
-
-  // Sort ASC (oldest -> newest) for the PDF
-  transactions.sort((a, b) => (a.transaction_date < b.transaction_date ? -1 : a.transaction_date > b.transaction_date ? 1 : 0));
-
-  // Extract first and last (now reliable)
-  const firstISO = transactions.length ? transactions[0].transaction_date : null;
-  const lastISO  = transactions.length ? transactions[transactions.length - 1].transaction_date : null;
-
-  // Form file name
-  const sector = $('#sector option:selected').text().trim();
-  const reportType = $('#type option:selected').text().trim();
-  const dateRangeText = $('#date_range option:selected').text().trim();
-
-  let fileName = '';
-  if (dateRangeText.toLowerCase() === 'custom') {
-    const startDate = $('#start_date').val();
-    const endDate = $('#end_date').val();
-    if (!startDate || !endDate) {
-      alert('Please select both start and end dates.');
-      $('.loader').hide();
-      return;
-    }
-    // you might keep these as raw picker values
-    fileName = `Custom ${startDate} - ${endDate}`;
-  } else {
-    // Use MM/DD/YYYY for display title, derived from ISO bounds
-    const startMDY = firstISO ? isoToMDY(firstISO) : null;
-    const endMDY   = lastISO ? isoToMDY(lastISO) : null;
-    fileName = (startMDY && endMDY)
-      ? `${sector} ${dateRangeText}: ${startMDY} - ${endMDY}`
-      : `${sector} ${dateRangeText}`;
-  }
-
-  // Final payload
-  const requestData = {
-    transactions,      // dates are ISO now (YYYY-MM-DD)
-    file_name: fileName,
-    report_type: reportType
-  };
-
-  $.ajax({
-    url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
-    type: 'POST',
-    dataType: "json",
-    contentType: 'application/json',
-    headers: {
-      "Authorization": "Bearer " + localStorage.authToken
-    },
-    data: JSON.stringify(requestData),
-    success: function (response) {
-      let statement_id = response.statement_id;
-      alert("Generating your report. Please do not refresh the page.");
-      fetchCustomReport(statement_id);
-    },
-    error: function (xhr, status, error) {
-      console.error('Error generating report:', error);
-      alert('Error generating report. Please try again.');
-      $('.loader').hide();
-    }
-  });
+    $.ajax({
+        url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
+        type: 'POST',
+        dataType: "json",
+        contentType: 'application/json',
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: JSON.stringify(requestData),
+        success: function (response) {
+            let statement_id = response.statement_id; // Store the statement ID
+            alert("Generating your report. Please do not refresh the page.");
+            fetchCustomReport(statement_id);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+            alert('Error generating report. Please try again.');
+            $('.loader').hide();
+        }
+    });
 }
 
 function fetchCustomReport(statementId) {
@@ -837,54 +815,4 @@ function fetchArrearsReport(statementId) {
             }
         });
     }, 3000);
-}
-
-// --- Date helpers ---
-function toISOFromAny(dateString) {
-  // Accepts "YYYY-MM-DD" or "M/D/YY" or "MM/DD/YYYY"
-  if (!dateString) return null;
-
-  // Already ISO?
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
-
-  // Try M/D/YY or MM/DD/YYYY
-  // Split on "/"
-  if (dateString.includes("/")) {
-    const parts = dateString.split("/");
-    if (parts.length === 3) {
-      let m = parseInt(parts[0], 10);
-      let d = parseInt(parts[1], 10);
-      let y = parts[2].trim();
-
-      // Normalize year: "25" => 2025; "2025" stays 2025
-      if (y.length === 2) {
-        const yy = parseInt(y, 10);
-        y = (yy >= 70 ? 1900 + yy : 2000 + yy).toString(); // adjust if you need a different pivot
-      }
-      const mm = String(m).padStart(2, "0");
-      const dd = String(d).padStart(2, "0");
-      return `${y}-${mm}-${dd}`;
-    }
-  }
-
-  // Last resort: Date parse
-  const d = new Date(dateString);
-  if (isNaN(d)) return null;
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function isoToMDY(iso) {
-  if (!iso) return "";
-  const [y, m, d] = iso.split("-");
-  return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y}`;
-}
-
-// Display for table (M/D/YY) from ISO
-function isoToMDYshort(iso) {
-  if (!iso) return "";
-  const [y, m, d] = iso.split("-");
-  return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y.slice(-2)}`;
 }
