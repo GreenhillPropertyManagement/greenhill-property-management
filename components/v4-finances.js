@@ -598,95 +598,97 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
-  $('.loader').css('display', 'flex'); // Show loader
-  let transactions = [];
 
-  // Build transactions from the table
-  $('#transactionsTable tbody tr').each(function () {
-    const cols = $(this).find('td');
+    $('.loader').css('display', 'flex'); // Show loader
+    let transactions = [];
 
-    let transaction = {
-      transaction_date: cols.eq(0).text(),            // e.g., "3/12/25" (your Liquid converts)
-      display_name: cols.eq(1).text(),
-      street: cols.eq(2).text(),
-      unit_name: cols.eq(3).text(),
-      type: cols.eq(4).text().toLowerCase(),
-      description: cols.eq(5).text(),
-      amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
+    $('#transactionsTable tbody tr').each(function () {
+        const cols = $(this).find('td');
+
+        let transaction = {
+            transaction_date: cols.eq(0).text(),
+            display_name: cols.eq(1).text(),
+            street: cols.eq(2).text(),
+            unit_name: cols.eq(3).text(),
+            type: cols.eq(4).text().toLowerCase(),
+            description: cols.eq(5).text(),
+            amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
+        };
+
+        transactions.push(transaction);
+    });
+
+    // Extract the first and last transaction dates
+    let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
+    let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
+
+    // Get the selected sector text
+    let sector = $('#sector option:selected').text().trim();
+
+    // Get the selected report type text (NOI, Payments, Expenses)
+    let reportType = $('#type option:selected').text().trim();
+
+    // Get the selected date range text (Last 3 months, Quarter to date, etc.)
+    let dateRangeText = $('#date_range option:selected').text().trim();
+
+    // Grab totals from UI
+    let totalRentCollected = $('[data-api="total_rent_collected"]').text().replace(/[$,]/g, '') || "0";
+    let totalExpenses      = $('[data-api="total_expenses"]').text().replace(/[$,]/g, '') || "0";
+    let noi                = $('[data-api="noi"]').text().replace(/[$,]/g, '') || "0";
+
+    // Grab property name from .noi-name
+    let propertyName = $('.noi-name').text().trim();
+
+    let fileName = '';
+
+    if (dateRangeText.toLowerCase() === 'custom') {
+        let startDate = $('#start_date').val();
+        let endDate = $('#end_date').val();
+
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates.');
+            $('.loader').hide();
+            return;
+        }
+
+        fileName = `Custom ${startDate} - ${endDate}`;
+    } else {
+        fileName = firstDate && lastDate
+            ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
+            : `${sector} ${dateRangeText}`;
+    }
+
+    // Explicitly structured payload
+    let requestData = {
+        transactions: transactions,
+        file_name: fileName,
+        report_type: reportType,
+        total_rent_collected: parseFloat(totalRentCollected),
+        total_expenses: parseFloat(totalExpenses),
+        noi: parseFloat(noi),
+        property_name: propertyName
     };
 
-    transactions.push(transaction);
-  });
-
-  // First/last dates for filename (based on visible table order)
-  let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
-  let lastDate  = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
-
-  // Selected UI values
-  let sector        = $('#sector option:selected').text().trim();
-  let reportType    = $('#type option:selected').text().trim();
-  let dateRangeText = $('#date_range option:selected').text().trim();
-
-  // Build file name
-  let fileName = '';
-  if (dateRangeText.toLowerCase() === 'custom') {
-    let startDate = $('#start_date').val();
-    let endDate   = $('#end_date').val();
-
-    if (!startDate || !endDate) {
-      alert('Please select both start and end dates.');
-      $('.loader').hide();
-      return;
-    }
-
-    fileName = `Custom ${startDate} - ${endDate}`;
-  } else {
-    fileName = firstDate && lastDate
-      ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
-      : `${sector} ${dateRangeText}`;
-  }
-
-  // --- NEW: grab totals from DOM (as numbers) ---
-  const totalRentCollectedNum = parseCurrencyToNumber($('[data-api="total_rent_collected"]').text());
-  const totalExpensesNum      = parseCurrencyToNumber($('[data-api="total_expenses"]').text());
-  const noiNum                = parseCurrencyToNumber($('[data-api="noi"]').text());
-
-  // --- NEW: capture the currently visible chart as a Base64 data URL ---
-  const chartImageDataURL = captureChartDataURL(); // returns "data:image/png;base64,..." or null
-
-  // Final payload
-  const requestData = {
-    transactions,
-    file_name: fileName,
-    report_type: reportType,
-    // NEW: totals (use DECIMAL/NUMERIC types in backend)
-    total_rent_collected: totalRentCollectedNum,
-    total_expenses: totalExpensesNum,
-    noi: noiNum,
-    // NEW: chart image (TEXT field backend; render via <img src="{{ chart_image }}"> in Liquid)
-    chart_image: chartImageDataURL
-  };
-
-  $.ajax({
-    url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
-    type: 'POST',
-    dataType: "json",
-    contentType: 'application/json',
-    headers: {
-      "Authorization": "Bearer " + localStorage.authToken
-    },
-    data: JSON.stringify(requestData),
-    success: function (response) {
-      let statement_id = response.statement_id; // Store the statement ID
-      alert("Generating your report. Please do not refresh the page.");
-      fetchCustomReport(statement_id);
-    },
-    error: function (xhr, status, error) {
-      console.error('Error generating report:', error);
-      alert('Error generating report. Please try again.');
-      $('.loader').hide();
-    }
-  });
+    $.ajax({
+        url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
+        type: 'POST',
+        dataType: "json",
+        contentType: 'application/json',
+        headers: {
+            "Authorization": "Bearer " + localStorage.authToken
+        },
+        data: JSON.stringify(requestData),
+        success: function (response) {
+            let statement_id = response.statement_id; // Store the statement ID
+            alert("Generating your report. Please do not refresh the page.");
+            fetchCustomReport(statement_id);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+            alert('Error generating report. Please try again.');
+            $('.loader').hide();
+        }
+    });
 }
 
 function fetchCustomReport(statementId) {
