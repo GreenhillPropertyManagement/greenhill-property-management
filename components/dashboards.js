@@ -465,7 +465,12 @@ function loadConvosInDashboard(target) {
       });
     },
     complete: function () {
-    
+          // strip anything in parentheses from last_message_sender cells
+      $("[data-comm-grid='last_message_sender']").each(function () {
+        const $el = $(this);
+        const text = $el.text();
+        $el.text(text.replace(/\([^)]*\)/g, "").trim());
+      });
     },
     error: function (error) {},
   });
@@ -781,7 +786,3 @@ function renderSimpleBarChart(containerSelector, chartData) {
     setTimeout(() => chart.resize(), 100);
 }
 
-function stripParenEmail(s) {
-  if (!s) return "";
-  return String(s).replace(/\([^)]*\)/g, "").trim();
-}
