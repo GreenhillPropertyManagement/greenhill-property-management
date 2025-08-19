@@ -1020,6 +1020,7 @@ function updateUserTransaction(transId, transFreq) {
     });
   });
 }
+
 function deleteRecurringTransaction(transId, type, frequency) {
   $(".loader").css("display", "flex");
 
