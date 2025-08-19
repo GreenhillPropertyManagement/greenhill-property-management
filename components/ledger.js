@@ -143,9 +143,19 @@ function updateTable(data) {
   const $tbody = $(".styled-table tbody");
   $tbody.empty();
 
-  function formatCurrency(amount) {
-    return amount.toLocaleString("en-US", { style: "currency", currency: "USD" });
-  }
+function normalizeZero(value) {
+  return Object.is(value, -0) ? 0 : value;
+}
+
+function formatCurrency(amount) {
+  const normalized = normalizeZero(amount);
+  return normalized.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
 
   function addEndOfMonthRow(month, year, balance) {
     const monthNames = [
@@ -359,3 +369,4 @@ function loadBalancesPaymentPage(user){
     },
   });
 }
+
