@@ -760,13 +760,8 @@ function generateArrearsReport() {
       $('.loader').hide();
       return;
     }
-
-    let propertyName = $('.noi-name').text().trim();
   
-    const requestData = { 
-      user_id: user_id,
-      property_name: propertyName  
-    };
+    const requestData = { user_id };
   
     $.ajax({
       url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_arrears_report',
