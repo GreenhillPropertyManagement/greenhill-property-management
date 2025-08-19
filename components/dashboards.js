@@ -465,7 +465,7 @@ function loadConvosInDashboard(target) {
       });
     },
     complete: function () {
-          // strip anything in parentheses from last_message_sender cells
+      // strip anything in parentheses from last_message_sender cells
       $("[data-comm-grid='last_message_sender']").each(function () {
         const $el = $(this);
         const text = $el.text();

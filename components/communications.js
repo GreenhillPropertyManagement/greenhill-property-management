@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
 
- stripEmailsFromLastMessageSender()
   createNewConvo(); // functinon to create new convo on form submit
   sendMessage();
 
