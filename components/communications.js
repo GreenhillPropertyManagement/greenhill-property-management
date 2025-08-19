@@ -209,6 +209,14 @@ function loadConvos(targetUser, type) {
         $('.chat__messages-wrapper').hide();
       });
       updateConvoCounter();
+
+      // strip anything in parentheses from last_message_sender cells
+      $("[data-convo='recipient-info']").each(function () {
+        const $el = $(this);
+        const text = $el.text();
+        $el.text(text.replace(/\([^)]*\)/g, "").trim());
+      });
+
     },
     error: function (error) {
       console.error("Error fetching conversations:", error);
@@ -722,15 +730,4 @@ function deleteConvo() {
   });
 }
 
-function stripEmailsFromLastMessageSender() {
-  $("[data-comm-grid='last_message_sender']").each(function () {
-    const $el = $(this);
-    let text = $el.text();
-
-    // Remove parentheses with email (or any content) inside
-    let cleaned = text.replace(/\([^)]*\)/g, "").trim();
-
-    $el.text(cleaned);
-  });
-}
 
