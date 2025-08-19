@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-
+ stripEmailsFromLastMessageSender()
   createNewConvo(); // functinon to create new convo on form submit
   sendMessage();
 
@@ -720,6 +720,18 @@ function deleteConvo() {
         loadConvos(localStorage.pageRefreshParam, "user");
       }
     },
+  });
+}
+
+function stripEmailsFromLastMessageSender() {
+  $("[data-comm-grid='last_message_sender']").each(function () {
+    const $el = $(this);
+    let text = $el.text();
+
+    // Remove parentheses with email (or any content) inside
+    let cleaned = text.replace(/\([^)]*\)/g, "").trim();
+
+    $el.text(cleaned);
   });
 }
 
