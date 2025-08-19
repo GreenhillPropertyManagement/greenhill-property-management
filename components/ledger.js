@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // init ledger on main unit page (load current balance)
   $(document).on("click", "#unit-overview-bttn", function () {
-    $("[api-button='unit-ledger']").trigger("click");
+      const urlParams = new URLSearchParams(window.location.search);
+      let unitId = urlParams.get("id");
+      fetchTransactions("active-tenant", unitId);
   });
 
   // Ledger Button Clicked - Unit Page
