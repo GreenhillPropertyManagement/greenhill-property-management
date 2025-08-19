@@ -443,11 +443,9 @@ function loadConvosInDashboard(target) {
           let otherParticipantInfo = null;
 
           participants.forEach(function (participant) {
-            if (participant.id !== activeUserId) {
-              otherParticipantInfo = participant.info;
-              dashConvoItem
-                .find("[data-comm-grid='last_message_sender']")
-                .text(otherParticipantInfo);
+            // compare as strings to avoid type mismatch (number vs string)
+            if (String(participant.id) !== activeUserId && !otherParticipantInfo) {
+              otherParticipantInfo = participant.info || "";
             }
           });
         } else {
@@ -779,4 +777,9 @@ function renderSimpleBarChart(containerSelector, chartData) {
     });
 
     setTimeout(() => chart.resize(), 100);
+}
+
+function stripParenEmail(s) {
+  if (!s) return "";
+  return String(s).replace(/\([^)]*\)/g, "").trim();
 }
