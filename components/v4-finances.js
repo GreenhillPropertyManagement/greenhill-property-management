@@ -761,7 +761,7 @@ function generateArrearsReport() {
       return;
     }
 
-    let propertyName = $('[data-profile="unit_property"]').text().trim();
+    let propertyName = $('[data-profile="unit_property"]').first().text().trim();
   
     const requestData = { 
       user_id: user_id,
