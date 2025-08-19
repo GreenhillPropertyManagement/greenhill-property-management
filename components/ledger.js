@@ -1,3 +1,7 @@
+/* ===========================
+   Ledger (with -0.00 fix)
+   =========================== */
+
 document.addEventListener("DOMContentLoaded", function () {
 
   // init ledger on main unit page (load current balance)
@@ -40,6 +44,28 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+/* ---------------------------
+   Money helpers (GLOBAL)
+   - Kills -0.00 via rounding
+   - Use for all math & display
+   --------------------------- */
+function roundToCents(n) {
+  return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+function normalizeMoney(n) {
+  const r = roundToCents(n);
+  return Object.is(r, -0) ? 0 : r;
+}
+function formatCurrency(amount) {
+  const v = normalizeMoney(amount);
+  return v.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
 function fetchTransactions(type, target) {
   $(".loader").css("display", "flex");
 
@@ -77,6 +103,9 @@ function fetchTransactions(type, target) {
   });
 }
 
+/* ---------------------------
+   Time helpers (ET handling)
+   --------------------------- */
 function parseDateInEasternTime(input) {
   if (!input) return null;
 
@@ -126,36 +155,19 @@ function formatBillingPeriod(input) {
   return `${month} ${year}`;
 }
 
-function isNewMonth(previousMonth, itemDate) {
-  return previousMonth !== itemDate.getMonth();
-}
-
+/* ---------------------------
+   Table rendering
+   --------------------------- */
 function updateTable(data) {
   console.log("Updating table with hybrid payment logic");
-  let runningBalance = 0;
-
-  // v2: balance through current ET month only
-  let currentMonthBalance = 0;
+  let runningBalance = 0;         // running balance over all rows
+  let currentMonthBalance = 0;    // v2: balance through current ET month only
 
   let previousMonth = null;
   let previousYear = null;
 
   const $tbody = $(".styled-table tbody");
   $tbody.empty();
-
-function normalizeZero(value) {
-  return Object.is(value, -0) ? 0 : value;
-}
-
-function formatCurrency(amount) {
-  const normalized = normalizeZero(amount);
-  return normalized.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
 
   function addEndOfMonthRow(month, year, balance) {
     const monthNames = [
@@ -229,17 +241,18 @@ function formatCurrency(amount) {
       ? formatBillingPeriod(matchedInit.billing_period)
       : formatBillingPeriod(item.billing_period);
 
-    // Update table running balance
-    runningBalance += item.amount;
+    // --- running balances (normalize every step)
+    runningBalance = normalizeMoney(runningBalance + Number(item.amount));
 
     // v2: include only items on/before current month in ET
     if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
-      currentMonthBalance += item.amount;
+      currentMonthBalance = normalizeMoney(currentMonthBalance + Number(item.amount));
     }
 
-    // End-of-month row when month changes
+    // End-of-month row when month changes (use balance BEFORE this row)
     if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
-      addEndOfMonthRow(previousMonth, previousYear, runningBalance - item.amount);
+      const prevBalance = normalizeMoney(runningBalance - Number(item.amount));
+      addEndOfMonthRow(previousMonth, previousYear, prevBalance);
     }
 
     const hasInvoice = !!item.invoice_url;
@@ -253,6 +266,11 @@ function formatCurrency(amount) {
       fileIconsHTML += `<span class="file-icon" data-url="${item.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
     }
 
+    // --- amounts for this row (normalized to kill -0.00)
+    const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(item.amount)) : "";
+    const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(-Number(item.amount))) : "";
+    const balanceAmt = formatCurrency(runningBalance);
+
     const row = `
       <tr>
         <td>${billingPeriod}</td>
@@ -260,9 +278,9 @@ function formatCurrency(amount) {
         <td>${completionDate}</td>
         <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
         <td>${item.description || ""}${fileIconsHTML}</td>
-        <td>${item.type === "charge" ? formatCurrency(item.amount) : ""}</td>
-        <td>${item.type !== "charge" ? formatCurrency(-item.amount) : ""}</td>
-        <td>${formatCurrency(runningBalance)}</td>
+        <td>${chargeAmt}</td>
+        <td>${creditAmt}</td>
+        <td>${balanceAmt}</td>
       </tr>
     `;
     $tbody.append(row);
@@ -274,13 +292,13 @@ function formatCurrency(amount) {
 
     const isLastItem = index === rowsToRender.length - 1;
     if (isLastItem && previousMonth !== null) {
-      addEndOfMonthRow(previousMonth, previousYear, runningBalance);
+      addEndOfMonthRow(previousMonth, previousYear, normalizeMoney(runningBalance));
     }
   });
 
   // v2 OUTPUT: client-computed balance through current month (ET)
   $("[data-tenant='current-balance-v2']").text(
-    currentMonthBalance.toLocaleString("en-US", { style: "currency", currency: "USD" })
+    formatCurrency(currentMonthBalance)
   );
 
   // Attach handlers
@@ -293,7 +311,6 @@ function formatCurrency(amount) {
 
   $(".charge-row").css("cursor", "pointer");
   $("[data-file-url]").css("cursor", "pointer");
-
 } // END updateTable
 
 /* --- Download CSV Functionality ---- */
@@ -326,7 +343,10 @@ function exportTableToCSV(table, filename) {
   dataRows.forEach((row) => {
     const cols = row.querySelectorAll("td");
     const rowData = [];
-    cols.forEach((col) => rowData.push(`"${col.innerText}"`));
+    cols.forEach((col, idx) => {
+      // For Amount columns (last 3 cells), preserve text as-is; CSV consumers can parse
+      rowData.push(`"${col.innerText}"`);
+    });
     csv.push(rowData.join(","));
   });
 
@@ -334,6 +354,9 @@ function exportTableToCSV(table, filename) {
   downloadCSV(csv, filename);
 }
 
+/* ---------------------------
+   Balances (Payment Page)
+   --------------------------- */
 function loadBalancesPaymentPage(user){
   // v1: retrieve balances from API (preserves your original behavior)
   $.ajax({
@@ -347,17 +370,14 @@ function loadBalancesPaymentPage(user){
     },
     dataType: "json",
     success: function (response) {
-      // v1: API-provided current balance
-      $("[data-tenant='current-balance']").text('$' + Number(response.balance).toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }));
+      // Use formatCurrency to normalize/format (kills -0.00)
+      $("[data-tenant='current-balance']").text(
+        formatCurrency(response.balance)
+      );
 
-      // next month balance from API
-      $("[data-tenant='next-month-balance']").text('$' + Number(response.next_month_payment).toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }));
+      $("[data-tenant='next-month-balance']").text(
+        formatCurrency(response.next_month_payment)
+      );
 
       // Note: v2 is set in updateTable() from ledger rows.
     },
@@ -369,4 +389,3 @@ function loadBalancesPaymentPage(user){
     },
   });
 }
-
