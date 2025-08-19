@@ -19,8 +19,8 @@
 
   });
 
-  /* Main App */
 
+  // init app
   function initializeApp() {
 
 
@@ -575,7 +575,7 @@ function fetchNotifications() {
   });
 }
 
-  function setupCustomDropdown() {
+function setupCustomDropdown() {
     const toggleButton = document.getElementById("notification-toggle");
     const dropdownList = document.getElementById("notification-list");
 
@@ -591,7 +591,7 @@ function fetchNotifications() {
             dropdownList.style.display = "none";
         }
     });
-  }
+}
 
 function updateNotifications(notifications) {
     const $counter = $("[data-api='notification-count']");
@@ -636,6 +636,15 @@ function updateNotifications(notifications) {
             }
 
             if (type === "legal") {
+                markNotificationAsSeen(id);
+                setTimeout(() => {
+                    localStorage.setItem("triggerLegalClick", "true");
+                    window.location.href = `/app/profile?id=${user_id}`;
+                }, 150);
+                return;
+            }
+
+            if (type === "profile") {
                 markNotificationAsSeen(id);
                 setTimeout(() => {
                     localStorage.setItem("triggerLegalClick", "true");
