@@ -96,7 +96,6 @@ function loadConvos(targetUser, type) {
     data: { user_uuid: targetUser },
     success: function (response) {
       console.log("Loading conversations for:", targetUser);
-      stripEmailsFromCommGrid();
       let seenConvos = new Set();
       let sampleConvo = $(".convo-item-sample-wrapper").find("[comm-sample-item='convo-item']");
 
