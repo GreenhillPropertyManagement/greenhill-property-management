@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+  stripEmailsFromCommGrid();
   createNewConvo(); // functinon to create new convo on form submit
   sendMessage();
 
@@ -94,7 +96,7 @@ function loadConvos(targetUser, type) {
     data: { user_uuid: targetUser },
     success: function (response) {
       console.log("Loading conversations for:", targetUser);
-
+      stripEmailsFromCommGrid();
       let seenConvos = new Set();
       let sampleConvo = $(".convo-item-sample-wrapper").find("[comm-sample-item='convo-item']");
 
@@ -719,5 +721,17 @@ function deleteConvo() {
         loadConvos(localStorage.pageRefreshParam, "user");
       }
     },
+  });
+}
+
+function stripEmailsFromCommGrid() {
+  $("[data-comm-grid]").each(function () {
+    const $el = $(this);
+    let text = $el.text();
+
+    // Remove anything in parentheses e.g. "John Doe (example@gmail.com)" → "John Doe"
+    text = text.replace(/\s*\([^)]*\)/g, "").trim();
+
+    $el.text(text);
   });
 }
