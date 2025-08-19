@@ -3,6 +3,15 @@ let latestApiResponse = null; // Declare it globally before using
 
 document.addEventListener("DOMContentLoaded", function() {
 
+    // Bind your button: [data-button="excel"]
+    $(document).off("click", '[data-button="excel"]').on("click", '[data-button="excel"]', function () {
+    // Optional: include current filters in file name
+    const sector = $('#sector option:selected').text().trim() || "All";
+    const dateRangeText = $('#date_range option:selected').text().trim() || "DateRange";
+    const filename = `Transactions_${sector}_${dateRangeText}.csv`.replace(/\s+/g, "_");
+    exportTransactionsTableToCSV(filename);
+    });
+
     initLandlordFinances();           // init finance component
     setupChartTypeListener();         // Allow users to change chart type dynamically
 
@@ -858,3 +867,61 @@ function captureChartDataURL() {
   // return tmp.toDataURL("image/jpeg", 0.9);
   return tmp.toDataURL("image/png");
 }
+
+// Export #transactionsTable to CSV and download
+function exportTransactionsTableToCSV(filename = "transactions.csv") {
+  const table = document.querySelector("#transactionsTable");
+  if (!table) {
+    console.error("Table #transactionsTable not found");
+    return;
+  }
+
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+  if (!thead || !tbody) return;
+
+  // Build header row
+  const headerCells = Array.from(thead.querySelectorAll("th")).map(th => th.textContent.trim());
+  const rows = [headerCells];
+
+  // Build data rows
+  Array.from(tbody.querySelectorAll("tr")).forEach(tr => {
+    const tds = Array.from(tr.querySelectorAll("td"));
+
+    // Skip placeholder row
+    if (tds.length === 1 && /No transactions/i.test(tds[0].textContent)) return;
+
+    const row = tds.map((td, idx) => {
+      let text = td.textContent.trim();
+
+      // Amount column = last column
+      const isAmount = idx === (headerCells.length - 1);
+      if (isAmount) {
+        // "$1,234.56" -> 1234.56 so Excel treats as number
+        text = text.replace(/[^0-9.\-]/g, "");
+      }
+
+      // Escape for CSV (" -> "")
+      if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+        text = `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    });
+
+    rows.push(row);
+  });
+
+  const csv = rows.map(r => r.join(",")).join("\r\n");
+
+  // Add BOM so Excel respects UTF-8
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
