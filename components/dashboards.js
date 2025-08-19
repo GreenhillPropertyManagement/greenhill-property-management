@@ -443,9 +443,11 @@ function loadConvosInDashboard(target) {
           let otherParticipantInfo = null;
 
           participants.forEach(function (participant) {
-            // compare as strings to avoid type mismatch (number vs string)
-            if (String(participant.id) !== activeUserId && !otherParticipantInfo) {
-              otherParticipantInfo = participant.info || "";
+            if (participant.id !== activeUserId) {
+              otherParticipantInfo = participant.info;
+              dashConvoItem
+                .find("[data-comm-grid='last_message_sender']")
+                .text(otherParticipantInfo);
             }
           });
         } else {
