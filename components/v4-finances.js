@@ -90,14 +90,14 @@ document.addEventListener("DOMContentLoaded", function () {
    ================================ */
 function bindFinanceRangeBar() {
   const $form        = $('#finance-filter-form');
-  const $panel       = $form.find('.filters-updated');
+  const $panel       = $form.find('.filters-updated');                   // modal/panel
   const $linksWrap   = $panel.find('.date-range-links-wrapper');
-  const $rangeDisplay= $('#range_selected');                         // optional label/button
+  const $rangeDisplay= $('#range_selected');                              // (now static text)
   const $dateRangeSel= $panel.find('[form-input="date_range"], #date_range');
   const $calHost     = $panel.find('.calendar-inject');
 
   // Hidden ISO inputs your backend expects
-  const $startISO    = $panel.find('#start_date');                   // value = YYYY-MM-DD
+  const $startISO    = $panel.find('#start_date');                        // value = YYYY-MM-DD
   const $endISO      = $panel.find('#end_date');
 
   // Stripe-style split inputs
@@ -123,15 +123,6 @@ function bindFinanceRangeBar() {
     'quarter-to-date':'quarter_to_date',
     'year-to-date':   'year_to_date',
     'custom':         'custom'
-  };
-  const VALUE_TO_LABEL = {
-    last_3_months:   'Last 3 Months',
-    last_12_months:  'Last 12 Months',
-    month_to_date:   'Month to Date',
-    quarter_to_date: 'Quarter to Date',
-    year_to_date:    'Year to Date',
-    all_time:        'All Items',
-    custom:          'Custom'
   };
 
   // Helpers
@@ -190,29 +181,8 @@ function bindFinanceRangeBar() {
     return { start: toISOFromDate(start), end: toISOFromDate(end) };
   }
 
-  function getActivePillLabel() {
-    const $active = $linksWrap.find('.filter-date-range.active');
-    if (!$active.length) return '';
-    const txt = ($active.text() || '').trim();
-    if (txt) return txt;
-    const dataKey = ($active.data('filter-range-text') || '').toString();
-    return dataKey.replace(/-/g, ' ');
-  }
-  function updateRangeSelectedDisplay() {
-    if (!$rangeDisplay.length) return;
-    const v = $dateRangeSel.val();
-    if (v === 'custom') {
-      const s = $startISO.val(), e = $endISO.val();
-      if (s && e) {
-        const [sy, sm, sd] = s.split('-'); const [ey, em, ed] = e.split('-');
-        $rangeDisplay.text(`${sm}-${sd.slice(-2)} - ${em}-${ed.slice(-2)}`);
-      } else {
-        $rangeDisplay.text('Select dates');
-      }
-    } else {
-      $rangeDisplay.text(VALUE_TO_LABEL[v] || getActivePillLabel() || 'Custom');
-    }
-  }
+  // (No longer updating #range_selected – this function is intentionally empty)
+  function updateRangeSelectedDisplay() {}
 
   // --- Inline Flatpickr (two months) ---
   function ensureInlineCalendar() {
@@ -231,14 +201,8 @@ function bindFinanceRangeBar() {
       dateFormat: 'Y-m-d',
       onChange(selected) {
         const [s, e] = selected;
-        if (s) {
-          const isoS = toISOFromDate(s);
-          setHiddenISO('start', isoS); setSplit('start', isoS);
-        }
-        if (e) {
-          const isoE = toISOFromDate(e);
-          setHiddenISO('end', isoE); setSplit('end', isoE);
-        }
+        if (s) { const isoS = toISOFromDate(s); setHiddenISO('start', isoS); setSplit('start', isoS); }
+        if (e) { const isoE = toISOFromDate(e); setHiddenISO('end',   isoE); setSplit('end',   isoE); }
         if ($startISO.val() && $endISO.val()) { $dateRangeSel.val('custom'); enableCustomDates(); }
         updateRangeSelectedDisplay();
       }
@@ -258,9 +222,7 @@ function bindFinanceRangeBar() {
     if (eSplit) setHiddenISO('end',   eSplit);
 
     // if we don't have both, mark custom and stop
-    if (!s || !e) {
-      $dateRangeSel.val('custom'); enableCustomDates(); updateRangeSelectedDisplay(); return;
-    }
+    if (!s || !e) { $dateRangeSel.val('custom'); enableCustomDates(); updateRangeSelectedDisplay(); return; }
 
     // Swap if reversed
     const sd = new Date(`${s}T00:00:00`), ed = new Date(`${e}T00:00:00`);
@@ -284,7 +246,7 @@ function bindFinanceRangeBar() {
   $eDD.on('input change blur', syncFromSplit);
   $eYYYY.on('input change blur', syncFromSplit);
 
-  // --- open panel from label/pill if you use one ---
+  // --- toggle panel open (keep if you still want the static label to open it) ---
   $rangeDisplay
     .off('click.financeRange focus.financeRange keydown.financeRange')
     .on('click.financeRange', e => { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); })
@@ -293,13 +255,31 @@ function bindFinanceRangeBar() {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); }
     });
 
+  // --- click outside / Esc to close ---
+  $(document)
+    .off('mousedown.financeOutside touchstart.financeOutside keydown.financeOutside')
+    .on('mousedown.financeOutside touchstart.financeOutside', function (evt) {
+      // If click is outside the panel, hide it
+      if ($panel.is(':visible') && !$(evt.target).closest('.filters-updated').length) {
+        $panel.hide();
+      }
+    })
+    .on('keydown.financeOutside', function (evt) {
+      if (evt.key === 'Escape' && $panel.is(':visible')) {
+        $panel.hide();
+      }
+    });
+
   // --- preset pills ---
   $linksWrap.off('click.financeRange', '.filter-date-range')
     .on('click.financeRange', '.filter-date-range', function () {
       const $btn = $(this);
       $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
 
-      const value = TEXT_TO_VALUE[String($btn.data('filter-range-text'))] || 'custom';
+      const value = (String($btn.data('filter-range-text')) in TEXT_TO_VALUE)
+        ? TEXT_TO_VALUE[String($btn.data('filter-range-text'))]
+        : 'custom';
+
       $dateRangeSel.val(value);
 
       if (value === 'custom') {
@@ -331,7 +311,7 @@ function bindFinanceRangeBar() {
           }
         }
       }
-      updateRangeSelectedDisplay();
+      updateRangeSelectedDisplay(); // no-op now
     });
 
   // --- default: Month to date ---
@@ -361,7 +341,7 @@ function bindFinanceRangeBar() {
         }
       }, 0);
     }
-    updateRangeSelectedDisplay();
+    updateRangeSelectedDisplay(); // no-op now
   })();
 
   // close panel on submit
