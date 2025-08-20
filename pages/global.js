@@ -6,6 +6,8 @@
       window.location.href = "/app/login";
     } else {
       authUser();
+
+      /* Notifications Logic */
       // ✅ Show "You're all caught up!" message ONLY when the dropdown is opened and there are no notifications
       document.getElementById("notification-toggle").addEventListener("click", function () {
         let $wrapper = document.getElementById("notification-list");
@@ -15,6 +17,13 @@
             $wrapper.innerHTML = `<div class="notification__empty-message">You're all caught up!</div>`;
         }
       });
+
+      // Delegate the click so it works even if the button is injected later
+      $(document).off("click", "[data-action='clear-all']")
+        .on("click", "[data-action='clear-all']", function (e) {
+          e.stopPropagation(); // keep dropdown open if you want
+          clearAllNotifications();
+        });
     }
 
   });
@@ -594,78 +603,134 @@ function setupCustomDropdown() {
 }
 
 function updateNotifications(notifications) {
-    const $counter = $("[data-api='notification-count']");
-    const $maintenanceCounter = $("[data-api='maintenance-counter']");
-    const $wrapper = $("#notification-list");
+  const $counter = $("[data-api='notification-count']");
+  const $maintenanceCounter = $("[data-api='maintenance-counter']");
+  const $wrapper = $("#notification-list");
 
-    $wrapper.html(""); // Clear old notifications
+  // Helper: recompute counters from DOM
+  function refreshCountersFromDOM() {
+    const total = $wrapper.find(".notification__item-wrapper").length;
+    const workOrders = $wrapper.find('.notification__item-wrapper[data-type="work-order"]').length;
 
-    let workOrderCount = 0;
+    if (total > 0) { $counter.text(total).show(); } else { $counter.hide(); }
+    $maintenanceCounter.text(workOrders).css("display", workOrders ? "flex" : "none");
 
-    notifications.forEach(notification => {
-        const { id, type, user_id, activity_record } = notification;
-        const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
-        const description = activity_record.description;
+    // Enable/disable Clear All
+    $wrapper.find('[data-action="clear-all"]').prop("disabled", total === 0);
+  }
 
-        // Count work-orders
-        if (type === "work-order") {
-            workOrderCount++;
+  // Reset list
+  $wrapper.html("");
+
+  // Inject controls row (once per render)
+  const $controls = $(`
+    <div class="notification__controls">
+      <button type="button" class="notification__clear-all" data-action="clear-all">Clear All</button>
+    </div>
+  `);
+  $wrapper.append($controls);
+
+  // Populate items
+  let workOrderCount = 0;
+
+  notifications.forEach(notification => {
+    const { id, type, user_id, activity_record } = notification;
+    const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
+    const description = activity_record.description;
+
+    if (type === "work-order") workOrderCount++;
+
+    const $item = $(`
+      <div class="notification__item-wrapper" data-id="${id}" data-type="${type}">
+        <div class="notification__item__text">${description}</div>
+        <div class="notification__timestamp">${formattedTimestamp}</div>
+      </div>
+    `);
+
+    $item.on("click", function () {
+      if (type === "work-order") {
+        clearAllWorkOrderNotifications();               // your existing flow
+        document.getElementById("maintenance").click();
+        return;
+      }
+
+      if (type === "transaction") {
+        const userRole = localStorage.getItem("userRole");
+        if (userRole === "Tenant") {
+          document.getElementById("pay-rent").click();
+        } else if (userRole === "Landlord") {
+          document.getElementById("finance").click();
         }
+      }
 
-        const $item = $(`
-            <div class="notification__item-wrapper" data-id="${id}" data-type="${type}">
-                <div class="notification__item__text">${description}</div>
-                <div class="notification__timestamp">${formattedTimestamp}</div>
-            </div>
-        `);
+      if (type === "legal" || type === "profile") {
+        markNotificationAsSeen(id);
+        setTimeout(() => {
+          localStorage.setItem("triggerLegalClick", "true");
+          window.location.href = `/app/profile?id=${user_id}`;
+        }, 150);
+        return;
+      }
 
-        $item.on("click", function () {
-            if (type === "work-order") {
-                clearAllWorkOrderNotifications(); // mark all as seen & update counters
-                document.getElementById("maintenance").click(); // switch to Maintenance tab
-                return;
-            }
-
-            if (type === "transaction") {
-                const userRole = localStorage.getItem("userRole");
-                if (userRole === "Tenant") {
-                    document.getElementById("pay-rent").click();
-                } else if (userRole === "Landlord") {
-                    document.getElementById("finance").click();
-                }
-            }
-
-            if (type === "legal") {
-                markNotificationAsSeen(id);
-                setTimeout(() => {
-                    localStorage.setItem("triggerLegalClick", "true");
-                    window.location.href = `/app/profile?id=${user_id}`;
-                }, 150);
-                return;
-            }
-
-            if (type === "profile") {
-                markNotificationAsSeen(id);
-                setTimeout(() => {
-                    localStorage.setItem("triggerLegalClick", "true");
-                    window.location.href = `/app/profile?id=${user_id}`;
-                }, 150);
-                return;
-            }
-
-            // fallback: mark as seen + remove
-            markNotificationAsSeen(id);
-            $(this).fadeOut(200, function () {
-                $(this).remove();
-                updateNotificationAndMaintenanceCounters(); // make sure both counters reflect real-time state
-            });
-        });
-
-        $wrapper.append($item);
+      // fallback: mark as seen + remove
+      markNotificationAsSeen(id);
+      $(this).fadeOut(200, function () {
+        $(this).remove();
+        refreshCountersFromDOM();                       // keep counters in sync
+        if (typeof updateNotificationAndMaintenanceCounters === "function") {
+          updateNotificationAndMaintenanceCounters();   // keep your existing behavior too
+        }
+      });
     });
 
-    // Set initial counter states (on page load)
-    $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
+    $wrapper.append($item);
+  });
+
+  // Initial counter state
+  $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
+  refreshCountersFromDOM();
+
+  // Bind Clear All (idempotent per wrapper)
+  if (!$wrapper.data("clearAllBound")) {
+    $wrapper.on("click", "[data-action='clear-all']", function (e) {
+      e.stopPropagation();
+
+      const $btn = $(this);
+      const ids = $wrapper.find(".notification__item-wrapper")
+        .map(function () { return $(this).data("id"); })
+        .get();
+
+      if (!ids.length) return;
+
+      $btn.prop("disabled", true);
+
+      $.ajax({
+        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification_bulk",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ notification_ids: ids }),   // Xano expects text list named notification_ids
+        headers: {
+          Authorization: "Bearer " + localStorage.authToken
+        },
+        success: function () {
+          // Remove all items on success
+          $wrapper.find(".notification__item-wrapper").remove();
+          refreshCountersFromDOM();
+          if (typeof updateNotificationAndMaintenanceCounters === "function") {
+            updateNotificationAndMaintenanceCounters();
+          }
+        },
+        error: function (xhr, status, err) {
+          console.error("Bulk clear failed:", err, xhr && xhr.responseText);
+        },
+        complete: function () {
+          $btn.prop("disabled", false);
+        }
+      });
+    });
+
+    $wrapper.data("clearAllBound", true);
+  }
 }
 
 function markNotificationAsSeen(notificationId) {
@@ -1048,3 +1113,76 @@ function updateNotificationAndMaintenanceCounters() {
         $maintenanceCounter.css("display", "none");
     }
 }
+
+/** Insert the Clear All control at the top of the dropdown list (once). */
+function ensureClearAllButton() {
+  const $list = $("#notification-list");
+  if (!$list.length) return;
+
+  // Add controls container + button if missing
+  if ($list.find(".notification__controls").length === 0) {
+    const $controls = $(`
+      <div class="notification__controls">
+        <button type="button" class="notification__clear-all" data-action="clear-all">Clear All</button>
+      </div>
+    `);
+    $list.prepend($controls);
+  }
+
+  // Enable/disable based on whether there are any items
+  const hasItems = $list.find(".notification__item-wrapper").length > 0;
+  $list.find('[data-action="clear-all"]').prop("disabled", !hasItems);
+}
+
+/** Recompute counters from what’s currently in the DOM. */
+function refreshNotificationCountersFromDOM() {
+  const $list = $("#notification-list");
+  const total = $list.find(".notification__item-wrapper").length;
+  const workOrders = $list.find('.notification__item-wrapper[data-type="work-order"]').length;
+
+  const $counter = $("[data-api='notification-count']");
+  const $maintenanceCounter = $("[data-api='maintenance-counter']");
+
+  if (total > 0) { $counter.text(total).show(); } else { $counter.hide(); }
+  $maintenanceCounter.text(workOrders).css("display", workOrders ? "flex" : "none");
+}
+
+/** Bulk-clear: collects all IDs and calls your Xano bulk endpoint. */
+function clearAllNotifications() {
+  const $btn = $('[data-action="clear-all"]');
+  const $list = $("#notification-list");
+
+  // Gather IDs from items in the list
+  const notification_ids = $list.find(".notification__item-wrapper")
+    .map(function () { return $(this).data("id"); })
+    .get();
+
+  if (!notification_ids.length) return; // nothing to do
+
+  // UX: disable button while processing
+  $btn.prop("disabled", true);
+
+  $.ajax({
+    url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification_bulk",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({ notification_ids }), // Xano text list input
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken
+    },
+    success: function () {
+      // Remove all items from the dropdown
+      $list.find(".notification__item-wrapper").remove();
+      refreshNotificationCountersFromDOM();
+      ensureClearAllButton(); // will disable the button since list is empty
+    },
+    error: function (xhr, status, err) {
+      console.error("Bulk clear failed:", err, xhr?.responseText);
+    },
+    complete: function () {
+      // Re-enable (in case items remain due to error)
+      $btn.prop("disabled", false);
+    }
+  });
+}
+
