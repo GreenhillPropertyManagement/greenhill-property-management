@@ -248,15 +248,20 @@ function bindFinanceRangeBar() {
             // update hidden inputs
             $start.val(rng.start);
             $end.val(rng.end);
-            // update calendar WITHOUT firing onChange (so we don't set 'custom')
+
+            // update calendar WITHOUT firing onChange (so date_range doesn't flip to 'custom')
             if (window.__fp) {
-            window.__fp.setDate([rng.start, rng.end], false);  // <-- important
-            window.__fp.jumpToDate(rng.start);                 // visible month
+            window.__fp.setDate([rng.start, rng.end], false);
+
+            // ensure RIGHT calendar = END month; LEFT = END-1 month
+            const end = new Date(rng.end + 'T00:00:00');
+            const leftMonth = new Date(end.getFullYear(), end.getMonth() - 1, 1);
+            window.__fp.jumpToDate(leftMonth);
             }
         }
         }
 
-        // show plain-English label for presets, or dates for custom
+        // show plain-English label for presets, dates only for custom
         updateRangeSelectedDisplay();
     });
 
@@ -265,15 +270,27 @@ function bindFinanceRangeBar() {
   $end.on('change.financeRange', updateRangeSelectedDisplay);
 
   // 4) Initialize defaults on load (Month to date)
-  (function initDefaultState() {
+    (function initDefaultState() {
     $linksWrap.find('.filter-date-range').removeClass('active');
     $linksWrap.find('[data-filter-range-text="month-to-date"]').addClass('active');
     $dateRangeSel.val('month_to_date');
-    const rng = computePresetRange('month_to_date');
-    if (rng) { $start.val(rng.start); $end.val(rng.end); }
-    updateRangeSelectedDisplay();
-  })();
 
+    const rng = computePresetRange('month_to_date');
+    if (rng) {
+        $start.val(rng.start);
+        $end.val(rng.end);
+
+        if (window.__fp) {
+        window.__fp.setDate([rng.start, rng.end], false);
+
+        const end = new Date(rng.end + 'T00:00:00');
+        const leftMonth = new Date(end.getFullYear(), end.getMonth() - 1, 1);
+        window.__fp.jumpToDate(leftMonth);
+        }
+    }
+
+    updateRangeSelectedDisplay();
+    })();
   // 5) Public helper for your finance tab to switch presets programmatically
   window.financeSetPreset = function (keyUnderscore) {
     const map = {
