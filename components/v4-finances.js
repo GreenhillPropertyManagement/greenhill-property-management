@@ -196,6 +196,18 @@ function bindFinanceRangeBar() {
     });
   }
 
+    function getActivePillLabel() {
+    const $active = $linksWrap.find('.filter-date-range.active');
+    if ($active.length) {
+        // Prefer the pill's visible text (keeps your capitalization), fallback to data attr
+        const txt = ($active.text() || '').trim();
+        if (txt) return txt;
+        const dataKey = ($active.data('filter-range-text') || '').toString();
+        return dataKey.replace(/-/g, ' '); // "month-to-date" -> "month to date"
+    }
+    return '';
+    }
+
   // 1) Clicking the top input reveals the panel
   $rangeInput.off('click.financeRange focus.financeRange keydown.financeRange')
     .on('click.financeRange', function (e) {
@@ -270,7 +282,13 @@ function bindFinanceRangeBar() {
     const $target = $linksWrap.find(`[data-filter-range-text="${dataKey}"]`);
     if ($target.length) $target.trigger('click');
   };
+
+  // 6) Close the panel when the form is submitted (Apply Date Range)
+  $form.on('submit.financeRange', function () {
+    $panel.hide(); // or $panel.fadeOut(200)
+  });
 }
+
 
 /* ================================
    Existing logic below (unchanged)
@@ -992,14 +1010,3 @@ function exportTransactionsTableToCSV(filename = "transactions.csv") {
   URL.revokeObjectURL(url);
 }
 
-function getActivePillLabel() {
-  const $active = $linksWrap.find('.filter-date-range.active');
-  if ($active.length) {
-    // Prefer the pill's visible text (keeps your capitalization), fallback to data attr
-    const txt = ($active.text() || '').trim();
-    if (txt) return txt;
-    const dataKey = ($active.data('filter-range-text') || '').toString();
-    return dataKey.replace(/-/g, ' '); // "month-to-date" -> "month to date"
-  }
-  return '';
-}
