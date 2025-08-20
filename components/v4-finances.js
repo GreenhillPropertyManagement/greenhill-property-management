@@ -90,20 +90,20 @@ document.addEventListener("DOMContentLoaded", function () {
    ================================ */
 function bindFinanceRangeBar() {
   const $form        = $('#finance-filter-form');                   // scope to this form
-  const $panel       = $form.find('.filters-updated');              // wrapper you’ll show/hide
+  const $panel       = $form.find('.filters-updated');              // wrapper
   const $linksWrap   = $panel.find('.date-range-links-wrapper');
-  const $rangeDisplay= $('#range_selected');                        // DISPLAY-ONLY button
-  const $dateRangeSel= $panel.find('[form-input="date_range"]');    // hidden select
+  const $rangeDisplay= $('#range_selected');                        // DISPLAY-ONLY button (optional)
+  const $dateRangeSel= $panel.find('[form-input="date_range"], #date_range'); // hidden select
   const $start       = $panel.find('#start_date');                  // has name="start_date"
   const $end         = $panel.find('#end_date');                    // has name="end_date"
   const $calHost     = $panel.find('.calendar-inject');
 
-  if (!$form.length || !$panel.length || !$rangeDisplay.length || !$dateRangeSel.length || !$start.length || !$end.length) {
+  if (!$form.length || !$panel.length || !$dateRangeSel.length || !$start.length || !$end.length) {
     console.warn('[FinanceRangeBar] Missing required elements.');
     return;
   }
 
-  // Start hidden
+  // Start hidden (open on pill/button click)
   $panel.hide();
 
   // Map between pills and select values
@@ -126,22 +126,30 @@ function bindFinanceRangeBar() {
   };
 
   // Helpers
-  const pad = n => String(n).padStart(2, '0');
+  const pad  = n => String(n).padStart(2, '0');
   const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   const toMDYDash = iso => {
     if (!iso) return '';
     const [y,m,d] = iso.split('-');
     return `${m}-${d}-${String(y).slice(-2)}`;
   };
+  const normalizeISO = (val) => {
+    if (!val) return '';
+    const v = String(val).trim();
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/;
+    if (iso.test(v)) return v;
+    const mdy = /^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4})$/;
+    const m = v.match(mdy);
+    if (m) return `${m[3]}-${pad(m[1])}-${pad(m[2])}`;
+    return v; // passthrough
+  };
 
   // Toggle whether start/end should be part of the form submission
   function enableCustomDates() {
-    // only add form-input when custom so your submit loop picks them up
     if ($start.attr('form-input') !== 'start_date') $start.attr('form-input', 'start_date');
     if ($end.attr('form-input')   !== 'end_date')   $end.attr('form-input',   'end_date');
   }
   function disableCustomDates() {
-    // remove from the submission payload for non-custom presets
     $start.removeAttr('form-input').val('');
     $end.removeAttr('form-input').val('');
   }
@@ -175,6 +183,7 @@ function bindFinanceRangeBar() {
   }
 
   function updateRangeSelectedDisplay() {
+    if (!$rangeDisplay.length) return;
     const v = $dateRangeSel.val();
     if (v === 'custom') {
       const s = $start.val();
@@ -191,12 +200,12 @@ function bindFinanceRangeBar() {
   function ensureInlineCalendar() {
     if (window.__fp) { window.__fp.redraw && window.__fp.redraw(); return; }
 
-    // Allow Flatpickr to manage these as text inputs
+    // Make sure inputs are text (Flatpickr manages them)
     if ($start.attr('type') === 'date') $start.attr('type', 'text');
     if ($end.attr('type')   === 'date') $end.attr('type',   'text');
 
     if (typeof flatpickr !== 'function') {
-      console.warn('[FinanceRangeBar] Flatpickr not found; calendar will not render.');
+      console.warn('[FinanceFilter] Flatpickr not found; calendar will not render.');
       return;
     }
 
@@ -212,16 +221,51 @@ function bindFinanceRangeBar() {
         const [s, e] = selected;
         if (s) $start.val(toISO(s));
         if (e) $end.val(toISO(e));
-
-        // When both dates are selected by user interaction -> custom
         if ($start.val() && $end.val()) {
           $dateRangeSel.val('custom');
-          enableCustomDates(); // ensure they are included in the form
+          enableCustomDates();
         }
         updateRangeSelectedDisplay();
       }
     });
   }
+
+  // When the user *types or pastes* into Start/End -> update calendar + set custom
+  function syncCustomFromInputs() {
+    let s = normalizeISO($start.val());
+    let e = normalizeISO($end.val());
+    if (s) $start.val(s);
+    if (e) $end.val(e);
+
+    // If both present, set custom + reflect on calendar
+    if (s && e) {
+      // auto-swap if out of order
+      const sd = new Date(`${s}T00:00:00`);
+      const ed = new Date(`${e}T00:00:00`);
+      if (sd > ed) { const tmp = s; s = e; e = tmp; $start.val(s); $end.val(e); }
+
+      $dateRangeSel.val('custom');
+      enableCustomDates();
+
+      if (window.__fp) {
+        window.__fp.setDate([s, e], false); // no onChange loop
+        const sameMonth =
+          sd.getFullYear() === ed.getFullYear() && sd.getMonth() === ed.getMonth();
+        const leftMonth = sameMonth
+          ? new Date(ed.getFullYear(), ed.getMonth() - 1, 1)
+          : new Date(sd.getFullYear(), sd.getMonth(), 1);
+        window.__fp.jumpToDate(leftMonth);
+      }
+    } else {
+      // Only one side typed; we can still toggle the pill to custom for clarity
+      $dateRangeSel.val('custom');
+      enableCustomDates();
+    }
+    updateRangeSelectedDisplay();
+  }
+
+  $start.on('change.financeRange blur.financeRange input.financeRange', syncCustomFromInputs);
+  $end  .on('change.financeRange blur.financeRange input.financeRange', syncCustomFromInputs);
 
   // 1) Clicking the top control reveals the panel
   $rangeDisplay.off('click.financeRange focus.financeRange keydown.financeRange')
@@ -253,53 +297,36 @@ function bindFinanceRangeBar() {
       $dateRangeSel.val(value);
 
       if (value === 'custom') {
-        enableCustomDates(); // let the calendar onChange populate values
+        enableCustomDates(); // let calendar/typing populate values
       } else if (value === 'all_time') {
         disableCustomDates();
         if (window.__fp) window.__fp.clear();
       } else {
-        // preset range
         const rng = computePresetRange(value);
         if (rng) {
-          // For presets we DO NOT want to submit start/end -> remove from form
+          // Non-custom: do not submit explicit dates
           disableCustomDates();
-
-          // (You can still keep these visible if you want)
+          // Keep visual values if you want them visible
           $start.val(rng.start);
           $end.val(rng.end);
 
           if (window.__fp) {
-            // update calendar WITHOUT firing onChange (so date_range doesn't flip to 'custom')
-            window.__fp.setDate([rng.start, rng.end], false);
-
-            // Stripe-like viewport rule:
-            // - multi-month ranges: left = start month
-            // - single-month range (month-to-date): left = end - 1 month
-            const start = new Date(rng.start + 'T00:00:00');
-            const end   = new Date(rng.end   + 'T00:00:00');
-
+            window.__fp.setDate([rng.start, rng.end], false); // don't flip to custom
+            const s = new Date(rng.start + 'T00:00:00');
+            const e = new Date(rng.end   + 'T00:00:00');
             const sameMonth =
-              start.getFullYear() === end.getFullYear() &&
-              start.getMonth()  === end.getMonth();
-
+              s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
             const leftMonth = sameMonth
-              ? new Date(end.getFullYear(), end.getMonth() - 1, 1)
-              : new Date(start.getFullYear(), start.getMonth(), 1);
-
+              ? new Date(e.getFullYear(), e.getMonth() - 1, 1)
+              : new Date(s.getFullYear(), s.getMonth(), 1);
             window.__fp.jumpToDate(leftMonth);
           }
         }
       }
-
-      // show plain-English label for presets, dates only for custom
       updateRangeSelectedDisplay();
     });
 
-  // 3) Reflect manual typing (if any) in the display (still display-only)
-  $start.on('change.financeRange', updateRangeSelectedDisplay);
-  $end.on('change.financeRange', updateRangeSelectedDisplay);
-
-  // 4) Initialize defaults on load (Month to date) with Stripe viewport + non-custom submission
+  // 3) Initialize defaults on load (Month to date) with Stripe viewport
   (function initDefaultState() {
     $linksWrap.find('.filter-date-range').removeClass('active');
     $linksWrap.find('[data-filter-range-text="month-to-date"]').addClass('active');
@@ -307,34 +334,26 @@ function bindFinanceRangeBar() {
 
     const rng = computePresetRange('month_to_date');
     if (rng) {
-      // Not custom by default -> remove from form payload
-      disableCustomDates();
-
-      // Visual values for display/calendar
+      disableCustomDates();             // not custom by default
       $start.val(rng.start);
       $end.val(rng.end);
 
       if (window.__fp) {
         window.__fp.setDate([rng.start, rng.end], false);
-
-        const start = new Date(rng.start + 'T00:00:00');
-        const end   = new Date(rng.end   + 'T00:00:00');
+        const s = new Date(rng.start + 'T00:00:00');
+        const e = new Date(rng.end   + 'T00:00:00');
         const sameMonth =
-          start.getFullYear() === end.getFullYear() &&
-          start.getMonth()  === end.getMonth();
-
+          s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
         const leftMonth = sameMonth
-          ? new Date(end.getFullYear(), end.getMonth() - 1, 1)
-          : new Date(start.getFullYear(), start.getMonth(), 1);
-
+          ? new Date(e.getFullYear(), e.getMonth() - 1, 1)
+          : new Date(s.getFullYear(), s.getMonth(), 1);
         window.__fp.jumpToDate(leftMonth);
       }
     }
-
     updateRangeSelectedDisplay();
   })();
 
-  // 5) Public helper for your finance tab to switch presets programmatically
+  // 4) Public helper if you need to switch presets programmatically
   window.financeSetPreset = function (keyUnderscore) {
     const map = {
       last_3_months: 'last-3-months',
@@ -350,12 +369,11 @@ function bindFinanceRangeBar() {
     if ($target.length) $target.trigger('click');
   };
 
-  // 6) Close the panel when the form is submitted (Apply Date Range)
+  // 5) Close the panel when the form is submitted (Apply Date Range)
   $form.on('submit.financeRange', function () {
     $panel.hide(); // or $panel.fadeOut(200)
   });
 }
-
 
 /* ================================
    Existing logic below (unchanged)
