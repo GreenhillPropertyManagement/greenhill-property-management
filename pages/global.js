@@ -695,8 +695,8 @@ function updateNotifications(notifications) {
   // Initial counter state
   $maintenanceCounter.text(workOrderCount).css("display", workOrderCount ? "flex" : "none");
   refreshCountersFromDOM();
+  ensureClearAllButton();
 
-  // Bind Clear All (idempotent per wrapper)
 // Bind Clear All (idempotent per wrapper)
 if (!$wrapper.data("clearAllBound")) {
   $wrapper.on("click", "[data-action='clear-all']", function (e) {
@@ -744,11 +744,17 @@ function markNotificationsAsSeenBulk(notificationIds) {
         success: function(response) {
             console.log("Bulk notifications marked as seen:", response);
 
-            // On success, clear all items from the dropdown
-            $("#notification-list").find(".notification__item-wrapper").remove();
+            const $list = $("#notification-list");
+            $list.find(".notification__item-wrapper").remove();
 
-            // Update counters after clearing
+            // Update counters
             updateNotificationAndMaintenanceCounters();
+
+            // Hide dropdown after clearing
+            $list.hide();
+
+            // (Optional) show the empty message if you want it visible next open
+            $list.html(`<div class="notification__empty-message">You're all caught up!</div>`);
         },
         error: function(xhr, status, error) {
             console.error("Error marking bulk notifications as seen:", error, xhr.responseText);
@@ -1124,7 +1130,7 @@ function ensureClearAllButton() {
   const $list = $("#notification-list");
   if (!$list.length) return;
 
-  // Add controls container + button if missing
+  // Add the controls container if missing
   if ($list.find(".notification__controls").length === 0) {
     const $controls = $(`
       <div class="notification__controls">
@@ -1134,9 +1140,15 @@ function ensureClearAllButton() {
     $list.prepend($controls);
   }
 
-  // Enable/disable based on whether there are any items
+  // Show or hide Clear All button based on whether there are items
   const hasItems = $list.find(".notification__item-wrapper").length > 0;
-  $list.find('[data-action="clear-all"]').prop("disabled", !hasItems);
+  const $clearAllBtn = $list.find('[data-action="clear-all"]');
+
+  if (hasItems) {
+    $clearAllBtn.show().prop("disabled", false);
+  } else {
+    $clearAllBtn.hide();
+  }
 }
 
 /** Recompute counters from what’s currently in the DOM. */
