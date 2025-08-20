@@ -245,15 +245,18 @@ function bindFinanceRangeBar() {
         } else {
         const rng = computePresetRange(value);
         if (rng) {
+            // update hidden inputs
             $start.val(rng.start);
             $end.val(rng.end);
-            // also update the calendar to reflect the range
+            // update calendar WITHOUT firing onChange (so we don't set 'custom')
             if (window.__fp) {
-            window.__fp.setDate([rng.start, rng.end], true); 
-            window.__fp.jumpToDate(rng.start); // make sure calendar view moves
+            window.__fp.setDate([rng.start, rng.end], false);  // <-- important
+            window.__fp.jumpToDate(rng.start);                 // visible month
             }
         }
         }
+
+        // show plain-English label for presets, or dates for custom
         updateRangeSelectedDisplay();
     });
 
