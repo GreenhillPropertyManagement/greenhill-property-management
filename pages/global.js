@@ -742,19 +742,18 @@ function markNotificationsAsSeenBulk(notificationIds) {
             Authorization: "Bearer " + localStorage.authToken,
         },
         success: function(response) {
-            console.log("Bulk notifications marked as seen:", response);
+          console.log("Bulk notifications marked as seen:", response);
 
-            const $list = $("#notification-list");
-            $list.find(".notification__item-wrapper").remove();
+          const $list = $("#notification-list");
+          $list.find(".notification__item-wrapper").remove();
 
-            // Update counters
-            updateNotificationAndMaintenanceCounters();
+          updateNotificationAndMaintenanceCounters();
 
-            // Hide dropdown after clearing
-            $list.hide();
+          // Animate hide instead of abrupt .hide()
+          hideNotificationDropdown();
 
-            // (Optional) show the empty message if you want it visible next open
-            $list.html(`<div class="notification__empty-message">You're all caught up!</div>`);
+          // When it opens again, show "caught up!"
+          $list.html(`<div class="notification__empty-message">You're all caught up!</div>`);
         },
         error: function(xhr, status, error) {
             console.error("Error marking bulk notifications as seen:", error, xhr.responseText);
@@ -1164,4 +1163,16 @@ function refreshNotificationCountersFromDOM() {
   $maintenanceCounter.text(workOrders).css("display", workOrders ? "flex" : "none");
 }
 
+function hideNotificationDropdown() {
+  const $list = $("#notification-list");
+
+  // Add the hiding class
+  $list.addClass("is-hiding");
+
+  // After the transition ends, fully hide
+  setTimeout(() => {
+    $list.removeClass("is-hiding");
+    $list.css("display", "none");  // fallback to be safe
+  }, 250); // match CSS transition duration
+}
 
