@@ -752,6 +752,30 @@ function markNotificationAsSeen(notificationId) {
     });
 }
 
+function markNotificationsAsSeenBulk(notificationIds) {
+    $.ajax({
+        url: xanoBaseUrl + "api:1GhG-UUM/view_notification_bulk",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ notification_ids: notificationIds }),
+        headers: {
+            Authorization: "Bearer " + localStorage.authToken,
+        },
+        success: function(response) {
+            console.log("Bulk notifications marked as seen:", response);
+
+            // On success, clear all items from the dropdown
+            $("#notification-list").find(".notification__item-wrapper").remove();
+
+            // Update counters after clearing
+            updateNotificationAndMaintenanceCounters();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error marking bulk notifications as seen:", error, xhr.responseText);
+        }
+    });
+}
+
 function updateNotificationCounter(change) {
     let $counter = $("[data-api='notification-count']");
     let currentCount = parseInt($counter.text()) || 0;
@@ -1148,42 +1172,4 @@ function refreshNotificationCountersFromDOM() {
   $maintenanceCounter.text(workOrders).css("display", workOrders ? "flex" : "none");
 }
 
-/** Bulk-clear: collects all IDs and calls your Xano bulk endpoint. */
-function clearAllNotifications() {
-  const $btn = $('[data-action="clear-all"]');
-  const $list = $("#notification-list");
-
-  // Gather IDs from items in the list
-  const notification_ids = $list.find(".notification__item-wrapper")
-    .map(function () { return $(this).data("id"); })
-    .get();
-
-  if (!notification_ids.length) return; // nothing to do
-
-  // UX: disable button while processing
-  $btn.prop("disabled", true);
-
-  $.ajax({
-    url: xanoBaseUrl +"api:1GhG-UUM/view_notification_bulk",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ notification_ids }), // Xano text list input
-    headers: {
-      Authorization: "Bearer " + localStorage.authToken
-    },
-    success: function () {
-      // Remove all items from the dropdown
-      $list.find(".notification__item-wrapper").remove();
-      refreshNotificationCountersFromDOM();
-      ensureClearAllButton(); // will disable the button since list is empty
-    },
-    error: function (xhr, status, err) {
-      console.error("Bulk clear failed:", err, xhr?.responseText);
-    },
-    complete: function () {
-      // Re-enable (in case items remain due to error)
-      $btn.prop("disabled", false);
-    }
-  });
-}
 
