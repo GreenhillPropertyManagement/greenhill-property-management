@@ -1,3 +1,5 @@
+  const xanoBaseUrl = "https://xs9h-ivtd-slvk.n7c.xano.io/";
+
   document.addEventListener("DOMContentLoaded", function() {
 
     if (localStorage.authToken == null) {
@@ -123,7 +125,7 @@
         // Send the error data to your server
         $.ajax({
             type: "POST",
-            url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:hhXosF91/errors",
+            url: xanoBaseUrl + "api:hhXosF91/errors",
             contentType: "application/json",
             data: errorData, // Send the stringified JSON object
             success: function(response) {
@@ -283,11 +285,10 @@
 
   function authUser() {
 
-    const xanoBaseUrl = "https://xs9h-ivtd-slvk.n7c.xano.io/";
     localStorage.setItem('baseUrl', xanoBaseUrl);
 
     $.ajax({
-      url: localStorage.baseUrl + "api:2yadJ61L/auth/me",
+      url: xanoBaseUrl + "api:2yadJ61L/auth/me",
       type: "GET",
       headers: {
         'Content-Type': "application/json",
@@ -561,7 +562,7 @@
 
 function fetchNotifications() {
   $.ajax({
-    url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/get_user_notifications",
+    url: xanoBaseUrl + "api:1GhG-UUM/get_user_notifications",
     method: "GET",
     dataType: "json",
     headers: {
@@ -705,7 +706,7 @@ function updateNotifications(notifications) {
       $btn.prop("disabled", true);
 
       $.ajax({
-        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification_bulk",
+        url: "api:1GhG-UUM/view_notification_bulk",
         method: "POST",
         contentType: "application/json",
         data: JSON.stringify({ notification_ids: ids }),   // Xano expects text list named notification_ids
@@ -735,7 +736,7 @@ function updateNotifications(notifications) {
 
 function markNotificationAsSeen(notificationId) {
     $.ajax({
-        url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification",
+        url: xanoBaseUrl + "api:1GhG-UUM/view_notification",
         method: "POST",
         contentType: "application/json",
         data: JSON.stringify({ notification_id: notificationId }),
@@ -1163,7 +1164,7 @@ function clearAllNotifications() {
   $btn.prop("disabled", true);
 
   $.ajax({
-    url: "https://xs9h-ivtd-slvk.n7c.xano.io/api:1GhG-UUM/view_notification_bulk",
+    url: xanoBaseUrl +"api:1GhG-UUM/view_notification_bulk",
     method: "POST",
     contentType: "application/json",
     data: JSON.stringify({ notification_ids }), // Xano text list input
