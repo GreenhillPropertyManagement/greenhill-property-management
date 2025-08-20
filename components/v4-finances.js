@@ -31,9 +31,10 @@ document.addEventListener("DOMContentLoaded", function() {
             localStorage.setItem("pageId", "finance-v4");               // Step 3
 
             // Step 4: Set default filter
-            $('[form-input="date_range"]').val("month_to_date");
-            $('#start_date').val('');
-            $('#end_date').val('');
+            // Sync preset + dates + display via the new range bar
+            if (window.financeSetPreset) {
+            window.financeSetPreset('month_to_date');
+            }
 
             // Submit form to trigger finance data fetching
             $('[api-form="finance-filter"]').trigger("submit");
@@ -924,4 +925,194 @@ function exportTransactionsTableToCSV(filename = "transactions.csv") {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+/* ================================
+   Range picker wiring for new UI
+   ================================ */
+(function FinanceRangeBar() {
+  // Scope to the new panel
+  const $panel        = $('.filters-updated');                     // wrapper you’ll show/hide
+  const $linksWrap    = $panel.find('.date-range-links-wrapper');
+  const $rangeInput   = $('#range_selected');                      // the pill-like input at top
+  const $dateRangeSel = $panel.find('[form-input="date_range"]');  // hidden select
+  const $start        = $panel.find('input[name="start_date"]').first();
+  const $end          = $panel.find('input[name="end_date"]').first();
+  const $calHost      = $panel.find('.calendar-inject');
+
+  // Guard: if markup is missing, bail
+  if (!$panel.length || !$rangeInput.length || !$dateRangeSel.length || !$start.length || !$end.length) {
+    console.warn('[FinanceRangeBar] Missing required elements.');
+    return;
+  }
+
+  // Ensure panel starts hidden (you said you hide it initially)
+  $panel.hide();
+
+  // Map between your pill data attributes and backend select values
+  const TEXT_TO_VALUE = {
+    'last-3-months':  'last_3_months',
+    'last-12-months': 'last_12_months',
+    'month-to-date':  'month_to_date',
+    'quarter-to-date':'quarter_to_date',
+    'year-to-date':   'year_to_date',
+    'custom':         'custom'
+    // (No explicit "all_time" pill in your new set—add if you reintroduce it)
+  };
+  const VALUE_TO_LABEL = {
+    last_3_months:   'Last 3 Months',
+    last_12_months:  'Last 12 Months',
+    month_to_date:   'Month to Date',
+    quarter_to_date: 'Quarter to Date',
+    year_to_date:    'Year to Date',
+    all_time:        'All Items',
+    custom:          'Custom'
+  };
+
+  // Helpers
+  const pad = n => String(n).padStart(2, '0');
+  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const toMDYDash = iso => {
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${m}-${d}-${String(y).slice(-2)}`;
+  };
+
+  function computePresetRange(value) {
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    let start = null;
+
+    switch (value) {
+      case 'last_3_months':   start = new Date(end); start.setMonth(start.getMonth()-3); break;
+      case 'last_12_months':  start = new Date(end); start.setFullYear(start.getFullYear()-1); break;
+      case 'month_to_date':   start = new Date(end.getFullYear(), end.getMonth(), 1); break;
+      case 'quarter_to_date': start = new Date(end.getFullYear(), Math.floor(end.getMonth()/3)*3, 1); break;
+      case 'year_to_date':    start = new Date(end.getFullYear(), 0, 1); break;
+      case 'all_time':        return { start: '', end: '' };
+      default:                return null; // custom
+    }
+    return { start: toISO(start), end: toISO(end) };
+  }
+
+  function updateRangeSelectedDisplay() {
+    const v = $dateRangeSel.val();
+    if (v === 'custom') {
+      const s = $start.val();
+      const e = $end.val();
+      if (s && e) $rangeInput.val(`${toMDYDash(s)} - ${toMDYDash(e)}`);
+      else        $rangeInput.val('Select dates');
+    } else {
+      $rangeInput.val(VALUE_TO_LABEL[v] || 'Custom');
+    }
+  }
+
+  // 1) Clicking the top input reveals the panel
+  $rangeInput.off('click.financeRange').on('click.financeRange', function(e){
+    e.preventDefault();
+    $panel.show();
+    ensureInlineCalendar();     // lazy-init calendar the first time it opens
+  });
+
+  // 2) Preset pill clicks
+  $linksWrap.off('click.financeRange', '.filter-date-range')
+    .on('click.financeRange', '.filter-date-range', function(){
+      const $btn = $(this);
+      $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
+
+      const textKey = ($btn.data('filter-range-text') || '').toString();
+      const value   = TEXT_TO_VALUE[textKey] || 'custom';
+      $dateRangeSel.val(value);
+
+      if (value === 'custom') {
+        // Do nothing; user will pick from calendar or type dates
+      } else if (value === 'all_time') {
+        $start.val(''); $end.val('');
+        if (window.__fp) window.__fp.clear();
+      } else {
+        const rng = computePresetRange(value);
+        if (rng) {
+          $start.val(rng.start);
+          $end.val(rng.end);
+          if (window.__fp) window.__fp.setDate([rng.start, rng.end], true);
+        }
+      }
+      updateRangeSelectedDisplay();
+    });
+
+  // 3) Clicking "Apply Date Range" is just your form submit (already wired).
+  //    We’ll also hide the panel after submit completes (optional but nice UX).
+  $('[api-form="finance-filter"]').on('submit.financeRange', function(){
+    // leave panel visible during request; you can hide here if you prefer:
+    // $panel.hide();
+  });
+
+  // 4) Keep #range_selected updated if user types dates manually
+  $start.on('change.financeRange', updateRangeSelectedDisplay);
+  $end.on('change.financeRange', updateRangeSelectedDisplay);
+
+  // 5) Inline calendar (Stripe-like) with two months that syncs the two inputs.
+  //    We’ll use Flatpickr rangePlugin and mount inside .calendar-inject
+  function ensureInlineCalendar() {
+    if (window.__fp) { window.__fp.redraw && window.__fp.redraw(); return; }
+
+    // If your inputs are type="date", switch to text so Flatpickr can control them
+    if ($start.attr('type') === 'date') $start.attr('type', 'text');
+    if ($end.attr('type') === 'date')   $end.attr('type', 'text');
+
+    if (typeof flatpickr !== 'function') {
+      console.warn('[FinanceRangeBar] Flatpickr not found; calendar will not render.');
+      return;
+    }
+
+    // Build an actual INPUT for the "start" to host the instance; reuse existing start input
+    window.__fp = flatpickr($start[0], {
+      plugins: [ new rangePlugin({ input: $end[0] }) ],
+      showMonths: 2,
+      inline: true,
+      appendTo: $calHost[0],
+      disableMobile: true,
+      altInput: false,
+      dateFormat: 'Y-m-d',
+      onChange(selected) {
+        const [s, e] = selected;
+        if (s) $start.val(toISO(s));
+        if (e) $end.val(toISO(e));
+        // When both present, show "custom"
+        if ($start.val() && $end.val()) $dateRangeSel.val('custom');
+        updateRangeSelectedDisplay();
+      }
+    });
+  }
+
+  // 6) Initialize defaults on load (Month to date)
+  (function initDefaultState() {
+    // Mark the correct pill active
+    $linksWrap.find('.filter-date-range').removeClass('active');
+    $linksWrap.find('[data-filter-range-text="month-to-date"]').addClass('active');
+    // Update hidden select + dates
+    $dateRangeSel.val('month_to_date');
+    const rng = computePresetRange('month_to_date');
+    if (rng) { $start.val(rng.start); $end.val(rng.end); }
+    updateRangeSelectedDisplay();
+    // (Calendar is lazy-inited when panel opens)
+  })();
+
+  // 7) If your finance tab auto-sets defaults before submit, keep in sync:
+  window.financeSetPreset = function(keyUnderscore) {
+    // Map underscore key to dash key for the pills
+    const map = {
+      last_3_months:'last-3-months',
+      last_12_months:'last-12-months',
+      month_to_date:'month-to-date',
+      quarter_to_date:'quarter-to-date',
+      year_to_date:'year-to-date',
+      all_time:'all-time',
+      custom:'custom'
+    };
+    const dataKey = map[keyUnderscore] || 'custom';
+    const $target = $linksWrap.find(`[data-filter-range-text="${dataKey}"]`);
+    if ($target.length) $target.trigger('click');
+  };
+
+})();
 
