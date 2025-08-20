@@ -88,7 +88,6 @@ document.addEventListener("DOMContentLoaded", function () {
 /* ================================
    Range picker wiring for new UI
    ================================ */
-
 function bindFinanceRangeBar() {
   const $form        = $('#finance-filter-form');                   // scope to this form
   const $panel       = $form.find('.filters-updated');              // wrapper you’ll show/hide
@@ -152,30 +151,29 @@ function bindFinanceRangeBar() {
     return { start: toISO(start), end: toISO(end) };
   }
 
-    function getActivePillLabel() {
-        const $active = $linksWrap.find('.filter-date-range.active');
-        if ($active.length) {
-        const txt = ($active.text() || '').trim();
-        if (txt) return txt;
-        const dataKey = ($active.data('filter-range-text') || '').toString();
-        return dataKey.replace(/-/g, ' ');
-        }
-        return '';
+  function getActivePillLabel() {
+    const $active = $linksWrap.find('.filter-date-range.active');
+    if ($active.length) {
+      const txt = ($active.text() || '').trim();
+      if (txt) return txt;
+      const dataKey = ($active.data('filter-range-text') || '').toString();
+      return dataKey.replace(/-/g, ' ');
     }
+    return '';
+  }
 
-    function updateRangeSelectedDisplay() {
+  function updateRangeSelectedDisplay() {
     const v = $dateRangeSel.val();
     if (v === 'custom') {
-        const s = $start.val();
-        const e = $end.val();
-        if (s && e) $rangeInput.val(`${toMDYDash(s)} - ${toMDYDash(e)}`);
-        else        $rangeInput.val('Select dates');
+      const s = $start.val();
+      const e = $end.val();
+      if (s && e) $rangeInput.val(`${toMDYDash(s)} - ${toMDYDash(e)}`);
+      else        $rangeInput.val('Select dates');
     } else {
-        // Show the label of the currently active pill (e.g., "Month to Date")
-        const label = getActivePillLabel();
-        $rangeInput.val(label || VALUE_TO_LABEL[v] || 'Custom');
+      const label = getActivePillLabel();
+      $rangeInput.val(label || VALUE_TO_LABEL[v] || 'Custom');
     }
-    }
+  }
 
   // Inline calendar init (two months) inside .calendar-inject
   function ensureInlineCalendar() {
@@ -227,70 +225,90 @@ function bindFinanceRangeBar() {
       }
     });
 
-    // 2) Preset pill clicks
-    $linksWrap.off('click.financeRange', '.filter-date-range')
+  // 2) Preset pill clicks (Stripe viewport logic)
+  $linksWrap.off('click.financeRange', '.filter-date-range')
     .on('click.financeRange', '.filter-date-range', function () {
-        const $btn = $(this);
-        $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
+      const $btn = $(this);
+      $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
 
-        const textKey = ($btn.data('filter-range-text') || '').toString();
-        const value   = TEXT_TO_VALUE[textKey] || 'custom';
-        $dateRangeSel.val(value);
+      const textKey = ($btn.data('filter-range-text') || '').toString();
+      const value   = TEXT_TO_VALUE[textKey] || 'custom';
+      $dateRangeSel.val(value);
 
-        if (value === 'custom') {
+      if (value === 'custom') {
         // user picks dates manually
-        } else if (value === 'all_time') {
+      } else if (value === 'all_time') {
         $start.val(''); $end.val('');
         if (window.__fp) window.__fp.clear();
-        } else {
+      } else {
         const rng = computePresetRange(value);
         if (rng) {
-            // update hidden inputs
-            $start.val(rng.start);
-            $end.val(rng.end);
+          // update hidden inputs
+          $start.val(rng.start);
+          $end.val(rng.end);
 
-            // update calendar WITHOUT firing onChange (so date_range doesn't flip to 'custom')
-            if (window.__fp) {
+          // update calendar WITHOUT firing onChange (so date_range doesn't flip to 'custom')
+          if (window.__fp) {
             window.__fp.setDate([rng.start, rng.end], false);
 
-            // ensure RIGHT calendar = END month; LEFT = END-1 month
-            const end = new Date(rng.end + 'T00:00:00');
-            const leftMonth = new Date(end.getFullYear(), end.getMonth() - 1, 1);
-            window.__fp.jumpToDate(leftMonth);
-            }
-        }
-        }
+            // Stripe-like viewport rule:
+            // - multi-month ranges: left = start month
+            // - single-month range  (month-to-date): left = end - 1 month
+            const start = new Date(rng.start + 'T00:00:00');
+            const end   = new Date(rng.end   + 'T00:00:00');
 
-        // show plain-English label for presets, dates only for custom
-        updateRangeSelectedDisplay();
+            const sameMonth =
+              start.getFullYear() === end.getFullYear() &&
+              start.getMonth()  === end.getMonth();
+
+            const leftMonth = sameMonth
+              ? new Date(end.getFullYear(), end.getMonth() - 1, 1)
+              : new Date(start.getFullYear(), start.getMonth(), 1);
+
+            window.__fp.jumpToDate(leftMonth);
+          }
+        }
+      }
+
+      // show plain-English label for presets, dates only for custom
+      updateRangeSelectedDisplay();
     });
 
   // 3) Keep #range_selected updated if user types dates manually
   $start.on('change.financeRange', updateRangeSelectedDisplay);
   $end.on('change.financeRange', updateRangeSelectedDisplay);
 
-  // 4) Initialize defaults on load (Month to date)
-    (function initDefaultState() {
+  // 4) Initialize defaults on load (Month to date) with Stripe viewport
+  (function initDefaultState() {
     $linksWrap.find('.filter-date-range').removeClass('active');
     $linksWrap.find('[data-filter-range-text="month-to-date"]').addClass('active');
     $dateRangeSel.val('month_to_date');
 
     const rng = computePresetRange('month_to_date');
     if (rng) {
-        $start.val(rng.start);
-        $end.val(rng.end);
+      $start.val(rng.start);
+      $end.val(rng.end);
 
-        if (window.__fp) {
+      if (window.__fp) {
         window.__fp.setDate([rng.start, rng.end], false);
 
-        const end = new Date(rng.end + 'T00:00:00');
-        const leftMonth = new Date(end.getFullYear(), end.getMonth() - 1, 1);
+        const start = new Date(rng.start + 'T00:00:00');
+        const end   = new Date(rng.end   + 'T00:00:00');
+        const sameMonth =
+          start.getFullYear() === end.getFullYear() &&
+          start.getMonth()  === end.getMonth();
+
+        const leftMonth = sameMonth
+          ? new Date(end.getFullYear(), end.getMonth() - 1, 1)
+          : new Date(start.getFullYear(), start.getMonth(), 1);
+
         window.__fp.jumpToDate(leftMonth);
-        }
+      }
     }
 
     updateRangeSelectedDisplay();
-    })();
+  })();
+
   // 5) Public helper for your finance tab to switch presets programmatically
   window.financeSetPreset = function (keyUnderscore) {
     const map = {
