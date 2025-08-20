@@ -23,8 +23,13 @@
       // Delegate the click so it works even if the button is injected later
       $(document).off("click", "[data-action='clear-all']")
         .on("click", "[data-action='clear-all']", function (e) {
-          e.stopPropagation(); // keep dropdown open if you want
-          clearAllNotifications();
+          e.stopPropagation();
+          const $list = $("#notification-list");
+          const ids = $list.find(".notification__item-wrapper")
+            .map(function () { return $(this).data("id"); })
+            .get();
+          if (!ids.length) return;
+          markNotificationsAsSeenBulk(ids);
         });
     }
 
@@ -692,46 +697,21 @@ function updateNotifications(notifications) {
   refreshCountersFromDOM();
 
   // Bind Clear All (idempotent per wrapper)
-  if (!$wrapper.data("clearAllBound")) {
-    $wrapper.on("click", "[data-action='clear-all']", function (e) {
-      e.stopPropagation();
+// Bind Clear All (idempotent per wrapper)
+if (!$wrapper.data("clearAllBound")) {
+  $wrapper.on("click", "[data-action='clear-all']", function (e) {
+    e.stopPropagation();
 
-      const $btn = $(this);
-      const ids = $wrapper.find(".notification__item-wrapper")
-        .map(function () { return $(this).data("id"); })
-        .get();
+    const ids = $wrapper.find(".notification__item-wrapper")
+      .map(function () { return $(this).data("id"); })
+      .get();
 
-      if (!ids.length) return;
+    if (!ids.length) return;
+    markNotificationsAsSeenBulk(ids);
+  });
 
-      $btn.prop("disabled", true);
-
-      $.ajax({
-        url: "api:1GhG-UUM/view_notification_bulk",
-        method: "POST",
-        contentType: "application/json",
-        data: JSON.stringify({ notification_ids: ids }),   // Xano expects text list named notification_ids
-        headers: {
-          Authorization: "Bearer " + localStorage.authToken
-        },
-        success: function () {
-          // Remove all items on success
-          $wrapper.find(".notification__item-wrapper").remove();
-          refreshCountersFromDOM();
-          if (typeof updateNotificationAndMaintenanceCounters === "function") {
-            updateNotificationAndMaintenanceCounters();
-          }
-        },
-        error: function (xhr, status, err) {
-          console.error("Bulk clear failed:", err, xhr && xhr.responseText);
-        },
-        complete: function () {
-          $btn.prop("disabled", false);
-        }
-      });
-    });
-
-    $wrapper.data("clearAllBound", true);
-  }
+  $wrapper.data("clearAllBound", true);
+}
 }
 
 function markNotificationAsSeen(notificationId) {
