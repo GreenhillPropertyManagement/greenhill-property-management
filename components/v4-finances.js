@@ -227,30 +227,34 @@ function bindFinanceRangeBar() {
       }
     });
 
-  // 2) Preset pill clicks
-  $linksWrap.off('click.financeRange', '.filter-date-range')
+    // 2) Preset pill clicks
+    $linksWrap.off('click.financeRange', '.filter-date-range')
     .on('click.financeRange', '.filter-date-range', function () {
-      const $btn = $(this);
-      $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
+        const $btn = $(this);
+        $btn.addClass('active').siblings('.filter-date-range').removeClass('active');
 
-      const textKey = ($btn.data('filter-range-text') || '').toString();
-      const value   = TEXT_TO_VALUE[textKey] || 'custom';
-      $dateRangeSel.val(value);
+        const textKey = ($btn.data('filter-range-text') || '').toString();
+        const value   = TEXT_TO_VALUE[textKey] || 'custom';
+        $dateRangeSel.val(value);
 
-      if (value === 'custom') {
+        if (value === 'custom') {
         // user picks dates manually
-      } else if (value === 'all_time') {
+        } else if (value === 'all_time') {
         $start.val(''); $end.val('');
         if (window.__fp) window.__fp.clear();
-      } else {
+        } else {
         const rng = computePresetRange(value);
         if (rng) {
-          $start.val(rng.start);
-          $end.val(rng.end);
-          if (window.__fp) window.__fp.setDate([rng.start, rng.end], true);
+            $start.val(rng.start);
+            $end.val(rng.end);
+            // also update the calendar to reflect the range
+            if (window.__fp) {
+            window.__fp.setDate([rng.start, rng.end], true); 
+            window.__fp.jumpToDate(rng.start); // make sure calendar view moves
+            }
         }
-      }
-      updateRangeSelectedDisplay();
+        }
+        updateRangeSelectedDisplay();
     });
 
   // 3) Keep #range_selected updated if user types dates manually
