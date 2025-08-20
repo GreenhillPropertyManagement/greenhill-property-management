@@ -86,31 +86,34 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ================================
-   Range picker wiring for new UI (with Stripe-style split inputs)
+   Range picker wiring for new UI (with split inputs)
    ================================ */
 function bindFinanceRangeBar() {
   const $form        = $('#finance-filter-form');
   const $panel       = $form.find('.filters-updated');
   const $linksWrap   = $panel.find('.date-range-links-wrapper');
-  const $rangeDisplay= $('#range_selected'); // optional display-only pill/button
+  const $rangeDisplay= $('#range_selected');                         // optional label/button
   const $dateRangeSel= $panel.find('[form-input="date_range"], #date_range');
   const $calHost     = $panel.find('.calendar-inject');
 
-  // Hidden ISO inputs that your backend expects
-  const $startISO    = $panel.find('#start_date');
+  // Hidden ISO inputs your backend expects
+  const $startISO    = $panel.find('#start_date');                   // value = YYYY-MM-DD
   const $endISO      = $panel.find('#end_date');
 
-  // Stripe-style split inputs (UI)
+  // Stripe-style split inputs
   const $sMM = $panel.find('#start_mm'),  $sDD = $panel.find('#start_dd'),  $sYYYY = $panel.find('#start_yyyy');
   const $eMM = $panel.find('#end_mm'),    $eDD = $panel.find('#end_dd'),    $eYYYY = $panel.find('#end_yyyy');
 
-  if (!$form.length || !$panel.length || !$dateRangeSel.length || !$startISO.length || !$endISO.length
-      || !$sMM.length || !$sDD.length || !$sYYYY.length || !$eMM.length || !$eDD.length || !$eYYYY.length) {
-    console.warn('[FinanceRangeBar] Missing date elements.');
+  if (
+    !$form.length || !$panel.length || !$linksWrap.length || !$dateRangeSel.length || !$calHost.length ||
+    !$startISO.length || !$endISO.length ||
+    !$sMM.length || !$sDD.length || !$sYYYY.length || !$eMM.length || !$eDD.length || !$eYYYY.length
+  ) {
+    console.warn('[FinanceRangeBar] Missing required elements.');
     return;
   }
 
-  $panel.hide(); // open panel explicitly from your trigger
+  $panel.hide();
 
   // Preset mappings
   const TEXT_TO_VALUE = {
@@ -135,76 +138,65 @@ function bindFinanceRangeBar() {
   const pad2 = n => String(n).padStart(2, '0');
   const toISOFromDate = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 
-  const is4 = v => /^\d{4}$/.test(v);
-  const is2 = v => /^\d{1,2}$/.test(v);
-
   function isValidISO(iso) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
     const [y, m, d] = iso.split('-').map(n => parseInt(n, 10));
     const dt = new Date(`${iso}T00:00:00`);
     return dt.getFullYear() === y && (dt.getMonth()+1) === m && dt.getDate() === d;
   }
-
   function isoFromSplit(mm, dd, yyyy) {
-    if (!is2(mm) || !is2(dd) || !is4(yyyy)) return '';
+    if (!/^\d{1,2}$/.test(mm) || !/^\d{1,2}$/.test(dd) || !/^\d{4}$/.test(yyyy)) return '';
     const iso = `${yyyy}-${pad2(mm)}-${pad2(dd)}`;
     return isValidISO(iso) ? iso : '';
   }
-
   function splitFromISO(iso) {
-    if (!isValidISO(iso)) return { mm: '', dd: '', yyyy: '' };
+    if (!isValidISO(iso)) return { mm:'', dd:'', yyyy:'' };
     const [yyyy, mm, dd] = iso.split('-');
     return { mm, dd, yyyy };
   }
-
   function setHiddenISO(which, iso) {
     if (which === 'start') $startISO.val(iso || '');
     else                   $endISO.val(iso || '');
   }
-
   function setSplit(which, iso) {
-    const parts = splitFromISO(iso);
-    if (which === 'start') {
-      $sMM.val(parts.mm); $sDD.val(parts.dd); $sYYYY.val(parts.yyyy);
-    } else {
-      $eMM.val(parts.mm); $eDD.val(parts.dd); $eYYYY.val(parts.yyyy);
-    }
+    const p = splitFromISO(iso);
+    if (which === 'start') { $sMM.val(p.mm); $sDD.val(p.dd); $sYYYY.val(p.yyyy); }
+    else                   { $eMM.val(p.mm); $eDD.val(p.dd); $eYYYY.val(p.yyyy); }
   }
 
-  // Toggle whether start/end will be included in submission
+  // Include/exclude ISO dates in form payload
   function enableCustomDates() {
     if ($startISO.attr('form-input') !== 'start_date') $startISO.attr('form-input', 'start_date');
     if ($endISO.attr('form-input')   !== 'end_date')   $endISO.attr('form-input',   'end_date');
   }
   function disableCustomDates() {
-    $startISO.removeAttr('form-input').val('');
-    $endISO.removeAttr('form-input').val('');
-    // Optionally also clear split fields visually:
-    // $sMM.val(''); $sDD.val(''); $sYYYY.val('');
-    // $eMM.val(''); $eDD.val(''); $eYYYY.val('');
+    $startISO.removeAttr('form-input');
+    $endISO.removeAttr('form-input');
   }
 
   function computePresetRange(value) {
     const today = new Date();
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    let start = null;
-
+    let start;
     switch (value) {
       case 'last_3_months':   start = new Date(end); start.setMonth(start.getMonth()-3); break;
       case 'last_12_months':  start = new Date(end); start.setFullYear(start.getFullYear()-1); break;
       case 'month_to_date':   start = new Date(end.getFullYear(), end.getMonth(), 1); break;
       case 'quarter_to_date': start = new Date(end.getFullYear(), Math.floor(end.getMonth()/3)*3, 1); break;
       case 'year_to_date':    start = new Date(end.getFullYear(), 0, 1); break;
-      case 'all_time':        return { start: '', end: '' };
+      case 'all_time':        return { start:'', end:'' };
       default:                return null; // custom
     }
     return { start: toISOFromDate(start), end: toISOFromDate(end) };
   }
 
-  function labelForCurrent() {
-    const v = $dateRangeSel.val();
-    if (v === 'custom') return 'Custom';
-    return VALUE_TO_LABEL[v] || 'Custom';
+  function getActivePillLabel() {
+    const $active = $linksWrap.find('.filter-date-range.active');
+    if (!$active.length) return '';
+    const txt = ($active.text() || '').trim();
+    if (txt) return txt;
+    const dataKey = ($active.data('filter-range-text') || '').toString();
+    return dataKey.replace(/-/g, ' ');
   }
   function updateRangeSelectedDisplay() {
     if (!$rangeDisplay.length) return;
@@ -212,81 +204,79 @@ function bindFinanceRangeBar() {
     if (v === 'custom') {
       const s = $startISO.val(), e = $endISO.val();
       if (s && e) {
-        const ds = s.split('-'); const de = e.split('-');
-        $rangeDisplay.text(`${ds[1]}-${ds[2].slice(-2)} - ${de[1]}-${de[2].slice(-2)}`);
+        const [sy, sm, sd] = s.split('-'); const [ey, em, ed] = e.split('-');
+        $rangeDisplay.text(`${sm}-${sd.slice(-2)} - ${em}-${ed.slice(-2)}`);
       } else {
         $rangeDisplay.text('Select dates');
       }
     } else {
-      $rangeDisplay.text(labelForCurrent());
+      $rangeDisplay.text(VALUE_TO_LABEL[v] || getActivePillLabel() || 'Custom');
     }
   }
 
-  // Init inline Flatpickr (two months)
+  // --- Inline Flatpickr (two months) ---
   function ensureInlineCalendar() {
     if (window.__fp) { window.__fp.redraw && window.__fp.redraw(); return; }
-    if (typeof flatpickr !== 'function') {
-      console.warn('[FinanceFilter] Flatpickr not found');
-      return;
-    }
+    if (typeof flatpickr !== 'function') { console.warn('[FinanceFilter] Flatpickr not found'); return; }
 
-    window.__fp = flatpickr($('<input />')[0], { // dummy input; we control dates manually
+    // Create a transient input solely for Flatpickr to own
+    const tempInput = document.createElement('input');
+    window.__fp = flatpickr(tempInput, {
+      mode: 'range',
       showMonths: 2,
       inline: true,
       appendTo: $calHost[0],
       disableMobile: true,
       altInput: false,
       dateFormat: 'Y-m-d',
-      mode: 'range',
       onChange(selected) {
         const [s, e] = selected;
         if (s) {
           const isoS = toISOFromDate(s);
-          setHiddenISO('start', isoS);
-          setSplit('start', isoS);
+          setHiddenISO('start', isoS); setSplit('start', isoS);
         }
         if (e) {
           const isoE = toISOFromDate(e);
-          setHiddenISO('end', isoE);
-          setSplit('end', isoE);
+          setHiddenISO('end', isoE); setSplit('end', isoE);
         }
-        if ($startISO.val() && $endISO.val()) {
-          $dateRangeSel.val('custom'); enableCustomDates();
-        }
+        if ($startISO.val() && $endISO.val()) { $dateRangeSel.val('custom'); enableCustomDates(); }
         updateRangeSelectedDisplay();
       }
     });
   }
 
-  // Sync calendar + hidden ISO when user edits split fields
+  // --- split → calendar/ISO (works if only one side changes) ---
   function syncFromSplit() {
-    const s = isoFromSplit($sMM.val(), $sDD.val(), $sYYYY.val());
-    const e = isoFromSplit($eMM.val(), $eDD.val(), $eYYYY.val());
+    const sSplit = isoFromSplit($sMM.val(), $sDD.val(), $sYYYY.val());
+    const eSplit = isoFromSplit($eMM.val(), $eDD.val(), $eYYYY.val());
 
-    if (s) setHiddenISO('start', s);
-    if (e) setHiddenISO('end',   e);
+    // fallback to existing hidden ISO for the other bound
+    let s = sSplit || $startISO.val();
+    let e = eSplit || $endISO.val();
 
-    if (s && e) {
-      // Swap if out of order
-      const sd = new Date(`${s}T00:00:00`), ed = new Date(`${e}T00:00:00`);
-      let sISO = s, eISO = e;
-      if (sd > ed) { sISO = e; eISO = s; setHiddenISO('start', sISO); setHiddenISO('end', eISO); setSplit('start', sISO); setSplit('end', eISO); }
+    if (sSplit) setHiddenISO('start', sSplit);
+    if (eSplit) setHiddenISO('end',   eSplit);
 
-      $dateRangeSel.val('custom'); enableCustomDates();
-      if (window.__fp) {
-        window.__fp.setDate([sISO, eISO], false);
-        const sameMonth = sd.getFullYear() === ed.getFullYear() && sd.getMonth() === ed.getMonth();
-        const leftMonth = sameMonth ? new Date(ed.getFullYear(), ed.getMonth()-1, 1)
-                                    : new Date(sd.getFullYear(), sd.getMonth(), 1);
-        window.__fp.jumpToDate(leftMonth);
-      }
-    } else {
-      $dateRangeSel.val('custom'); enableCustomDates(); // partial typing still sets custom
+    // if we don't have both, mark custom and stop
+    if (!s || !e) {
+      $dateRangeSel.val('custom'); enableCustomDates(); updateRangeSelectedDisplay(); return;
+    }
+
+    // Swap if reversed
+    const sd = new Date(`${s}T00:00:00`), ed = new Date(`${e}T00:00:00`);
+    if (sd > ed) { const tmp = s; s = e; e = tmp; setHiddenISO('start', s); setHiddenISO('end', e); setSplit('start', s); setSplit('end', e); }
+
+    $dateRangeSel.val('custom'); enableCustomDates();
+
+    if (window.__fp) {
+      window.__fp.setDate([s, e], false);
+      const sameMonth = sd.getFullYear() === ed.getFullYear() && sd.getMonth() === ed.getMonth();
+      const leftMonth = sameMonth ? new Date(ed.getFullYear(), ed.getMonth()-1, 1)
+                                  : new Date(sd.getFullYear(), sd.getMonth(), 1);
+      window.__fp.jumpToDate(leftMonth);
     }
     updateRangeSelectedDisplay();
   }
-
-  // Wire split inputs
   $sMM.on('input change blur', syncFromSplit);
   $sDD.on('input change blur', syncFromSplit);
   $sYYYY.on('input change blur', syncFromSplit);
@@ -294,13 +284,16 @@ function bindFinanceRangeBar() {
   $eDD.on('input change blur', syncFromSplit);
   $eYYYY.on('input change blur', syncFromSplit);
 
-  // Show panel via your display button if present
-  $rangeDisplay.off('click.financeRange focus.financeRange keydown.financeRange')
-    .on('click.financeRange', function (e) { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); })
-    .on('focus.financeRange', function ()   { $panel.show(); setTimeout(ensureInlineCalendar, 0); })
-    .on('keydown.financeRange', function (e){ if (['Enter',' '].includes(e.key)) { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); } });
+  // --- open panel from label/pill if you use one ---
+  $rangeDisplay
+    .off('click.financeRange focus.financeRange keydown.financeRange')
+    .on('click.financeRange', e => { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); })
+    .on('focus.financeRange', () => { $panel.show(); setTimeout(ensureInlineCalendar, 0); })
+    .on('keydown.financeRange', e => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); $panel.show(); setTimeout(ensureInlineCalendar, 0); }
+    });
 
-  // Preset pill clicks
+  // --- preset pills ---
   $linksWrap.off('click.financeRange', '.filter-date-range')
     .on('click.financeRange', '.filter-date-range', function () {
       const $btn = $(this);
@@ -310,24 +303,25 @@ function bindFinanceRangeBar() {
       $dateRangeSel.val(value);
 
       if (value === 'custom') {
-        enableCustomDates(); // user will type/pick dates
+        enableCustomDates(); // user will type/pick
       } else if (value === 'all_time') {
         disableCustomDates();
+        setHiddenISO('start',''); setHiddenISO('end','');
+        setSplit('start',''); setSplit('end','');
         if (window.__fp) window.__fp.clear();
-        setSplit('start', ''); setSplit('end', '');
       } else {
         const rng = computePresetRange(value);
         if (rng) {
-          // Non-custom: do not submit explicit dates (but show them if you want)
+          // not custom → do not submit explicit dates (but show them if you like)
           disableCustomDates();
-
           setHiddenISO('start', rng.start);
           setHiddenISO('end',   rng.end);
           setSplit('start', rng.start);
           setSplit('end',   rng.end);
 
+          setTimeout(ensureInlineCalendar, 0);
           if (window.__fp) {
-            window.__fp.setDate([rng.start, rng.end], false);
+            window.__fp.setDate([rng.start, rng.end], false); // don't flip to custom
             const s = new Date(rng.start + 'T00:00:00');
             const e = new Date(rng.end   + 'T00:00:00');
             const sameMonth = s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
@@ -338,10 +332,9 @@ function bindFinanceRangeBar() {
         }
       }
       updateRangeSelectedDisplay();
-      setTimeout(ensureInlineCalendar, 0);
     });
 
-  // Default state (Month to date)
+  // --- default: Month to date ---
   (function initDefaultState() {
     $linksWrap.find('.filter-date-range').removeClass('active');
     $linksWrap.find('[data-filter-range-text="month-to-date"]').addClass('active');
@@ -349,7 +342,7 @@ function bindFinanceRangeBar() {
 
     const rng = computePresetRange('month_to_date');
     if (rng) {
-      disableCustomDates();
+      disableCustomDates();                       // not custom by default
       setHiddenISO('start', rng.start);
       setHiddenISO('end',   rng.end);
       setSplit('start', rng.start);
@@ -371,10 +364,9 @@ function bindFinanceRangeBar() {
     updateRangeSelectedDisplay();
   })();
 
-  // Close panel on submit
+  // close panel on submit
   $form.on('submit.financeRange', function () { $panel.hide(); });
 }
-
 
 /* ================================
    Existing logic below (unchanged)
