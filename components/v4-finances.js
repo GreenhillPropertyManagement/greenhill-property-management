@@ -88,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
 /* ================================
    Range picker wiring for new UI
    ================================ */
+
 function bindFinanceRangeBar() {
   const $form        = $('#finance-filter-form');                   // scope to this form
   const $panel       = $form.find('.filters-updated');              // wrapper you’ll show/hide
@@ -151,6 +152,17 @@ function bindFinanceRangeBar() {
     return { start: toISO(start), end: toISO(end) };
   }
 
+    function getActivePillLabel() {
+        const $active = $linksWrap.find('.filter-date-range.active');
+        if ($active.length) {
+        const txt = ($active.text() || '').trim();
+        if (txt) return txt;
+        const dataKey = ($active.data('filter-range-text') || '').toString();
+        return dataKey.replace(/-/g, ' ');
+        }
+        return '';
+    }
+
     function updateRangeSelectedDisplay() {
     const v = $dateRangeSel.val();
     if (v === 'custom') {
@@ -195,18 +207,6 @@ function bindFinanceRangeBar() {
       }
     });
   }
-
-    function getActivePillLabel() {
-    const $active = $linksWrap.find('.filter-date-range.active');
-    if ($active.length) {
-        // Prefer the pill's visible text (keeps your capitalization), fallback to data attr
-        const txt = ($active.text() || '').trim();
-        if (txt) return txt;
-        const dataKey = ($active.data('filter-range-text') || '').toString();
-        return dataKey.replace(/-/g, ' '); // "month-to-date" -> "month to date"
-    }
-    return '';
-    }
 
   // 1) Clicking the top input reveals the panel
   $rangeInput.off('click.financeRange focus.financeRange keydown.financeRange')
