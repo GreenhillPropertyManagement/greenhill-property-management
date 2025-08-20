@@ -151,17 +151,19 @@ function bindFinanceRangeBar() {
     return { start: toISO(start), end: toISO(end) };
   }
 
-  function updateRangeSelectedDisplay() {
+    function updateRangeSelectedDisplay() {
     const v = $dateRangeSel.val();
     if (v === 'custom') {
-      const s = $start.val();
-      const e = $end.val();
-      if (s && e) $rangeInput.val(`${toMDYDash(s)} - ${toMDYDash(e)}`);
-      else        $rangeInput.val('Select dates');
+        const s = $start.val();
+        const e = $end.val();
+        if (s && e) $rangeInput.val(`${toMDYDash(s)} - ${toMDYDash(e)}`);
+        else        $rangeInput.val('Select dates');
     } else {
-      $rangeInput.val(VALUE_TO_LABEL[v] || 'Custom');
+        // Show the label of the currently active pill (e.g., "Month to Date")
+        const label = getActivePillLabel();
+        $rangeInput.val(label || VALUE_TO_LABEL[v] || 'Custom');
     }
-  }
+    }
 
   // Inline calendar init (two months) inside .calendar-inject
   function ensureInlineCalendar() {
@@ -988,4 +990,16 @@ function exportTransactionsTableToCSV(filename = "transactions.csv") {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function getActivePillLabel() {
+  const $active = $linksWrap.find('.filter-date-range.active');
+  if ($active.length) {
+    // Prefer the pill's visible text (keeps your capitalization), fallback to data attr
+    const txt = ($active.text() || '').trim();
+    if (txt) return txt;
+    const dataKey = ($active.data('filter-range-text') || '').toString();
+    return dataKey.replace(/-/g, ' '); // "month-to-date" -> "month to date"
+  }
+  return '';
 }
