@@ -7,17 +7,17 @@ document.addEventListener("DOMContentLoaded", function () {
   bindFinanceRangeBar();
 
   // ===== Detect finance mode from URL and update heading =====
-  (function updateFinanceModeLabel() {
-    const pathParts = window.location.pathname.split('/').filter(Boolean); 
-    // e.g. ["app", "finance"] or ["app", "property"]
-    const mode = pathParts[1] || ''; // the piece after "app"
 
-    if (mode === 'finance') {
-      $('.finance-mode').text('Portfolio Finances');
-    } else if (mode === 'property') {
-      $('.finance-mode').text('Property Finances');
-    }
-  })();
+  const pathParts = window.location.pathname.split('/').filter(Boolean); 
+  // e.g. ["app", "finance"] or ["app", "property"]
+  const mode = pathParts[1] || ''; // the piece after "app"
+
+  if (mode === 'finance') {
+    $('.finance-mode').text('Portfolio Finances');
+  } else if (mode === 'property') {
+    $('.finance-mode').text('Property Finances');
+  }
+
 
   // Bind your button: [data-button="excel"]
   $(document).off("click", '[data-button="excel"]').on("click", '[data-button="excel"]', function () {
