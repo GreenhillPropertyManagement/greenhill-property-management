@@ -24,6 +24,31 @@ document.addEventListener("DOMContentLoaded", function () {
       // Submit the same filter form used by "Apply Date Range"
       $('[api-form="finance-filter"]').trigger('submit');
   });
+  
+  // Clickable transaction-type pills/buttons: [data-filter="payments|expenses|noi"]
+  $(document)
+    .off('click.financeFilterPill', '[data-filter]')
+    .on('click.financeFilterPill', '[data-filter]', function (e) {
+      e.preventDefault();
+
+      const v = String($(this).data('filter') || '').toLowerCase(); // "payments" | "expenses" | "noi"
+      if (!/^(payments|expenses|noi)$/.test(v)) return;
+
+      // Toggle a visual active state (scoped to siblings if wrapped; otherwise global)
+      const $group = $(this).closest('[data-filter-group]'); // optional wrapper if you add one
+      const $scope = $group.length ? $group.find('[data-filter]') : $('[data-filter]');
+      $scope.removeClass('active').attr('aria-pressed', 'false');
+      $(this).addClass('active').attr('aria-pressed', 'true');
+
+      // Drive the select that already triggers a submit on change
+      const $type = $('#type'); // <select form-input="transaction_type">
+      if ($type.val() !== v) {
+        $type.val(v).trigger('change');   // our existing #type handler submits the form
+      } else {
+        // If user clicked the pill for the already-selected type, force a refresh anyway
+        $('[api-form="finance-filter"]').trigger('submit');
+      }
+    });
 
   // Event listener to trigger report generation
   $('#download-report').off('click').on('click', function () {
