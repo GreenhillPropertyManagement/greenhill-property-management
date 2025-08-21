@@ -8,15 +8,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== Detect finance mode from URL and update heading =====
 
-  const pathParts = window.location.pathname.split('/').filter(Boolean); 
-  // e.g. ["app", "finance"] or ["app", "property"]
-  const mode = pathParts[1] || ''; // the piece after "app"
+  // ---- Finance mode label helper
+  function updateFinanceModeLabel() {
+    // /app/<mode> -> 'finance' or 'property'
+    const parts = (window.location.pathname || '/').split('/').filter(Boolean);
+    const mode = parts[1] || ''; // piece after "app"
 
-  if (mode === 'finance') {
-    $('.finance-mode').text('Portfolio Finances');
-  } else if (mode === 'property') {
-    $('.finance-mode').text('Property Finances');
+    let text = '';
+    if (mode === 'finance')      text = 'Portfolio Finances';
+    else if (mode === 'property')text = 'Property Finances';
+
+    if (text) {
+      // Update all matching elements in case there are multiple
+      $('.finance-mode').text(text);
+    }
   }
+
+  // Run once at load (in case the heading is already present)
+  updateFinanceModeLabel();
+
+  // Also run again after your UI is definitely wired / shown
+  $(document).on('click', '[api="finance-v4"]', function () {
+    // Give Webflow a tick to inject any deferred content
+    setTimeout(updateFinanceModeLabel, 0);
+  });
+
+  // If your app uses pushState / internal routing, catch those too (optional)
+  window.addEventListener('popstate', updateFinanceModeLabel);
 
 
   // Bind your button: [data-button="excel"]
