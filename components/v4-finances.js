@@ -17,6 +17,14 @@ document.addEventListener("DOMContentLoaded", function () {
   initLandlordFinances();           // init finance component
   setupChartTypeListener();         // Allow users to change chart type dynamically
 
+  // Re-run the finance fetch whenever the "Type" select changes
+  $(document)
+    .off('change.financeType', '#type')
+    .on('change.financeType', '#type', function () {
+      // Submit the same filter form used by "Apply Date Range"
+      $('[api-form="finance-filter"]').trigger('submit');
+  });
+
   // Event listener to trigger report generation
   $('#download-report').off('click').on('click', function () {
     generateCustomReport();
