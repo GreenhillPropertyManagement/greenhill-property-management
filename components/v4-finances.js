@@ -3,55 +3,6 @@ let latestApiResponse = null; // Declare it globally before using
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  // ===== Detect finance mode from URL and update heading (robust) =====
-
-  // figure out the mode from /app/<mode>
-  function getFinanceModeFromPath() {
-    const m = (window.location.pathname || '/').match(/\/app\/([^/]+)/i);
-    return (m && m[1]) ? m[1].toLowerCase() : '';
-  }
-
-  // map to the label you want
-  function computeFinanceModeText() {
-    const mode = getFinanceModeFromPath();
-    if (mode === 'finance')  return 'Portfolio Finances';
-    if (mode === 'property') return 'Property Finances';
-    return ''; // unknown — leave as-is
-  }
-
-  // apply text to all .finance-mode elements (if present)
-  function applyFinanceModeText() {
-    const text = computeFinanceModeText();
-    if (!text) return;
-    const $els = $('.finance-mode');
-    if ($els.length) $els.text(text);
-  }
-
-  // run once right away
-  applyFinanceModeText();
-
-  // also wait for .finance-mode to show up later (Webflow lazy DOM)
-  (function waitForFinanceModeEl() {
-    const targetSel = '.finance-mode';
-    if (document.querySelector(targetSel)) return; // already applied above
-
-    const mo = new MutationObserver(() => {
-      const el = document.querySelector(targetSel);
-      if (el) {
-        applyFinanceModeText();
-        mo.disconnect();
-      }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
-  })();
-
-  // re-apply after switching to the Finance pane (in case heading is injected)
-  $(document).on('click', '[api="finance-v4"]', function () {
-    setTimeout(applyFinanceModeText, 0);
-  });
-
-  // optional: handle in-app navigation using history
-  window.addEventListener('popstate', applyFinanceModeText);
 
   // ===== Range picker wiring for new UI (runs after DOM ready) =====
   bindFinanceRangeBar();
