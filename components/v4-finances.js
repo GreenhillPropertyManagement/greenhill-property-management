@@ -11,16 +11,17 @@ document.addEventListener("DOMContentLoaded", function () {
   $(document)
     .off("click", '#finance-v4')
     .on("click", '#finance-v4', function () {
+
       const currentPageId = localStorage.getItem("pageId");
       localStorage.setItem("financeMode", currentPageId);
       localStorage.setItem("pageId", "finance-v4");
 
       // --- Force defaults each time user opens Finance ---
-      $('#type').val('noi');                     // reset Type select
+     /* $('#type').val('noi');                     // reset Type select
       $('#date_range').val('month_to_date');     // reset Date Range select
       if (window.financeSetPreset) {
         window.financeSetPreset('month_to_date');
-      }
+      }*/
 
       // --- Update finance mode heading ---
       const mode = localStorage.getItem("financeMode");
@@ -30,10 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
         $(".finance-mode").text("Property Finances");
       }
 
-      // Fire initial fetch
+      /* Fire initial fetch
       $('[api-form="finance-filter"]').trigger("submit");
       loadRecentPayments();
-      fetchStatements();
+      fetchStatements();*/
     });
 
   // Bind your button: [data-button="excel"]
