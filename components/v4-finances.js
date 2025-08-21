@@ -7,7 +7,39 @@ document.addEventListener("DOMContentLoaded", function () {
   // ===== Range picker wiring for new UI (runs after DOM ready) =====
   bindFinanceRangeBar();
 
-  
+  // --- Always default filters on initial load / return (M2D + NOI) ---
+  function forceFinanceDefaults() {
+    // 1) Transaction type -> NOI
+    const $type = $('#type'); // <select form-input="transaction_type">
+    if ($type.length) {
+      $type.val('noi');              // set without triggering submit here
+      // if you have [data-filter] pills, also reflect the active visual state:
+      $('[data-filter]').removeClass('active').attr('aria-pressed', 'false');
+      $('[data-filter="noi"]').addClass('active').attr('aria-pressed', 'true');
+    }
+
+    // 2) Date range -> Month to date (use your range bar helper if present)
+    if (window.financeSetPreset) {
+      // this sets the hidden #date_range to month_to_date and updates the calendar/fields
+      window.financeSetPreset('month_to_date');
+    } else {
+      // fallback: set the hidden select directly
+      $('#date_range').val('month_to_date');
+    }
+
+    // 3) Submit once to fetch with the defaults
+    $('[api-form="finance-filter"]').trigger('submit');
+  }
+
+  // Run immediately on first load
+  forceFinanceDefaults();
+
+  // Also re-apply when page is restored from bfcache (back/forward nav)
+  window.addEventListener('pageshow', (ev) => {
+    // If coming from bfcache, many browsers mark it persisted=true
+    // Either way, we still want defaults when re-entering the page
+    forceFinanceDefaults();
+  });
 
   // Bind your button: [data-button="excel"]
   $(document).off("click", '[data-button="excel"]').on("click", '[data-button="excel"]', function () {
