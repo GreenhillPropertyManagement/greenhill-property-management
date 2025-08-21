@@ -720,7 +720,9 @@ function deleteConvo() {
       if (page == "unit"){
         $("[api-button=tenant-convos]").click();
       }
+      $("[dyn-container='chat-container']").empty();
       $(".loader").hide();
+
     },
     complete: function () {
       if (localStorage.pageId === "communications") {
