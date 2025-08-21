@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // restore deefaults when finance page loads 
   $(document)
-    .off("click", '[api="finance-v4"]')
-    .on("click", '[api="finance-v4"]', function () {
+    .off("click", '#finance-v4')
+    .on("click", '#finance-v4', function () {
       const currentPageId = localStorage.getItem("pageId");
       localStorage.setItem("financeMode", currentPageId);
       localStorage.setItem("pageId", "finance-v4");
