@@ -7,26 +7,34 @@ document.addEventListener("DOMContentLoaded", function () {
   // ===== Range picker wiring for new UI (runs after DOM ready) =====
   bindFinanceRangeBar();
 
-  // reset filter defaults on new load
+  // restore deefaults when finance page loads 
   $(document)
-  .off("click", '[api="finance-v4"]')
-  .on("click", '[api="finance-v4"]', function () {
-    const currentPageId = localStorage.getItem("pageId");
-    localStorage.setItem("financeMode", currentPageId);
-    localStorage.setItem("pageId", "finance-v4");
+    .off("click", '[api="finance-v4"]')
+    .on("click", '[api="finance-v4"]', function () {
+      const currentPageId = localStorage.getItem("pageId");
+      localStorage.setItem("financeMode", currentPageId);
+      localStorage.setItem("pageId", "finance-v4");
 
-    // --- Force defaults each time user opens Finance ---
-    $('#type').val('noi');                     // reset Type select
-    $('#date_range').val('month_to_date');     // reset Date Range select
-    if (window.financeSetPreset) {
-      window.financeSetPreset('month_to_date');
-    }
+      // --- Force defaults each time user opens Finance ---
+      $('#type').val('noi');                     // reset Type select
+      $('#date_range').val('month_to_date');     // reset Date Range select
+      if (window.financeSetPreset) {
+        window.financeSetPreset('month_to_date');
+      }
 
-    // Fire initial fetch
-    $('[api-form="finance-filter"]').trigger("submit");
-    loadRecentPayments();
-    fetchStatements();
-  });
+      // --- Update finance mode heading ---
+      const mode = localStorage.getItem("financeMode");
+      if (mode === "finance") {
+        $(".finance-mode").text("Portfolio Finances");
+      } else if (mode === "property") {
+        $(".finance-mode").text("Property Finances");
+      }
+
+      // Fire initial fetch
+      $('[api-form="finance-filter"]').trigger("submit");
+      loadRecentPayments();
+      fetchStatements();
+    });
 
   // Bind your button: [data-button="excel"]
   $(document).off("click", '[data-button="excel"]').on("click", '[data-button="excel"]', function () {
