@@ -32,8 +32,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function displayProperties(page, user_profile) {
 
-
-
+  //show loader
+  $('.loader').css('display', 'flex');
+  
   var propertiesContainer = $("[data='properties-container']");
 
   $.ajax({
