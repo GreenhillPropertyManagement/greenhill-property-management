@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
       localStorage.setItem("pageId", "finance-v4");
 
       // --- Force defaults each time user opens Finance ---
-     /* $('#type').val('noi');                     // reset Type select
+      /*$('#type').val('noi');                     // reset Type select
       $('#date_range').val('month_to_date');     // reset Date Range select
       if (window.financeSetPreset) {
         window.financeSetPreset('month_to_date');
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
         $(".finance-mode").text("Property Finances");
       }
 
-      /* Fire initial fetch
+      /* fire initial batch
       $('[api-form="finance-filter"]').trigger("submit");
       loadRecentPayments();
       fetchStatements();*/
