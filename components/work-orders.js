@@ -431,7 +431,9 @@ function updateWorkOrder() {
 
 function loadWorkOrders (type,user,unit,view) {
 
-  
+  //show loader
+  $('.loader').css('display', 'flex');
+
   var workOrdersContainer = $("[dyn-container='work-orders']");
 
   $.ajax({
