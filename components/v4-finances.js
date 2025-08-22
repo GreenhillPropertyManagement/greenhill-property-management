@@ -3,7 +3,7 @@ let latestApiResponse = null; // Declare it globally before using
 
 document.addEventListener("DOMContentLoaded", function () {
 
-
+  /*-- PATCHED for Manual Payments modal */
   // ===== Range picker wiring for new UI (runs after DOM ready) =====
   bindFinanceRangeBar();
 
@@ -1152,4 +1152,3 @@ function exportTransactionsTableToCSV(filename = "transactions.csv") {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-
