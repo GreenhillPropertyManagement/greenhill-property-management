@@ -13,14 +13,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ---- Communication Button Clicked on Users Profile Page
   $("[api-button=user-convos]").off("click").on("click", function () {
-    $("[dyn-container='chat-container']").empty();
+    $("[dyn-container='chat-container']").empty(); // empty messages
     loadConvos(localStorage.pageRefreshParam, "user");
     localStorage.removeItem("activeConvo");
   });
 
   // ---- Communication Button Clicked on Unit Page (Get Tenant Convos)
   $("[api-button=tenant-convos]").off("click").on("click", function () {
-    $("[dyn-container='chat-container']").empty();
+    $("[dyn-container='chat-container']").empty(); // empty messages
     loadConvos(localStorage.activeTenantUserUuid, "user");
     localStorage.removeItem("activeConvo");
   });
