@@ -749,16 +749,36 @@ function populateTransactionModal(payment) {
     console.error("Error: Payment data is missing.");
     return;
   }
+  const grossPayment = Math.abs(Number(payment.amount)) || 0;
 
-  let grossPayment = Math.abs(payment.amount);
-  let netPayment = parseFloat(payment.landlords_net_payment) || 0;
-  let managementFee = grossPayment - netPayment;
-  let balanceAfterPayment = payment.total_running_balance || 0;
+  // Detect manual/offline payments:
+  // - explicit flags (is_manual / manual)
+  // - common method strings (check, manual, offline, cash)
+  // - missing landlords_net_payment field
+  const method = (payment.payment_method || payment.method || payment.source || '').toString().toLowerCase();
+  const explicitManual = payment.is_manual === true || payment.manual === true;
+  const methodLooksManual = /manual|check|offline|cash/.test(method);
+  const noLandlordNet = !payment.hasOwnProperty('landlords_net_payment') || payment.landlords_net_payment == null || payment.landlords_net_payment === '';
 
-  let grossPaymentEl = document.querySelector('[data="gross-payment"]');
-  let mgFeeEl = document.querySelector('[data="mg-fee"]');
-  let netPaymentEl = document.querySelector('[data="net-payment"]');
-  let balanceAfterPaymentEl = document.querySelector('[data="balance-after-payment"]');
+  let netPayment = 0;
+  let managementFee = 0;
+
+  if (explicitManual || methodLooksManual || noLandlordNet) {
+    // For manual/offline payments assume no management fee
+    netPayment = grossPayment;
+    managementFee = 0;
+  } else {
+    netPayment = Number(payment.landlords_net_payment) || 0;
+    managementFee = grossPayment - netPayment;
+    if (managementFee < 0) managementFee = 0; // guard against bad data
+  }
+
+  const balanceAfterPayment = Number(payment.total_running_balance) || 0;
+
+  const grossPaymentEl = document.querySelector('[data="gross-payment"]');
+  const mgFeeEl = document.querySelector('[data="mg-fee"]');
+  const netPaymentEl = document.querySelector('[data="net-payment"]');
+  const balanceAfterPaymentEl = document.querySelector('[data="balance-after-payment"]');
 
   if (!grossPaymentEl || !mgFeeEl || !netPaymentEl || !balanceAfterPaymentEl) {
     console.error("Error: One or more modal elements not found.");
