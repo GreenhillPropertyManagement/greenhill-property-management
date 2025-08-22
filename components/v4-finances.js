@@ -756,7 +756,8 @@ function populateTransactionModal(payment) {
   // - common method strings (check, manual, offline, cash)
   // - missing landlords_net_payment field
   const method = (payment.payment_method || payment.method || payment.source || '').toString().toLowerCase();
-  const explicitManual = payment.is_manual === true || payment.manual === true;
+  // Prefer the explicit backend flag `manually_entered` if present
+  const explicitManual = payment.manually_entered === true || payment.is_manual === true || payment.manual === true;
   const methodLooksManual = /manual|check|offline|cash/.test(method);
   const noLandlordNet = !payment.hasOwnProperty('landlords_net_payment') || payment.landlords_net_payment == null || payment.landlords_net_payment === '';
 
