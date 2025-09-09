@@ -487,9 +487,9 @@ function updateQuickStats(response) {
   const totalExpenses = response.total_expenses || 0;
   const noi = response.noi || 0;
 
-  $('[data-api="total_rent_collected"]').text(`$${totalRentCollected.toLocaleString()}`);
-  $('[data-api="total_expenses"]').text(`$${totalExpenses.toLocaleString()}`);
-  $('[data-api="noi"]').text(`$${noi.toLocaleString()}`);
+  $('[data-api="total_rent_collected"]').text(v4formattedCurrency(totalRentCollected));
+  $('[data-api="total_expenses"]').text(v4formattedCurrency(totalExpenses));
+  $('[data-api="noi"]').text(v4formattedCurrency(noi));
 }
 
 // Function to format date to M/D/YY
@@ -503,6 +503,12 @@ function formatTransDate(dateString) {
 
   if (isNaN(date)) return ""; // Ensure date is valid
   return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear().toString().slice(-2)}`;
+}
+
+// Format number as USD currency with exactly two decimals, e.g. $1,234.50
+function v4formattedCurrency(value) {
+  const n = Number(value) || 0;
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 }
 
 function extractChartData(response, transactionType) {
@@ -708,7 +714,7 @@ function populateTransactionsTable(response, transactionType) {
   transactions.forEach(transaction => {
     let row = document.createElement("tr");
 
-    let formattedAmount = `$${Math.abs(transaction.amount).toLocaleString()}`;
+  let formattedAmount = v4formattedCurrency(Math.abs(transaction.amount));
     let transactionTypeText = transaction.type === "payment" ? "Payment" : "Expense";
     let transactionDescription = transaction.description || "N/A";
 
@@ -786,10 +792,10 @@ function populateTransactionModal(payment) {
     return;
   }
 
-  grossPaymentEl.textContent = `$${grossPayment.toLocaleString()}`;
-  mgFeeEl.textContent = `$${managementFee.toLocaleString()}`;
-  netPaymentEl.textContent = `$${netPayment.toLocaleString()}`;
-  balanceAfterPaymentEl.textContent = `$${balanceAfterPayment.toLocaleString()}`;
+  grossPaymentEl.textContent = v4formattedCurrency(grossPayment);
+  mgFeeEl.textContent = v4formattedCurrency(managementFee);
+  netPaymentEl.textContent = v4formattedCurrency(netPayment);
+  balanceAfterPaymentEl.textContent = v4formattedCurrency(balanceAfterPayment);
 }
 
 function setupChartTypeListener() {
