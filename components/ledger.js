@@ -249,7 +249,21 @@ function updateTable(data) {
     const amountNum = Number(item.amount) || 0;
     const absAmt = Math.abs(amountNum);
     const delta = (item.type === 'charge') ? absAmt : -absAmt;
+    // Debug: trace calculation for each row
+    if (window && window.console && typeof console.debug === 'function') {
+      console.debug('[ledger] row', index, {
+        id: item.transaction_id || item.id || null,
+        type: item.type,
+        rawAmount: amountNum,
+        absAmt: absAmt,
+        delta: delta,
+        runningBefore: runningBalance
+      });
+    }
     runningBalance = normalizeMoney(runningBalance + delta);
+    if (window && window.console && typeof console.debug === 'function') {
+      console.debug('[ledger] after', index, { runningAfter: runningBalance });
+    }
 
     // v2: include only items on/before current month in ET
     if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
@@ -259,6 +273,9 @@ function updateTable(data) {
     // End-of-month row when month changes (use balance BEFORE this row)
     if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
       const prevBalance = normalizeMoney(runningBalance - delta);
+      if (window && window.console && typeof console.debug === 'function') {
+        console.debug('[ledger] endOfMonth', { month: previousMonth, year: previousYear, prevBalance });
+      }
       addEndOfMonthRow(previousMonth, previousYear, prevBalance);
     }
 
@@ -300,6 +317,9 @@ function updateTable(data) {
 
     const isLastItem = index === rowsToRender.length - 1;
     if (isLastItem && previousMonth !== null) {
+      if (window && window.console && typeof console.debug === 'function') {
+        console.debug('[ledger] finalEndOfMonth', { month: previousMonth, year: previousYear, finalBalance: normalizeMoney(runningBalance) });
+      }
       addEndOfMonthRow(previousMonth, previousYear, normalizeMoney(runningBalance));
     }
   });
