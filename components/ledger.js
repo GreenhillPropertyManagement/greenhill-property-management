@@ -198,25 +198,39 @@ function updateTable(data) {
     $tbody.append(row);
   }
 
+  // Build payment init index and enriched list with effective ET dates so we
+  // can sort chronologically before rendering. This prevents month rows from
+  // appearing out of order and avoids duplicate month-end rows.
   const paymentInits = data.filter(d => d.description?.toLowerCase().includes("initiated"));
 
   function findMatchingInit(record) {
     if (!record || record.type !== "payment") return null;
     if (record.payment_init_id) {
-      return paymentInits.find(init => init.payment_init_id && init.payment_init_id === record.payment_init_id);
+      return paymentInits.find(init => init.payment_init_id && init.payment_init_id === record.payment_init_id) || null;
     }
-    const completionDate = new Date(record.transaction_date);
+    const completionDate = record.transaction_date ? new Date(record.transaction_date) : null;
     return paymentInits.find(init =>
       init.transaction_id === record.transaction_id &&
       init.amount === 0 &&
-      new Date(init.transaction_date) <= completionDate
-    );
+      (!completionDate || new Date(init.transaction_date) <= completionDate)
+    ) || null;
   }
 
-  const rowsToRender = data.filter(item => {
-    if (item.type !== "payment") return true;
-    return item.payment_successful || item.description?.toLowerCase().includes("failed");
-  });
+  // Enrich items with effective dates and sort by that date
+  const enriched = data.map(item => {
+    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
+    const effectiveISO = (item.type === "payment" && !item.manually_entered && matchedInit)
+      ? matchedInit.transaction_date
+      : item.transaction_date;
+    const effectiveET = parseDateInEasternTime(effectiveISO);
+    const sortKey = effectiveET ? effectiveET.getTime() : (item.transaction_date ? new Date(item.transaction_date + 'T00:00:00').getTime() : 0);
+    return { item, matchedInit, effectiveISO, effectiveET, sortKey };
+  })
+  .filter(meta => {
+    if (meta.item.type !== "payment") return true;
+    return meta.item.payment_successful || meta.item.description?.toLowerCase().includes("failed");
+  })
+  .sort((a, b) => a.sortKey - b.sortKey);
 
   // Today in ET for month cut-off
   const todayET = getEasternToday();
@@ -229,17 +243,14 @@ function updateTable(data) {
     return (y < todayYear) || (y === todayYear && m <= todayMonth);
   }
 
-  rowsToRender.forEach((item, index) => {
-    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
+  // Track which month/year end rows we've added to avoid duplicates
+  const addedMonthKeys = new Set();
 
-    // Effective date (ET) for grouping & month comparisons:
-    // - for gateway payments (not manually entered): use the init date if available
-    // - otherwise, use the record’s transaction_date
-    const effectiveISO = (item.type === "payment" && !item.manually_entered && matchedInit)
-      ? matchedInit.transaction_date
-      : item.transaction_date;
-
-    const effectiveET = parseDateInEasternTime(effectiveISO);
+  enriched.forEach((meta, index) => {
+    const item = meta.item;
+    const matchedInit = meta.matchedInit;
+    const effectiveISO = meta.effectiveISO;
+    const effectiveET = meta.effectiveET;
 
     const dateInput = formatDate(effectiveISO);               // shown input date (MM/DD/YY)
     const completionDate = formatDate(item.transaction_date); // shown completion date (MM/DD/YY)
@@ -248,8 +259,6 @@ function updateTable(data) {
       : formatBillingPeriod(item.billing_period);
 
     // --- running balances (normalize every step)
-    // Use absolute values to determine delta so that charges always add and
-    // payments/credits always subtract regardless of how the API signs amounts.
     const amountNum = Number(item.amount) || 0;
     const absAmt = Math.abs(amountNum);
     const delta = (item.type === 'charge') ? absAmt : -absAmt;
@@ -280,7 +289,11 @@ function updateTable(data) {
       if (window && window.console && typeof console.debug === 'function') {
         console.debug('[ledger] endOfMonth', { month: previousMonth, year: previousYear, prevBalance });
       }
-      addEndOfMonthRow(previousMonth, previousYear, prevBalance);
+      const key = `${previousMonth}-${previousYear}`;
+      if (!addedMonthKeys.has(key)) {
+        addedMonthKeys.add(key);
+        addEndOfMonthRow(previousMonth, previousYear, prevBalance);
+      }
     }
 
     const hasInvoice = !!item.invoice_url;
