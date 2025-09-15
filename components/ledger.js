@@ -274,10 +274,25 @@ function updateTable(data) {
       currentMonthBalance = normalizeMoney(currentMonthBalance + delta);
     }
 
-    // End-of-month row when month changes (use balance BEFORE this row)
+    // End-of-month row when month changes (use balance BEFORE this row).
+    // Prefer the initiated date for payments so that a payment initiated in
+    // August but completed in September doesn't create a second August row.
+    const effectiveMonthForKey = matchedInit && matchedInit.transaction_date
+      ? parseDateInEasternTime(matchedInit.transaction_date).getMonth()
+      : (effectiveET ? effectiveET.getMonth() : null);
+    const effectiveYearForKey = matchedInit && matchedInit.transaction_date
+      ? parseDateInEasternTime(matchedInit.transaction_date).getFullYear()
+      : (effectiveET ? effectiveET.getFullYear() : null);
+
     if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
       const prevBalance = normalizeMoney(runningBalance - delta);
-      addEndOfMonthRow(previousMonth, previousYear, prevBalance);
+      const key = `${previousMonth}-${previousYear}`;
+      // If this month's end row hasn't been added yet, add it. This prevents
+      // duplicate month rows when a completion record appears in a later month.
+      if (!addedMonthKeys.has(key)) {
+        addedMonthKeys.add(key);
+        addEndOfMonthRow(previousMonth, previousYear, prevBalance);
+      }
     }
 
     const hasInvoice = !!item.invoice_url;
