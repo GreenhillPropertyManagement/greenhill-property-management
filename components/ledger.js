@@ -244,16 +244,19 @@ function updateTable(data) {
       : formatBillingPeriod(item.billing_period);
 
     // --- running balances (normalize every step)
-    runningBalance = normalizeMoney(runningBalance + Number(item.amount));
+    // Treat charges as positive additions, payments/credits as subtractions
+    const amountNum = Number(item.amount) || 0;
+    const delta = (item.type === 'charge') ? amountNum : -amountNum;
+    runningBalance = normalizeMoney(runningBalance + delta);
 
     // v2: include only items on/before current month in ET
     if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
-      currentMonthBalance = normalizeMoney(currentMonthBalance + Number(item.amount));
+      currentMonthBalance = normalizeMoney(currentMonthBalance + delta);
     }
 
     // End-of-month row when month changes (use balance BEFORE this row)
     if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
-      const prevBalance = normalizeMoney(runningBalance - Number(item.amount));
+      const prevBalance = normalizeMoney(runningBalance - delta);
       addEndOfMonthRow(previousMonth, previousYear, prevBalance);
     }
 
@@ -268,9 +271,11 @@ function updateTable(data) {
       fileIconsHTML += `<span class="file-icon" data-url="${item.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
     }
 
-    // --- amounts for this row (normalized to kill -0.00)
-    const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(item.amount)) : "";
-    const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(-Number(item.amount))) : "";
+  // --- amounts for this row (normalized to kill -0.00)
+  // Show positive values in both charge and credit columns (use abs)
+  const absAmount = Math.abs(amountNum);
+  const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(absAmount)) : "";
+  const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(absAmount)) : "";
     const balanceAmt = formatCurrency(runningBalance);
 
     const row = `
