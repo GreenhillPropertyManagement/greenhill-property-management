@@ -954,7 +954,23 @@ function generateCustomReport() {
       $('.loader').hide();
       return;
     }
-    fileName = `Custom ${startDate} - ${endDate}`;
+    // Format dates like: "September 5, 2025 - September 25th, 2025"
+    function formatHuman(iso, useOrdinal) {
+      const d = new Date(iso + 'T00:00:00');
+      if (isNaN(d)) return iso;
+      const month = d.toLocaleString('en-US', { month: 'long' });
+      const day = d.getUTCDate();
+      const year = d.getUTCFullYear();
+      if (!useOrdinal) return `${month} ${day}, ${year}`;
+      const s = ['th','st','nd','rd'];
+      const v = day % 100;
+      const ord = (s[(v-20)%10] || s[v] || s[0]);
+      return `${month} ${day}${ord}, ${year}`;
+    }
+
+    const startLabel = formatHuman(startDate, false);
+    const endLabel = formatHuman(endDate, true);
+    fileName = `${startLabel} - ${endLabel}`;
   } else {
     fileName = firstDate && lastDate
       ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
