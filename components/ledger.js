@@ -182,6 +182,10 @@ function updateTable(data) {
     const displayMonth = monthNames[month];
     const displayYear = year;
 
+    const key = `${month}-${year}`;
+    if (addedMonthKeys.has(key)) return; // already rendered
+    addedMonthKeys.add(key);
+
     const formatted = (balance < 0)
       ? `-${formatCurrency(Math.abs(balance))}`
       : formatCurrency(balance);
@@ -195,7 +199,7 @@ function updateTable(data) {
         <td></td>
         <td></td>
         <td></td>
-  <td>${formatted}</td>
+        <td>${formatted}</td>
       </tr>
     `;
     $tbody.append(row);
@@ -216,15 +220,43 @@ function updateTable(data) {
     );
   }
 
-  const rowsToRender = data.filter(item => {
-    if (item.type !== "payment") return true;
-    return item.payment_successful || item.description?.toLowerCase().includes("failed");
+  // Build an enriched list using the payment-initiated date when present,
+  // then group by month/year and render groups chronologically. This ensures
+  // payments initiated in August but completed in September appear in August
+  // and that each month balance row is rendered once.
+  const enriched = data.map(item => {
+    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
+    const effectiveISO = (item.type === "payment" && !item.manually_entered && matchedInit)
+      ? matchedInit.transaction_date
+      : item.transaction_date;
+    const effectiveET = parseDateInEasternTime(effectiveISO);
+    return { item, matchedInit, effectiveISO, effectiveET };
+  }).filter(meta => {
+    if (meta.item.type !== "payment") return true;
+    return meta.item.payment_successful || meta.item.description?.toLowerCase().includes("failed");
   });
 
-  // Today in ET for month cut-off
+  // Group by month/year key (use effectiveET; skip items without dates)
+  const groups = {};
+  enriched.forEach(meta => {
+    const et = meta.effectiveET || parseDateInEasternTime(meta.item.transaction_date);
+    if (!et) return;
+    const key = `${et.getFullYear()}-${et.getMonth()}`;
+    if (!groups[key]) groups[key] = { year: et.getFullYear(), month: et.getMonth(), items: [] };
+    groups[key].items.push(meta);
+  });
+
+  // Sort group keys chronologically
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    const [ay, am] = a.split('-').map(Number);
+    const [by, bm] = b.split('-').map(Number);
+    return ay === by ? am - bm : ay - by;
+  });
+
+  // Today in ET for month cut-off (used below)
   const todayET = getEasternToday();
   const todayYear = todayET.getFullYear();
-  const todayMonth = todayET.getMonth(); // 0..11
+  const todayMonth = todayET.getMonth();
 
   function isOnOrBeforeCurrentMonth(dateET) {
     const y = dateET.getFullYear();
@@ -232,117 +264,69 @@ function updateTable(data) {
     return (y < todayYear) || (y === todayYear && m <= todayMonth);
   }
 
-  rowsToRender.forEach((item, index) => {
-    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
+  // Render groups in order
+  sortedKeys.forEach((gKey, gIndex) => {
+    const group = groups[gKey];
+    // sort items in group by effectiveET to keep intra-month ordering
+    group.items.sort((a, b) => (a.effectiveET?.getTime() || 0) - (b.effectiveET?.getTime() || 0));
 
-    // Effective date (ET) for grouping & month comparisons:
-    // - for gateway payments (not manually entered): use the init date if available
-    // - otherwise, use the record’s transaction_date
-    const effectiveISO = (item.type === "payment" && !item.manually_entered && matchedInit)
-      ? matchedInit.transaction_date
-      : item.transaction_date;
+    group.items.forEach((meta, index) => {
+      const item = meta.item;
+      const matchedInit = meta.matchedInit;
+      const effectiveISO = meta.effectiveISO;
+      const effectiveET = meta.effectiveET;
 
-    const effectiveET = parseDateInEasternTime(effectiveISO);
+      const dateInput = formatDate(effectiveISO);
+      const completionDate = formatDate(item.transaction_date);
+      const billingPeriod = matchedInit ? formatBillingPeriod(matchedInit.billing_period) : formatBillingPeriod(item.billing_period);
 
-    const dateInput = formatDate(effectiveISO);               // shown input date (MM/DD/YY)
-    const completionDate = formatDate(item.transaction_date); // shown completion date (MM/DD/YY)
-    const billingPeriod = matchedInit
-      ? formatBillingPeriod(matchedInit.billing_period)
-      : formatBillingPeriod(item.billing_period);
+      const amountNum = Number(item.amount) || 0;
+      const absAmt = Math.abs(amountNum);
+      const delta = (item.type === 'charge') ? absAmt : -absAmt;
 
-    // --- running balances (normalize every step)
-    // Use absolute values to determine delta so that charges always add and
-    // payments/credits always subtract regardless of how the API signs amounts.
-    const amountNum = Number(item.amount) || 0;
-    const absAmt = Math.abs(amountNum);
-    const delta = (item.type === 'charge') ? absAmt : -absAmt;
-    // Debug: trace calculation for each row
-    if (window && window.console && typeof console.debug === 'function') {
-      console.debug('[ledger] row', index, {
-        id: item.transaction_id || item.id || null,
-        type: item.type,
-        rawAmount: amountNum,
-        absAmt: absAmt,
-        delta: delta,
-        runningBefore: runningBalance
-      });
-    }
-    runningBalance = normalizeMoney(runningBalance + delta);
-    if (window && window.console && typeof console.debug === 'function') {
-      console.debug('[ledger] after', index, { runningAfter: runningBalance });
-    }
-
-    // v2: include only items on/before current month in ET
-    if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
-      currentMonthBalance = normalizeMoney(currentMonthBalance + delta);
-    }
-
-    // End-of-month row when month changes (use balance BEFORE this row).
-    // Prefer the initiated date for payments so that a payment initiated in
-    // August but completed in September doesn't create a second August row.
-    const effectiveMonthForKey = matchedInit && matchedInit.transaction_date
-      ? parseDateInEasternTime(matchedInit.transaction_date).getMonth()
-      : (effectiveET ? effectiveET.getMonth() : null);
-    const effectiveYearForKey = matchedInit && matchedInit.transaction_date
-      ? parseDateInEasternTime(matchedInit.transaction_date).getFullYear()
-      : (effectiveET ? effectiveET.getFullYear() : null);
-
-    if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
-      const prevBalance = normalizeMoney(runningBalance - delta);
-      const key = `${previousMonth}-${previousYear}`;
-      // If this month's end row hasn't been added yet, add it. This prevents
-      // duplicate month rows when a completion record appears in a later month.
-      if (!addedMonthKeys.has(key)) {
-        addedMonthKeys.add(key);
-        addEndOfMonthRow(previousMonth, previousYear, prevBalance);
-      }
-    }
-
-    const hasInvoice = !!item.invoice_url;
-    const hasFile = !!item.file;
-
-    let fileIconsHTML = "";
-    if (hasInvoice) {
-      fileIconsHTML += `<span class="file-icon" data-url="${item.invoice_url}" title="View Invoice" style="margin-left: 6px; cursor: pointer;">📄</span>`;
-    }
-    if (hasFile) {
-      fileIconsHTML += `<span class="file-icon" data-url="${item.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
-    }
-
-  // --- amounts for this row (normalized to kill -0.00)
-  // Display positive values in the ledger columns (use absAmt).
-  const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
-  const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
-    const balanceAmt = (runningBalance < 0)
-      ? `-${formatCurrency(Math.abs(runningBalance))}`
-      : formatCurrency(runningBalance);
-
-    const row = `
-      <tr>
-        <td>${billingPeriod}</td>
-        <td>${dateInput}</td>
-        <td>${completionDate}</td>
-        <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
-        <td>${item.description || ""}${fileIconsHTML}</td>
-        <td>${chargeAmt}</td>
-        <td>${creditAmt}</td>
-        <td>${balanceAmt}</td>
-      </tr>
-    `;
-    $tbody.append(row);
-
-    if (effectiveET) {
-      previousMonth = effectiveET.getMonth();
-      previousYear = effectiveET.getFullYear();
-    }
-
-    const isLastItem = index === rowsToRender.length - 1;
-    if (isLastItem && previousMonth !== null) {
       if (window && window.console && typeof console.debug === 'function') {
-        console.debug('[ledger] finalEndOfMonth', { month: previousMonth, year: previousYear, finalBalance: normalizeMoney(runningBalance) });
+        console.debug('[ledger] row', `${gKey}-${index}`, { id: item.transaction_id || item.id || null, type: item.type, rawAmount: amountNum, absAmt, delta, runningBefore: runningBalance });
       }
-  addEndOfMonthRow(previousMonth, previousYear, normalizeMoney(runningBalance));
-    }
+      runningBalance = normalizeMoney(runningBalance + delta);
+      if (window && window.console && typeof console.debug === 'function') {
+        console.debug('[ledger] after', `${gKey}-${index}`, { runningAfter: runningBalance });
+      }
+
+      if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
+        currentMonthBalance = normalizeMoney(currentMonthBalance + delta);
+      }
+
+      const hasInvoice = !!item.invoice_url;
+      const hasFile = !!item.file;
+      let fileIconsHTML = "";
+      if (hasInvoice) fileIconsHTML += `<span class="file-icon" data-url="${item.invoice_url}" title="View Invoice" style="margin-left: 6px; cursor: pointer;">📄</span>`;
+      if (hasFile) fileIconsHTML += `<span class="file-icon" data-url="${item.file}" title="View File" style="margin-left: 6px; cursor: pointer;">📎</span>`;
+
+      const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
+      const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
+      const balanceAmt = (runningBalance < 0) ? `-${formatCurrency(Math.abs(runningBalance))}` : formatCurrency(runningBalance);
+
+      const row = `
+        <tr>
+          <td>${billingPeriod}</td>
+          <td>${dateInput}</td>
+          <td>${completionDate}</td>
+          <td>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
+          <td>${item.description || ""}${fileIconsHTML}</td>
+          <td>${chargeAmt}</td>
+          <td>${creditAmt}</td>
+          <td>${balanceAmt}</td>
+        </tr>
+      `;
+      $tbody.append(row);
+
+      // update previousMonth/Year to the group's month
+      previousMonth = group.month;
+      previousYear = group.year;
+    });
+
+    // after finishing a group, append the month's balance once
+    addEndOfMonthRow(group.month, group.year, normalizeMoney(runningBalance));
   });
 
   // v2 OUTPUT: client-computed balance through current month (ET)
