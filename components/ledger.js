@@ -179,6 +179,10 @@ function updateTable(data) {
     const displayMonth = monthNames[month];
     const displayYear = year;
 
+    const formatted = (balance < 0)
+      ? `-${formatCurrency(Math.abs(balance))}`
+      : formatCurrency(balance);
+
     const row = `
       <tr style="background-color: #92EFDD;">
         <td>${displayMonth} ${displayYear}</td>
@@ -188,7 +192,7 @@ function updateTable(data) {
         <td></td>
         <td></td>
         <td></td>
-        <td>${formatCurrency(balance)}</td>
+  <td>${formatted}</td>
       </tr>
     `;
     $tbody.append(row);
@@ -294,7 +298,9 @@ function updateTable(data) {
   // Display positive values in the ledger columns (use absAmt).
   const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
   const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(absAmt)) : "";
-    const balanceAmt = formatCurrency(runningBalance);
+    const balanceAmt = (runningBalance < 0)
+      ? `-${formatCurrency(Math.abs(runningBalance))}`
+      : formatCurrency(runningBalance);
 
     const row = `
       <tr>
@@ -320,13 +326,15 @@ function updateTable(data) {
       if (window && window.console && typeof console.debug === 'function') {
         console.debug('[ledger] finalEndOfMonth', { month: previousMonth, year: previousYear, finalBalance: normalizeMoney(runningBalance) });
       }
-      addEndOfMonthRow(previousMonth, previousYear, normalizeMoney(runningBalance));
+  addEndOfMonthRow(previousMonth, previousYear, normalizeMoney(runningBalance));
     }
   });
 
   // v2 OUTPUT: client-computed balance through current month (ET)
   $("[data-tenant='current-balance-v2']").text(
-    formatCurrency(currentMonthBalance)
+    (currentMonthBalance < 0)
+      ? `-${formatCurrency(Math.abs(currentMonthBalance))}`
+      : formatCurrency(currentMonthBalance)
   );
 
   // Attach handlers
