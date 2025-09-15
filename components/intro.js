@@ -6,18 +6,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (hasSeenIntro !== "true") {
     // user has NOT seen the intro, so show it automatically
-    if (role === 'Tenant' && userRecId === '272') {
+    if (role === 'Tenant') {
       startTenantIntro();
-    } else if (role === 'Landlord' && userRecId === '270') {
+    } else if (role === 'Landlord') {
       startLandlordIntro();
     }
   }
 
   // Manual trigger (always works regardless of localStorage)
   $('.intro-button').on('click', function () {
-    if (role === 'Tenant' && userRecId === '272') {
+    if (role === 'Tenant') {
       startTenantIntro();
-    } else if (role === 'Landlord' && userRecId === '270') {
+    } else if (role === 'Landlord') {
       startLandlordIntro();
     }
   });
