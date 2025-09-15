@@ -168,6 +168,9 @@ function updateTable(data) {
   let previousMonth = null;
   let previousYear = null;
 
+  // Track which month/year end rows we've added to avoid duplicates
+  const addedMonthKeys = new Set();
+
   const $tbody = $(".styled-table tbody");
   $tbody.empty();
 
