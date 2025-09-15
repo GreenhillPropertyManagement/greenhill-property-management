@@ -244,19 +244,19 @@ function updateTable(data) {
       : formatBillingPeriod(item.billing_period);
 
     // --- running balances (normalize every step)
-    // Treat charges as positive additions, payments/credits as subtractions
+    // Use the API-provided signed amount. Payments/credits are typically negative
+    // so adding the raw amount will correctly decrease the running balance.
     const amountNum = Number(item.amount) || 0;
-    const delta = (item.type === 'charge') ? amountNum : -amountNum;
-    runningBalance = normalizeMoney(runningBalance + delta);
+    runningBalance = normalizeMoney(runningBalance + amountNum);
 
     // v2: include only items on/before current month in ET
     if (effectiveET && isOnOrBeforeCurrentMonth(effectiveET)) {
-      currentMonthBalance = normalizeMoney(currentMonthBalance + delta);
+      currentMonthBalance = normalizeMoney(currentMonthBalance + amountNum);
     }
 
     // End-of-month row when month changes (use balance BEFORE this row)
     if (previousMonth !== null && effectiveET && previousMonth !== effectiveET.getMonth()) {
-      const prevBalance = normalizeMoney(runningBalance - delta);
+      const prevBalance = normalizeMoney(runningBalance - amountNum);
       addEndOfMonthRow(previousMonth, previousYear, prevBalance);
     }
 
@@ -272,10 +272,10 @@ function updateTable(data) {
     }
 
   // --- amounts for this row (normalized to kill -0.00)
-  // Show positive values in both charge and credit columns (use abs)
-  const absAmount = Math.abs(amountNum);
-  const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(absAmount)) : "";
-  const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(absAmount)) : "";
+  // Display positive values in the ledger columns. For payments (negative
+  // amounts) negate to show a positive credit, for charges show the amount as-is.
+  const chargeAmt  = (item.type === "charge") ? formatCurrency(normalizeMoney(amountNum)) : "";
+  const creditAmt  = (item.type !== "charge") ? formatCurrency(normalizeMoney(-amountNum)) : "";
     const balanceAmt = formatCurrency(runningBalance);
 
     const row = `
