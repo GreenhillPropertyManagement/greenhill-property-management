@@ -483,9 +483,27 @@ function initLandlordFinances() {
 }
 
 function updateQuickStats(response) {
-  const totalRentCollected = response.total_rent_collected || 0;
-  const totalExpenses = response.total_expenses || 0;
-  const noi = response.noi || 0;
+  // Prefer backend-provided totals, but fall back to computing from arrays if missing.
+  let totalRentCollected = Number(response.total_rent_collected) || 0;
+  let totalExpenses = Number(response.total_expenses) || 0;
+  let noi = Number(response.noi) || 0;
+
+  try {
+    if ((!totalRentCollected || totalRentCollected === 0) && Array.isArray(response.payments)) {
+      // Sum absolute values of payments (API uses negative amounts for payments)
+      totalRentCollected = response.payments.reduce((sum, p) => sum + (Math.abs(Number(p.amount) || 0)), 0);
+    }
+
+    if ((!totalExpenses || totalExpenses === 0) && Array.isArray(response.expenses)) {
+      totalExpenses = response.expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    }
+
+    if ((!noi || noi === 0) && (totalRentCollected || totalExpenses)) {
+      noi = totalRentCollected - totalExpenses;
+    }
+  } catch (err) {
+    console.error('Error computing quick stats:', err);
+  }
 
   $('[data-api="total_rent_collected"]').text(v4formattedCurrency(totalRentCollected));
   $('[data-api="total_expenses"]').text(v4formattedCurrency(totalExpenses));
