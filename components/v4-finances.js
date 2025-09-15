@@ -981,8 +981,11 @@ function generateCustomReport() {
   const dataUrl = captureChartDataURL();
   const chartImageBase64 = dataUrl ? dataUrl.replace(/^data:image\/\w+;base64,/, '') : null;
 
+  // Send transactions oldest -> newest for the report (do not mutate original)
+  const txToSend = Array.isArray(transactions) ? transactions.slice().reverse() : transactions;
+
   let requestData = {
-    transactions: transactions,
+    transactions: txToSend,
     file_name: fileName,
     report_type: reportType,
     total_rent_collected: parseFloat(totalRentCollected),
