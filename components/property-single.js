@@ -295,6 +295,75 @@ function loadProperty(property_id) {
   });
 }
 
+// Property-wide arrears report generation handler
+$(document).off('click', '[api-button="property-arrears"]');
+$(document).on('click', '[api-button="property-arrears"]', function (e) {
+  e.preventDefault();
+  $('.loader').css('display', 'flex');
+
+  const propertyIdRaw = localStorage.getItem('propertyRecId') || localStorage.getItem('propertyId');
+  const property_id = propertyIdRaw ? parseInt(propertyIdRaw, 10) : null;
+
+  if (!property_id) {
+    alert('Property ID is missing or invalid.');
+    $('.loader').hide();
+    return;
+  }
+
+  const requestData = { property_id: property_id };
+
+  $.ajax({
+    url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_arrears_report_property_wide',
+    type: 'POST',
+    dataType: 'json',
+    contentType: 'application/json',
+    headers: { "Authorization": "Bearer " + localStorage.authToken },
+    data: JSON.stringify(requestData),
+    success: function (response) {
+      const statement_id = response.statement_id;
+      alert('Generating property-wide arrears report. Please do not refresh the page.');
+      // Try to call the shared fetchArrearsReport if available
+      if (typeof fetchArrearsReport === 'function') {
+        fetchArrearsReport(statement_id);
+      } else {
+        // fallback polling if the shared function isn't loaded
+        let attempts = 0;
+        const maxAttempts = 10;
+        const interval = setInterval(() => {
+          if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            $('.loader').hide();
+            alert('Arrears report generation is taking longer than expected. Please try again later.');
+            return;
+          }
+          $.ajax({
+            url: localStorage.baseUrl + 'api:rpDXPv3x/v4_get_arrears_report',
+            type: 'GET',
+            headers: { "Authorization": "Bearer " + localStorage.authToken },
+            data: { statement_id: statement_id },
+            success: function (resp) {
+              if (typeof resp === 'string' && resp.startsWith('https://')) {
+                clearInterval(interval);
+                window.open(resp, '_blank');
+                $('.loader').hide();
+              } else {
+                attempts++;
+              }
+            },
+            error: function () {
+              attempts++;
+            }
+          });
+        }, 2000);
+      }
+    },
+    error: function () {
+      alert('Error generating property-wide arrears report. Please try again.');
+      $('.loader').hide();
+    }
+  });
+});
+
 function editProperty() {
   // Form Submission API Call
   $("#edit-property-form").submit(function (event) {
