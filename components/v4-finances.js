@@ -615,14 +615,14 @@ function renderChart(chartType, chartData) {
       borderWidth: 1
     }];
   } else {
-    datasetConfig = [
+      datasetConfig = [
       {
         label: "Payments",
         data: chartData.paymentData,
         backgroundColor: "rgba(75, 192, 192, 0.5)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
-        yAxisID: "y-axis-payments"
+        yAxisID: "y"
       },
       {
         label: "Expenses",
@@ -630,7 +630,7 @@ function renderChart(chartType, chartData) {
         backgroundColor: "rgba(255, 99, 132, 0.5)",
         borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 1,
-        yAxisID: "y-axis-expenses"
+        yAxisID: "y"
       }
     ];
   }
@@ -653,17 +653,10 @@ function renderChart(chartType, chartData) {
         }
       },
       scales: chartType === "pie" ? {} : {
-        "y-axis-payments": {
+        y: {
           type: "linear",
           position: "left",
           beginAtZero: true,
-          ticks: { callback: function (value) { return "$" + value.toLocaleString(); } }
-        },
-        "y-axis-expenses": {
-          type: "linear",
-          position: "right",
-          beginAtZero: true,
-          grid: { drawOnChartArea: false },
           ticks: { callback: function (value) { return "$" + value.toLocaleString(); } }
         }
       }
