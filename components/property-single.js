@@ -1,9 +1,9 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-  
-  createUnit();
-  editProperty();
-  messageBroadcast();
+  var runInit = function () {
+    createUnit();
+    editProperty();
+    messageBroadcast();
 
   /* ------------- Load View ----------------- */
   $("#property").on("click", function () {
@@ -75,6 +75,18 @@ document.addEventListener("DOMContentLoaded", function () {
     $("[data-property-user='dyn-item']").removeClass("selected-add-user");
     managePropertyUsers($("[dyn-container='add-landlords']"), "landlords");
   });
+  };
+
+  if (typeof window.$ === 'undefined') {
+    var _jqWait = setInterval(function () {
+      if (typeof window.$ !== 'undefined') {
+        clearInterval(_jqWait);
+        runInit();
+      }
+    }, 100);
+  } else {
+    runInit();
+  }
 });
 
 function loadProperty(property_id) {
@@ -295,72 +307,69 @@ function loadProperty(property_id) {
   });
 }
 
-// Property-wide arrears report generation handler
-$(document).off('click', '[api-button="property-arrears"]');
-$(document).on('click', '[api-button="property-arrears"]', function (e) {
+// Property-wide arrears report generation handler (vanilla JS)
+document.addEventListener('click', function (e) {
+  const target = e.target.closest('[api-button="property-arrears"]');
+  if (!target) return;
   e.preventDefault();
-  $('.loader').css('display', 'flex');
+
+  // show loader if present
+  const loader = document.querySelector('.loader');
+  if (loader) loader.style.display = 'flex';
 
   const propertyIdRaw = localStorage.getItem('propertyRecId') || localStorage.getItem('propertyId');
   const property_id = propertyIdRaw ? parseInt(propertyIdRaw, 10) : null;
 
   if (!property_id) {
     alert('Property ID is missing or invalid.');
-    $('.loader').hide();
+    if (loader) loader.style.display = 'none';
     return;
   }
 
-  const requestData = { property_id: property_id };
+  const url = (localStorage.baseUrl || '') + 'api:rpDXPv3x/v4_generate_arrears_report_property_wide';
+  const body = { property_id: property_id };
 
-  $.ajax({
-    url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_arrears_report_property_wide',
-    type: 'POST',
-    dataType: 'json',
-    contentType: 'application/json',
-    headers: { "Authorization": "Bearer " + localStorage.authToken },
-    data: JSON.stringify(requestData),
-    success: function (response) {
-      const statement_id = response.statement_id;
-      alert('Generating property-wide arrears report. Please do not refresh the page.');
-      // Try to call the shared fetchArrearsReport if available
-      if (typeof fetchArrearsReport === 'function') {
-        fetchArrearsReport(statement_id);
-      } else {
-        // fallback polling if the shared function isn't loaded
-        let attempts = 0;
-        const maxAttempts = 10;
-        const interval = setInterval(() => {
-          if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            $('.loader').hide();
-            alert('Arrears report generation is taking longer than expected. Please try again later.');
-            return;
-          }
-          $.ajax({
-            url: localStorage.baseUrl + 'api:rpDXPv3x/v4_get_arrears_report',
-            type: 'GET',
-            headers: { "Authorization": "Bearer " + localStorage.authToken },
-            data: { statement_id: statement_id },
-            success: function (resp) {
-              if (typeof resp === 'string' && resp.startsWith('https://')) {
-                clearInterval(interval);
-                window.open(resp, '_blank');
-                $('.loader').hide();
-              } else {
-                attempts++;
-              }
-            },
-            error: function () {
-              attempts++;
-            }
-          });
-        }, 2000);
-      }
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.authToken || '')
     },
-    error: function () {
-      alert('Error generating property-wide arrears report. Please try again.');
-      $('.loader').hide();
+    body: JSON.stringify(body)
+  }).then(res => res.json()).then(response => {
+    const statement_id = response && response.statement_id;
+    alert('Generating property-wide arrears report. Please do not refresh the page.');
+    if (typeof fetchArrearsReport === 'function') {
+      fetchArrearsReport(statement_id);
+      return;
     }
+
+    // fallback polling using fetch
+    let attempts = 0;
+    const maxAttempts = 10;
+    const poll = setInterval(() => {
+      if (attempts >= maxAttempts) {
+        clearInterval(poll);
+        if (loader) loader.style.display = 'none';
+        alert('Arrears report generation is taking longer than expected. Please try again later.');
+        return;
+      }
+      attempts++;
+      const pollUrl = (localStorage.baseUrl || '') + 'api:rpDXPv3x/v4_get_arrears_report?statement_id=' + encodeURIComponent(statement_id);
+      fetch(pollUrl, { headers: { 'Authorization': 'Bearer ' + (localStorage.authToken || '') } })
+        .then(r => r.text())
+        .then(text => {
+          if (text && text.startsWith('https://')) {
+            clearInterval(poll);
+            window.open(text, '_blank');
+            if (loader) loader.style.display = 'none';
+          }
+        }).catch(() => { /* ignore and retry */ });
+    }, 2000);
+  }).catch(() => {
+    alert('Error generating property-wide arrears report. Please try again.');
+    const loaderEl = document.querySelector('.loader');
+    if (loaderEl) loaderEl.style.display = 'none';
   });
 });
 
