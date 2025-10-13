@@ -373,6 +373,12 @@ function loadUserProfile(user) {
         $("[data-profile=base_amount]")
           .text(response.tenant_info.base_amount)
           .val(response.tenant_info.base_amount);
+        $("[data-profile=school_tax_base]")
+          .text(response.tenant_info.school_tax_base)
+          .val(response.tenant_info.school_tax_base);
+        $("[data-profile=village_tax_base]")
+          .text(response.tenant_info.village_tax_base)
+          .val(response.tenant_info.village_tax_base);
         $("[data-profile=late_fee_percentage]")
           .text(response.tenant_info.late_fee_percentage)
           .val(response.tenant_info.late_fee_percentage);
