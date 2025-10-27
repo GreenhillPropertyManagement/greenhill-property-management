@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }),
                 success: function (response) {
                     localStorage.setItem("codeVerified",true);
-                    window.location.href = "/banking/choose-method";
+                    window.location.href = "/banking/edit-bank-choose-method";
                 },
                 error: function (xhr) {
                     try {
