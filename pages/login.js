@@ -89,11 +89,11 @@ $("#login-form").submit(function (event) {
           
           // update page ID in local storage
           localStorage.setItem("pageId", pageId);
+          $('#verify-bank-update').css('display','flex');
 
           //re-direct user to dashboard
           window.location.href = "/app/home";
 
-          $('#verify-bank-update').css('display','flex');
 
       // if tenant has not updated their info ------------------ 
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
