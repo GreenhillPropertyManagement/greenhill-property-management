@@ -78,6 +78,11 @@ $("#login-form").submit(function (event) {
 
           window.location.href = "/banking/choose-method";       
 
+      // if tenant has updated their bank without verification ----------------
+      } else if (response.user_info.user_role === 'Tenant' && response.user_info.tenant_info.bank_account_status === "update-pending" && response.user_info.tenant_info.bank_verification_method === "manual") {
+
+        $('#verify-bank-update').css('display','flex');
+
       // if tenant has not updated their info ------------------ 
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
 
