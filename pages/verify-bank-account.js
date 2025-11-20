@@ -35,6 +35,7 @@ function authUser() {
 }
 
 function verifyBank() {
+
   var userRecIdValue = localStorage.getItem("userRecId");
   $("#user-rec_id").val(userRecIdValue);
 
@@ -72,8 +73,9 @@ function verifyBank() {
       data: formData,
       success: function (response) {
         localStorage.setItem("pageId", "my-profile");
-        window.location.href = "/app/home";
         localStorage.setItem('bankStatus','verified');
+        window.location.href = "/app/home";
+
       },
       error: function (error) {
         $(".form__error-block").show(); // show error
