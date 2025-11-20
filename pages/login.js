@@ -78,22 +78,6 @@ $("#login-form").submit(function (event) {
 
           window.location.href = "/banking/choose-method";       
 
-      // if tenant has updated their bank without verification ----------------
-      } else if (response.user_info.user_role === 'Tenant' && response.user_info.tenant_info.bank_account_status === "update-pending" && response.user_info.tenant_info.bank_verification_method === "manual") {
-
-          /* update the default page ID depending on user role */
-          let pageId; 
-          pageId = "my-profile";
-          localStorage.setItem('tenantRecId', response.user_info.tenant_info.id);
-          localStorage.setItem('bankStatus',response.user_info.tenant_info.bank_account_status);
-          
-          // update page ID in local storage
-          localStorage.setItem("pageId", pageId);
-          $('#verify-bank-update').css('display','flex');
-
-          //re-direct user to dashboard
-          window.location.href = "/app/home";
-
 
       // if tenant has not updated their info ------------------ 
       } else if (response.user_info.user_role === 'Tenant' && response.user_info.user_status === 'pending') {
