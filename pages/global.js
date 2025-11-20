@@ -219,6 +219,13 @@
     
     /* -------- Element Dynamic Visibility ------- */
 
+    // show alert bar if user updates their bank without verification
+    if (localStorage.bankStatus === 'update-pending') {
+      $('#verify-bank-update').css('display','flex');
+    } else{
+      $('#verify-bank-update').css('display','none');
+    }
+
     if (localStorage.userRole === 'Admin') {
       $('[dynamic-visibility=admin-hidden]').remove();
     }

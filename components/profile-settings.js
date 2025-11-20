@@ -434,8 +434,10 @@ function updateBankInfo() {
 
       if (localStorage.userRole === 'Tenant' && response.bank_verified === "no") {
         $('#verify-bank-update').css('display','flex');
+        localStorage.setItem('bankStatus','update-pending');
       } else if (localStorage.userRole === 'Tenant' && response.bank_verified === "yes") {
         showToast('Success! Your bank information has been updated and verified.');
+        localStorage.setItem('bankStatus','verified');
       }
 
       profileSettingsLoad();
