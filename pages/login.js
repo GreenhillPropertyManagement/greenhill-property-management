@@ -113,7 +113,13 @@ $("#login-form").submit(function (event) {
               pageId = "my-profile";
               localStorage.setItem('tenantRecId', response.user_info.tenant_info.id);
               localStorage.setItem('bankStatus',response.user_info.tenant_info.bank_account_status);
-            
+
+              // check if bank account is valid with new stripe update
+              if (response?.user_info?.tenant_info?.stripe_bank_id?.startsWith('pm_')) {
+                localStorage.setItem('bankValid', true);
+              } else {
+                localStorage.setItem('bankValid', false);
+              }
 
           } else if (userRole === "Admin" || userRole === "Employee") {
 
