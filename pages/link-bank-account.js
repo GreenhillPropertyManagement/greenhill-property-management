@@ -72,7 +72,9 @@ function createLinkToken() {
                         // Run for Tenants...
                         // Redirect the user to the auto-pay page
                         if (localStorage.userRole === "Tenant") {
+                          localStorage.setItem('bankValid', true);
                           window.location.href = '/tenant/auto-pay-confirmation';
+                          
                         } else {
                           //run for landlords...
                           alert("Bank Account Successfuly Linked!");

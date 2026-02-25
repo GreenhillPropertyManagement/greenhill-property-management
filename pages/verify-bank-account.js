@@ -74,6 +74,7 @@ function verifyBank() {
       success: function (response) {
         localStorage.setItem("pageId", "my-profile");
         localStorage.setItem('bankStatus','verified');
+        localStorage.setItem('bankValid', true);
         showToast('Success! Your bank account has been verified.');
         window.location.href = "/app/home";
 
