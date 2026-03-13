@@ -901,12 +901,11 @@ function fetchStatements() {
 }
 
 function generateCustomReport() {
-  $('.loader').css('display', 'flex'); // Show loader
+  $('.loader').css('display', 'flex');
   let transactions = [];
 
   $('#transactionsTable tbody tr').each(function () {
     const cols = $(this).find('td');
-
     let transaction = {
       transaction_date: cols.eq(0).text(),
       display_name: cols.eq(1).text(),
@@ -916,20 +915,16 @@ function generateCustomReport() {
       description: cols.eq(5).text(),
       amount: parseFloat(cols.eq(6).text().replace(/[$,]/g, ''))
     };
-
     transactions.push(transaction);
   });
 
-  // Extract the first and last transaction dates
   let firstDate = transactions.length > 0 ? transactions[0].transaction_date : null;
   let lastDate = transactions.length > 0 ? transactions[transactions.length - 1].transaction_date : null;
 
-  // UI selections
   let sector        = $('#sector option:selected').text().trim();
   let reportType    = $('#type option:selected').text().trim();
   let dateRangeText = $('#date_range option:selected').text().trim();
 
-  // Totals from UI
   let totalRentCollected = $('[data-api="total_rent_collected"]').text().replace(/[$,]/g, '') || "0";
   let totalExpenses      = $('[data-api="total_expenses"]').text().replace(/[$,]/g, '') || "0";
   let noi                = $('[data-api="noi"]').text().replace(/[$,]/g, '') || "0";
@@ -937,7 +932,6 @@ function generateCustomReport() {
   let propertyName = $('.noi-name').text().trim();
   let userName     = localStorage.getItem("displayName") || "";
 
-  // Build file name
   let fileName = '';
   if (dateRangeText.toLowerCase() === 'custom') {
     let startDate = $('#start_date').val();
@@ -947,7 +941,6 @@ function generateCustomReport() {
       $('.loader').hide();
       return;
     }
-    // Format dates like: "September 5, 2025 - September 25th, 2025"
     function formatHuman(iso, useOrdinal) {
       const d = new Date(iso + 'T00:00:00');
       if (isNaN(d)) return iso;
@@ -960,21 +953,15 @@ function generateCustomReport() {
       const ord = (s[(v-20)%10] || s[v] || s[0]);
       return `${month} ${day}${ord}, ${year}`;
     }
-
-    const startLabel = formatHuman(startDate, false);
-    const endLabel = formatHuman(endDate, true);
-    fileName = `${startLabel} - ${endLabel}`;
+    fileName = `${formatHuman(startDate, false)} - ${formatHuman(endDate, true)}`;
   } else {
     fileName = firstDate && lastDate
       ? `${sector} ${dateRangeText}: ${firstDate} - ${lastDate}`
       : `${sector} ${dateRangeText}`;
   }
 
-  // Capture chart
   const dataUrl = captureChartDataURL();
   const chartImageBase64 = dataUrl ? dataUrl.replace(/^data:image\/\w+;base64,/, '') : null;
-
-  // Send transactions oldest -> newest for the report (do not mutate original)
   const txToSend = Array.isArray(transactions) ? transactions.slice().reverse() : transactions;
 
   let requestData = {
@@ -989,6 +976,15 @@ function generateCustomReport() {
     chart_image: chartImageBase64
   };
 
+  // Open window NOW while still in the click handler — before any async work
+  const reportWindow = window.open('', '_blank');
+  if (!reportWindow) {
+    alert('Please allow popups for this site to download reports.');
+    $('.loader').hide();
+    return;
+  }
+  reportWindow.document.write('<p style="font-family:sans-serif;padding:20px;">Generating your report, please wait…</p>');
+
   $.ajax({
     url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_report',
     type: 'POST',
@@ -997,12 +993,11 @@ function generateCustomReport() {
     headers: { "Authorization": "Bearer " + localStorage.authToken },
     data: JSON.stringify(requestData),
     success: function (response) {
-      let statement_id = response.statement_id;
-      alert("Generating your report. Please do not refresh the page.");
-      fetchCustomReport(statement_id);
+      fetchCustomReport(response.statement_id, reportWindow);
     },
     error: function () {
       alert('Error generating report. Please try again.');
+      reportWindow.close();
       $('.loader').hide();
     }
   });
@@ -1065,7 +1060,14 @@ function generateArrearsReport() {
 
   let propertyName = $('[data-profile="unit_property"]').first().text().trim();
 
-  const requestData = { user_id: user_id, property_name: propertyName };
+  // Open window NOW while still in the click handler — before any async work
+  const reportWindow = window.open('', '_blank');
+  if (!reportWindow) {
+    alert('Please allow popups for this site to download reports.');
+    $('.loader').hide();
+    return;
+  }
+  reportWindow.document.write('<p style="font-family:sans-serif;padding:20px;">Generating your arrears report, please wait…</p>');
 
   $.ajax({
     url: localStorage.baseUrl + 'api:rpDXPv3x/v4_generate_arrears_report',
@@ -1073,14 +1075,13 @@ function generateArrearsReport() {
     dataType: 'json',
     contentType: 'application/json',
     headers: { "Authorization": "Bearer " + localStorage.authToken },
-    data: JSON.stringify(requestData),
+    data: JSON.stringify({ user_id: user_id, property_name: propertyName }),
     success: function (response) {
-      let statement_id = response.statement_id;
-      alert("Generating your arrears report. Please do not refresh the page.");
-      fetchArrearsReport(statement_id);
+      fetchArrearsReport(response.statement_id, reportWindow);
     },
     error: function () {
       alert('Error generating arrears report. Please try again.');
+      reportWindow.close();
       $('.loader').hide();
     }
   });
