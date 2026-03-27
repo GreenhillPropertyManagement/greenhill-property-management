@@ -226,11 +226,26 @@
       $('#verify-bank-update').css('display','none');
     }
 
+    /*
     // show update bank account bar for stripe update (payment intents only from now on)
-    /*if (localStorage.userRole === 'Tenant' && localStorage.bankValid === 'false' && localStorage.bankStatus !== 'update-pending') {
-      $('#bank-valid-message').css('display','flex');
+    if (
+      localStorage.userRole === 'Tenant' &&
+      localStorage.bankValid === 'false' &&
+      localStorage.bankStatus !== 'update-pending'
+    ) {
+      $('#bank-valid-message').css('display', 'flex');
+
+      // remove any previous handler first so it doesn't stack
+      $(document).off('click.bankUpdate', '.bank-update-click');
+
+      // when clicked, trigger profile settings tab/button
+      $(document).on('click.bankUpdate', '.bank-update-click', function () {
+        $('#profile-settings').trigger('click');
+      });
+
     } else {
-      $('#bank-valid-message').css('display','none');
+      $('#bank-valid-message').css('display', 'none');
+
     }*/
 
     if (localStorage.userRole === 'Admin') {
