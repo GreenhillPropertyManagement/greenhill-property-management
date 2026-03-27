@@ -256,6 +256,8 @@ function updateTable(data) {
     const yr = groups[k].year;
     if (!yearOrder.includes(yr)) yearOrder.push(yr);
   });
+  yearOrder.reverse(); // newest year first
+
 
   // ── Build one tbody per year, preceded by an accordion toggle row ──
   // We insert a single-cell <tr> INSIDE a lightweight thead-like wrapper.
