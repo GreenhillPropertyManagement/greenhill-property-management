@@ -75,8 +75,9 @@ function verifyBank() {
         localStorage.setItem("pageId", "my-profile");
         localStorage.setItem('bankStatus','verified');
         localStorage.setItem('bankValid', true);
+        $('#bank-valid-message').hide();
         showToast('Success! Your bank account has been verified.');
-        window.location.href = "/app/home";
+        window.location.href = '/tenant/auto-pay-confirmation';
 
 
       },
