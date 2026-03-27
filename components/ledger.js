@@ -350,10 +350,19 @@ function updateTable(data) {
 
   // ── Wire up accordion toggles (delegated, fires once per table) ──
   $table.off("click", ".year-accordion-row").on("click", ".year-accordion-row", function () {
-    const year = $(this).data("year");
-    $(this).toggleClass("is-collapsed");
-    $table.find(`tbody.year-tbody[data-year="${year}"]`).toggleClass("is-collapsed");
-  });
+      const year = $(this).data("year");
+      const isCurrentlyCollapsed = $(this).hasClass("is-collapsed");
+
+      // Collapse all
+      $table.find(".year-accordion-row").addClass("is-collapsed");
+      $table.find("tbody.year-tbody").addClass("is-collapsed");
+
+      // If it was collapsed, open it; if it was open, leave it closed (toggle)
+      if (isCurrentlyCollapsed) {
+        $(this).removeClass("is-collapsed");
+        $table.find(`tbody.year-tbody[data-year="${year}"]`).removeClass("is-collapsed");
+      }
+    });
 
   // ── File icon handler ──
   $table.off("click", ".file-icon").on("click", ".file-icon", function (e) {
