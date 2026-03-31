@@ -36,9 +36,15 @@ function loadUsers(type,unit) {
       
       usersContainer.empty();
 
+      // Hide archived users only for the "all users" view
+      let filteredUsers = response;
+      if (type === 'all') {
+        filteredUsers = response.filter(user => user.user_status !== 'archived');
+      }
+
       // loop through each user
-      response.forEach((user) => {
-    
+      filteredUsers.forEach((user) => {
+
         // clone the sample card for the user and append to users container
         let userItem = $(sampleUser).clone().appendTo(usersContainer);
 
@@ -46,33 +52,32 @@ function loadUsers(type,unit) {
         userItem.attr("id", user.user_id);
         userItem.addClass(user.user_role);
         userItem.addClass(user.user_status); 
+
         if (user.profile_img) {
           userItem.find(".users__dyn-item__img").attr("src", user.profile_img); 
         }    
+
         userItem.find(".user-name").text(user.display_name);
         userItem.find("[data='user-role']").text(user.user_role);
         userItem.find("[data='status']").text(user.user_status);
         userItem.find(".user-phone").attr("href", "tel:" + user.mobile_phone).text(user.mobile_phone);
         userItem.find(".user-email").attr("href", "mailto:" + user.email).text(user.email);
 
-        if(user.company_name){
+        if (user.company_name) {
           userItem.find(".user-company").text(user.company_name);
-        } else{
+        } else {
           userItem.find("[data=user-company-block]").hide();
         }
-    
-       
+
         // click handler to direct to each user's page
         $(userItem).find(".user-click-target").click(function () {
-                     
-            var fetchedUserId = user.user_id; 
-            $('#profile').click();
-            localStorage.setItem("pageId", "profile");
-            localStorage.setItem('pageRefreshParam', user.user_id);
-            localStorage.setItem('userProfileRecId', user.id);
-            history.pushState("profile",null,"/app/profile?id=" + fetchedUserId);
-
-          });
+          var fetchedUserId = user.user_id; 
+          $('#profile').click();
+          localStorage.setItem("pageId", "profile");
+          localStorage.setItem('pageRefreshParam', user.user_id);
+          localStorage.setItem('userProfileRecId', user.id);
+          history.pushState("profile", null, "/app/profile?id=" + fetchedUserId);
+        });
       });
 
     },
