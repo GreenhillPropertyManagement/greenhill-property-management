@@ -36,20 +36,15 @@ function loadUsers(type,unit) {
       
       usersContainer.empty();
 
-      // Hide archived users only for the "all users" view
-      let filteredUsers = response;
-      if (type === 'all') {
-        filteredUsers = response.filter(user => user.user_status !== 'archived');
-      }
-
       // loop through each user
-      filteredUsers.forEach((user) => {
+      response.forEach((user) => {
 
         // clone the sample card for the user and append to users container
         let userItem = $(sampleUser).clone().appendTo(usersContainer);
 
         // bind the user's data to the cloned card
         userItem.attr("id", user.user_id);
+        userItem.addClass("dyn-item__user");
         userItem.addClass(user.user_role);
         userItem.addClass(user.user_status); 
 
@@ -94,7 +89,6 @@ function loadUsers(type,unit) {
 
 function usersFiltering() {
   
-  //Debounce function to delay the search filtering
   function debounce(fn, delay) {
     let timeoutID = null;
     return function () {
@@ -108,41 +102,71 @@ function usersFiltering() {
   }
 
   var qsRegex;
-  // Query all .users-component elements
+  var currentStatusFilter = '*';
   var maintenanceComponents = document.querySelectorAll('.users-component');
 
-  maintenanceComponents.forEach(function (component, index) {
-    // Initialize Isotope on the .dyn-container__maintenance-records element
+  maintenanceComponents.forEach(function (component) {
     var iso = new Isotope(component.querySelector('.dyn-container__users'), {
       itemSelector: '.dyn-item__user',
-      layoutMode: 'vertical', // This will keep the grid layout intact
-      transitionDuration: 0 // animation
+      layoutMode: 'vertical',
+      transitionDuration: 0
+    });
+
+    // default = show all except archived
+    iso.arrange({
+      filter: function() {
+        return !this.classList.contains('archived');
+      }
     });
 
     document.querySelectorAll('.user-filter-button').forEach(function(button) {
       button.addEventListener('click', function(event) {
         event.preventDefault();
+
         var filterClass = event.currentTarget.getAttribute('user-filter');
-        // Check if the filter is the wildcard '*', if so, don't add a '.'
-        var filterSelector = filterClass === '*' ? '*' : '.' + filterClass;
-        iso.arrange({
-          filter: filterSelector
-        });
+        currentStatusFilter = filterClass;
+
+        if (filterClass === '*') {
+          iso.arrange({
+            filter: function() {
+              return !this.classList.contains('archived');
+            }
+          });
+        } else if (filterClass === 'archived') {
+          iso.arrange({
+            filter: '.archived'
+          });
+        } else {
+          iso.arrange({
+            filter: '.' + filterClass
+          });
+        }
       });
     });
 
-
-    // Initialize search functionality
     var searchInput = component.querySelector('[element="users-search"]');
     if (searchInput) {
       searchInput.addEventListener('input', debounce(function() {
         qsRegex = new RegExp(searchInput.value, 'gi');
+
         iso.arrange({
           filter: function() {
-            return qsRegex ? this.innerText.match(qsRegex) : true;
+            const matchesSearch = qsRegex ? this.innerText.match(qsRegex) : true;
+
+            let matchesStatus = true;
+
+            if (currentStatusFilter === '*') {
+              matchesStatus = !this.classList.contains('archived');
+            } else if (currentStatusFilter === 'archived') {
+              matchesStatus = this.classList.contains('archived');
+            } else {
+              matchesStatus = this.classList.contains(currentStatusFilter);
+            }
+
+            return matchesSearch && matchesStatus;
           }
         });
-      }, 200)); // Adjust debounce delay as needed
+      }, 200));
     }
   });
 }
