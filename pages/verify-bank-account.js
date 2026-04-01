@@ -23,7 +23,7 @@ function authUser() {
     },
     success: function (data) {
       // Handle success here, if needed
-      console.log(data);
+      //console.log(data);
       verifyBank();
     },
     error: function (error) {
