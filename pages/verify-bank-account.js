@@ -89,7 +89,7 @@ function verifyBank() {
         data: formData,
         success: function (response) {
 
-          if (response.status === 200) {  
+          if (response.response.status === 200) {  
             localStorage.setItem("pageId", "my-profile");
             localStorage.setItem('bankStatus','verified');
             localStorage.setItem('bankValid', true);
@@ -168,7 +168,7 @@ function verifyBank() {
         data: formData,
         success: function (response) {
 
-          if (response.status === 200) { 
+          if (response.response.status === 200) { 
 
             localStorage.setItem("pageId", "my-profile");
             localStorage.setItem('bankStatus','verified');
