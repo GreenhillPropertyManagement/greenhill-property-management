@@ -44,6 +44,14 @@ function verifyBank() {
 
   if (microdepositType === "descriptor_code") {
 
+    $('#descriptor').on('input', function() {
+      if ($(this).val().length > 0) {
+        $('#verify-bank-form-descriptor').find('input[type="submit"]').removeClass('inactive');
+      } else {
+        $('#verify-bank-form-descriptor').find('input[type="submit"]').addClass('inactive');
+      }
+    });
+
     $('.descriptor-wrapper').show(); // show the descriptor code input
     $('.deposits-wrapper').hide(); // hide the microdeposit amount inputs
 
@@ -106,6 +114,14 @@ function verifyBank() {
 
     $('.deposits-wrapper').show(); // show the microdeposit amount inputs
     $('.descriptor-wrapper').hide(); // hide the descriptor code input
+
+    $('#deposit_1, #deposit_2').on('input', function() {
+      if ($('#deposit_1').val().length > 0 && $('#deposit_2').val().length > 0) {
+        $('#verify-bank-form').find('input[type="submit"]').removeClass('inactive');
+      } else {
+        $('#verify-bank-form').find('input[type="submit"]').addClass('inactive');
+      }
+    });
 
 
     // Handle form submission
