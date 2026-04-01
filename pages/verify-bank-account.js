@@ -56,7 +56,7 @@ function verifyBank() {
     $('.deposits-wrapper').hide(); // hide the microdeposit amount inputs
 
     // Handle form submission
-    $("#verify-bank-form-descriptor").submit(function (event) {
+    $("#verify-bank-form-descriptor").off("submit").on("submit", function (event) {
       // Prevent the default form submission behavior
       event.preventDefault();
 
@@ -135,7 +135,7 @@ function verifyBank() {
 
 
     // Handle form submission
-    $("#verify-bank-form").submit(function (event) {
+    $("#verify-bank-form").off("submit").on("submit", function (event) {
       // Prevent the default form submission behavior
       event.preventDefault();
 
@@ -169,7 +169,7 @@ function verifyBank() {
         success: function (response) {
 
           if (response.status === 200) { 
-            
+
             localStorage.setItem("pageId", "my-profile");
             localStorage.setItem('bankStatus','verified');
             localStorage.setItem('bankValid', true);
