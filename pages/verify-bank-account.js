@@ -88,18 +88,20 @@ function verifyBank() {
         },
         data: formData,
         success: function (response) {
+
           if (response.status === 200) {  
-          localStorage.setItem("pageId", "my-profile");
-          localStorage.setItem('bankStatus','verified');
-          localStorage.setItem('bankValid', true);
-          $('#bank-valid-message').hide();
-          showToast('Success! Your bank account has been verified.');
-          window.location.href = '/tenant/auto-pay-confirmation';} 
+            localStorage.setItem("pageId", "my-profile");
+            localStorage.setItem('bankStatus','verified');
+            localStorage.setItem('bankValid', true);
+            $('#bank-valid-message').hide();
+            showToast('Success! Your bank account has been verified.');
+            window.location.href = '/tenant/auto-pay-confirmation';
+          } 
           else {
             $(".form__error-block").show(); // show error
             // Disable pointer events for the submit button
             $("#verify-bank-form-descriptor").find('input[type="submit"]').val("Continue");
-            $("#verify-bank-form")
+            $("#verify-bank-form-descriptor")
               .find('input[type="submit"]')
               .css("pointer-events", "auto");
           }
@@ -109,7 +111,7 @@ function verifyBank() {
           $(".form__error-block").show(); // show error
           // Disable pointer events for the submit button
           $("#verify-bank-form-descriptor").find('input[type="submit"]').val("Continue");
-          $("#verify-bank-form")
+          $("#verify-bank-form-descriptor")
             .find('input[type="submit"]')
             .css("pointer-events", "auto");
         },
@@ -165,12 +167,24 @@ function verifyBank() {
         },
         data: formData,
         success: function (response) {
-          localStorage.setItem("pageId", "my-profile");
-          localStorage.setItem('bankStatus','verified');
-          localStorage.setItem('bankValid', true);
-          $('#bank-valid-message').hide();
-          showToast('Success! Your bank account has been verified.');
-          window.location.href = '/tenant/auto-pay-confirmation';
+
+          if (response.status === 200) { 
+            
+            localStorage.setItem("pageId", "my-profile");
+            localStorage.setItem('bankStatus','verified');
+            localStorage.setItem('bankValid', true);
+            $('#bank-valid-message').hide();
+            showToast('Success! Your bank account has been verified.');
+            window.location.href = '/tenant/auto-pay-confirmation';
+        } else {
+
+            $(".form__error-block").show(); // show error
+            // Disable pointer events for the submit button
+            $("#verify-bank-form").find('input[type="submit"]').val("Continue");
+            $("#verify-bank-form")
+            .find('input[type="submit"]')
+            .css("pointer-events", "auto");
+        }
 
 
         },
