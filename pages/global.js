@@ -227,7 +227,7 @@
     }
 
     
-    // show update bank account bar for stripe update (payment intents only from now on)
+    // show update bank account bar for stripe update (payment intents only from now on per stripe update)
     if (
       localStorage.userRole === 'Tenant' &&
       localStorage.userId === 'f7173331-dc22-4157-88c4-f8bc507ef267' 
