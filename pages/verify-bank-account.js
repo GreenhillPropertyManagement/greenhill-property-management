@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+  var microdepositType; // create var to store microdeposit type for conditional form display for tenants
+
   if (localStorage.authToken == null) {
     //run code if they are not logged in
     alert("You are not logged in");
@@ -24,6 +26,7 @@ function authUser() {
     success: function (data) {
       // Handle success here, if needed
       //console.log(data);
+      microdepositType = data.microdeposit_type;
       verifyBank();
     },
     error: function (error) {
@@ -37,58 +40,127 @@ function authUser() {
 function verifyBank() {
 
   var userRecIdValue = localStorage.getItem("userRecId");
-  $("#user-rec_id").val(userRecIdValue);
+  $("#user_rec_id").val(userRecIdValue);
 
-  // Handle form submission
-  $("#verify-bank-form").submit(function (event) {
-    // Prevent the default form submission behavior
-    event.preventDefault();
+  if (microdepositType === "descriptor_code") {
 
-    $(".loader").css("display", "flex");
+    $('.descriptor-wrapper').show(); // show the descriptor code input
+    $('.deposits-wrapper').hide(); // hide the microdeposit amount inputs
 
-    // Change the text of the submit button
-    $(this).find('input[type="submit"]').val("Please Wait...");
+    // Handle form submission
+    $("#verify-bank-form-descriptor").submit(function (event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
 
-    // Disable pointer events for the submit button
-    $(this).find('input[type="submit"]').css("pointer-events", "none");
+      $(".loader").css("display", "flex");
 
-    // Create an object to store form data
-    const formData = {};
+      // Change the text of the submit button
+      $(this).find('input[type="submit"]').val("Please Wait...");
 
-    // Iterate through form inputs and collect key-value pairs
-    $(this)
-      .find("input, select, textarea")
-      .each(function () {
-        const input = $(this);
-        formData[input.attr("id")] = input.val();
+      // Disable pointer events for the submit button
+      $(this).find('input[type="submit"]').css("pointer-events", "none");
+
+      // Create an object to store form data
+      const formData = {};
+
+      // Iterate through form inputs and collect key-value pairs
+      $(this)
+        .find("input, select, textarea")
+        .each(function () {
+          const input = $(this);
+          formData[input.attr("data-name")] = input.val();
+        });
+
+      // Make an AJAX POST request to the specified API endpoint
+      $.ajax({
+        url: localStorage.baseUrl + "api:sElUkr6t/verify_bank_acct",
+        type: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.authToken,
+        },
+        data: formData,
+        success: function (response) {
+          localStorage.setItem("pageId", "my-profile");
+          localStorage.setItem('bankStatus','verified');
+          localStorage.setItem('bankValid', true);
+          $('#bank-valid-message').hide();
+          showToast('Success! Your bank account has been verified.');
+          window.location.href = '/tenant/auto-pay-confirmation';
+
+
+        },
+        error: function (error) {
+          $(".form__error-block").show(); // show error
+          // Disable pointer events for the submit button
+          $("#verify-bank-form-descriptor").find('input[type="submit"]').val("Continue");
+          $("#verify-bank-form")
+            .find('input[type="submit"]')
+            .css("pointer-events", "auto");
+        },
       });
-
-    // Make an AJAX POST request to the specified API endpoint
-    $.ajax({
-      url: localStorage.baseUrl + "api:sElUkr6t/verify_bank_acct",
-      type: "POST",
-      headers: {
-        Authorization: "Bearer " + localStorage.authToken,
-      },
-      data: formData,
-      success: function (response) {
-        localStorage.setItem("pageId", "my-profile");
-        localStorage.setItem('bankStatus','verified');
-        localStorage.setItem('bankValid', true);
-        $('#bank-valid-message').hide();
-        showToast('Success! Your bank account has been verified.');
-        window.location.href = '/tenant/auto-pay-confirmation';
-
-
-      },
-      error: function (error) {
-        $(".form__error-block").show(); // show error
-        // Disable pointer events for the submit button
-        $("#verify-bank-form").find('input[type="submit"]').val("Continue");
-        $("#verify-bank-form")
-          .find('input[type="submit"]')
-          .css("pointer-events", "auto");
-      },
     });
-  });
+
+   
+
+  } else {
+
+    $('.deposits-wrapper').show(); // show the microdeposit amount inputs
+    $('.descriptor-wrapper').hide(); // hide the descriptor code input
+
+
+    // Handle form submission
+    $("#verify-bank-form").submit(function (event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+
+      $(".loader").css("display", "flex");
+
+      // Change the text of the submit button
+      $(this).find('input[type="submit"]').val("Please Wait...");
+
+      // Disable pointer events for the submit button
+      $(this).find('input[type="submit"]').css("pointer-events", "none");
+
+      // Create an object to store form data
+      const formData = {};
+
+      // Iterate through form inputs and collect key-value pairs
+      $(this)
+        .find("input, select, textarea")
+        .each(function () {
+          const input = $(this);
+          formData[input.attr("data-name")] = input.val();
+        });
+
+      // Make an AJAX POST request to the specified API endpoint
+      $.ajax({
+        url: localStorage.baseUrl + "api:sElUkr6t/verify_bank_acct",
+        type: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.authToken,
+        },
+        data: formData,
+        success: function (response) {
+          localStorage.setItem("pageId", "my-profile");
+          localStorage.setItem('bankStatus','verified');
+          localStorage.setItem('bankValid', true);
+          $('#bank-valid-message').hide();
+          showToast('Success! Your bank account has been verified.');
+          window.location.href = '/tenant/auto-pay-confirmation';
+
+
+        },
+        error: function (error) {
+          $(".form__error-block").show(); // show error
+          // Disable pointer events for the submit button
+          $("#verify-bank-form").find('input[type="submit"]').val("Continue");
+          $("#verify-bank-form")
+            .find('input[type="submit"]')
+            .css("pointer-events", "auto");
+        },
+      });
+    });
+  }
+
+
 }
