@@ -671,7 +671,7 @@ function updateNotifications(notifications) {
 
   notifications.forEach(notification => {
     const { id, type, user_id, activity_record } = notification;
-    const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
+    //const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
     const description = activity_record.description;
 
     if (type === "work-order") workOrderCount++;
