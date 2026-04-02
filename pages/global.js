@@ -671,8 +671,8 @@ function updateNotifications(notifications) {
 
   notifications.forEach(notification => {
     const { id, type, user_id, activity_record } = notification;
-    const formattedTimestamp = formatDateToLocalTimezone(activity_record.created_at);
-    const description = activity_record.description;
+    const formattedTimestamp = activity_record ? formatDateToLocalTimezone(activity_record.created_at) : '';
+    const description = activity_record ? activity_record.description : '';
 
     if (type === "work-order") workOrderCount++;
 
@@ -685,7 +685,7 @@ function updateNotifications(notifications) {
 
     $item.on("click", function () {
       if (type === "work-order") {
-        clearAllWorkOrderNotifications();               // your existing flow
+        clearAllWorkOrderNotifications();
         document.getElementById("maintenance").click();
         return;
       }
@@ -712,9 +712,9 @@ function updateNotifications(notifications) {
       markNotificationAsSeen(id);
       $(this).fadeOut(200, function () {
         $(this).remove();
-        refreshCountersFromDOM();                       // keep counters in sync
+        refreshCountersFromDOM();
         if (typeof updateNotificationAndMaintenanceCounters === "function") {
-          updateNotificationAndMaintenanceCounters();   // keep your existing behavior too
+          updateNotificationAndMaintenanceCounters();
         }
       });
     });
@@ -727,21 +727,21 @@ function updateNotifications(notifications) {
   refreshCountersFromDOM();
   ensureClearAllButton();
 
-// Bind Clear All (idempotent per wrapper)
-if (!$wrapper.data("clearAllBound")) {
-  $wrapper.on("click", "[data-action='clear-all']", function (e) {
-    e.stopPropagation();
+  // Bind Clear All (idempotent per wrapper)
+  if (!$wrapper.data("clearAllBound")) {
+    $wrapper.on("click", "[data-action='clear-all']", function (e) {
+      e.stopPropagation();
 
-    const ids = $wrapper.find(".notification__item-wrapper")
-      .map(function () { return $(this).data("id"); })
-      .get();
+      const ids = $wrapper.find(".notification__item-wrapper")
+        .map(function () { return $(this).data("id"); })
+        .get();
 
-    if (!ids.length) return;
-    markNotificationsAsSeenBulk(ids);
-  });
+      if (!ids.length) return;
+      markNotificationsAsSeenBulk(ids);
+    });
 
-  $wrapper.data("clearAllBound", true);
-}
+    $wrapper.data("clearAllBound", true);
+  }
 }
 
 function markNotificationAsSeen(notificationId) {
