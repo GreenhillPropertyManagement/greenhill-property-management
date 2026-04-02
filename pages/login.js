@@ -52,14 +52,16 @@ $("#login-form").submit(function (event) {
       if (response.user_info.profile_img) {
         localStorage.setItem('profileImage', response.user_info.profile_img)
       }
+
       if (localStorage.userRole === 'Tenant') {
-        
+
         localStorage.setItem("paymentsEnabled", response.user_info.tenant_info.enable_payments);
+
         // check if bank account is valid with new stripe update
-        if (response?.user_info?.tenant_info?.stripe_bank_id?.startsWith('pm_')) {
-            localStorage.setItem('bankValid', true);
-          } else {
+        if (response.user_info.tenant_info.stripe_setup_intent_id === null) {
             localStorage.setItem('bankValid', false);
+          } else {
+            localStorage.setItem('bankValid', true);
           }
       }
       
