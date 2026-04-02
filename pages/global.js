@@ -228,11 +228,11 @@
 
     
     // show update bank account bar for stripe update (payment intents only from now on per stripe update)
-    /*if (
+    if (
       localStorage.userRole === 'Tenant' &&
-      localStorage.userId === 'f7173331-dc22-4157-88c4-f8bc507ef267' 
-      //localStorage.bankValid === 'false' &&
-      //localStorage.bankStatus !== 'update-pending'
+      //localStorage.userId === 'f7173331-dc22-4157-88c4-f8bc507ef267' 
+      localStorage.bankValid === 'false' &&
+      localStorage.bankStatus !== 'update-pending'
     ) {
       $('#bank-valid-message').css('display', 'flex');
 
@@ -247,7 +247,7 @@
     } else {
       $('#bank-valid-message').css('display', 'none');
 
-    }*/
+    }
 
     if (localStorage.userRole === 'Admin') {
       $('[dynamic-visibility=admin-hidden]').remove();
