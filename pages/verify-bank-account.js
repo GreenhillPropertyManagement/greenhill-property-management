@@ -88,31 +88,71 @@ function verifyBank() {
         },
         data: formData,
         success: function (response) {
-
-          if (response.response.status === 200) {  
+          if (response.response.status === 200) {
             localStorage.setItem("pageId", "my-profile");
-            localStorage.setItem('bankStatus','verified');
-            localStorage.setItem('bankValid', true);
-            $('#bank-valid-message').hide();
-            showToast('Success! Your bank account has been verified.');
-            window.location.href = '/tenant/auto-pay-confirmation';
-          } 
-          else {
-            $(".form__error-block").show(); // show error
-            // Disable pointer events for the submit button
-            $("#verify-bank-form-descriptor").find('input[type="submit"]').val("Continue");
-            $("#verify-bank-form-descriptor")
+            localStorage.setItem("bankStatus", "verified");
+            localStorage.setItem("bankValid", true);
+
+            $("#bank-valid-message").hide();
+            $(".form__error-block").hide();
+            $(".verify-bank-error-text").text("");
+
+            showToast("Success! Your bank account has been verified.");
+            window.location.href = "/tenant/auto-pay-confirmation";
+
+          } else {
+            
+            let errorMessage =
+              "We couldn’t verify your bank account. Please try again.";
+
+            const stripeError = response?.response?.body?.error || response?.error;
+            const setupIntent = stripeError?.setup_intent;
+            const topLevelCode = stripeError?.code;
+            const lastSetupErrorCode = setupIntent?.last_setup_error?.code;
+            const stripeMessage = (stripeError?.message || "").toLowerCase();
+
+            // Expired case
+            if (
+              lastSetupErrorCode === "setup_intent_setup_attempt_expired" ||
+              (topLevelCode === "intent_invalid_state" &&
+                setupIntent?.status === "requires_payment_method" &&
+                lastSetupErrorCode === "setup_intent_setup_attempt_expired")
+            ) {
+              errorMessage =
+                "This verification window has expired because more than 10 days have passed. Please relink your bank account to continue.";
+            }
+
+            // Wrong code case
+            else if (
+              topLevelCode === "payment_method_microdeposit_verification_attempts_exceeded" ||
+              topLevelCode === "payment_method_microdeposit_verification_amounts_invalid" ||
+              topLevelCode === "payment_method_microdeposit_verification_descriptor_code_mismatch" ||
+              stripeMessage.includes("descriptor code") ||
+              stripeMessage.includes("microdeposit")
+            ) {
+              errorMessage =
+                "The verification code entered is incorrect. Please enter the 6-character code that starts with SM from your bank statement.";
+            }
+
+            $(".verify-bank-error-text").text(errorMessage);
+            $(".form__error-block").show();
+
+            $("#verify-bank-form")
               .find('input[type="submit"]')
+              .val("Continue")
               .css("pointer-events", "auto");
           }
-
         },
-        error: function (error) {
-          $(".form__error-block").show(); // show error
-          // Disable pointer events for the submit button
-          $("#verify-bank-form-descriptor").find('input[type="submit"]').val("Continue");
-          $("#verify-bank-form-descriptor")
+
+        error: function () {
+          $(".verify-bank-error-text").text(
+            "Something went wrong while verifying your bank account. Please try again."
+          );
+          $(".form__error-block").show();
+
+          $("#verify-bank-form")
             .find('input[type="submit"]')
+            .val("Continue")
             .css("pointer-events", "auto");
         },
       });
@@ -167,33 +207,69 @@ function verifyBank() {
         },
         data: formData,
         success: function (response) {
-
-          if (response.response.status === 200) { 
-
+          if (response.response.status === 200) {
             localStorage.setItem("pageId", "my-profile");
-            localStorage.setItem('bankStatus','verified');
-            localStorage.setItem('bankValid', true);
-            $('#bank-valid-message').hide();
-            showToast('Success! Your bank account has been verified.');
-            window.location.href = '/tenant/auto-pay-confirmation';
-        } else {
+            localStorage.setItem("bankStatus", "verified");
+            localStorage.setItem("bankValid", true);
 
-            $(".form__error-block").show(); // show error
-            // Disable pointer events for the submit button
-            $("#verify-bank-form").find('input[type="submit"]').val("Continue");
+            $("#bank-valid-message").hide();
+            $(".form__error-block").hide();
+            $(".verify-bank-error-text").text("");
+
+            showToast("Success! Your bank account has been verified.");
+            window.location.href = "/tenant/auto-pay-confirmation";
+          } else {
+            let errorMessage =
+              "We couldn’t verify your bank account. Please try again.";
+
+            const stripeError = response?.response?.body?.error || response?.error;
+            const setupIntent = stripeError?.setup_intent;
+            const topLevelCode = stripeError?.code;
+            const lastSetupErrorCode = setupIntent?.last_setup_error?.code;
+            const stripeMessage = (stripeError?.message || "").toLowerCase();
+
+            // Expired case
+            if (
+              lastSetupErrorCode === "setup_intent_setup_attempt_expired" ||
+              (topLevelCode === "intent_invalid_state" &&
+                setupIntent?.status === "requires_payment_method" &&
+                lastSetupErrorCode === "setup_intent_setup_attempt_expired")
+            ) {
+              errorMessage =
+                "This verification window has expired because more than 10 days have passed. Please relink your bank account to continue.";
+            }
+
+            // Wrong code case
+            else if (
+              topLevelCode === "payment_method_microdeposit_verification_attempts_exceeded" ||
+              topLevelCode === "payment_method_microdeposit_verification_amounts_invalid" ||
+              topLevelCode === "payment_method_microdeposit_verification_descriptor_code_mismatch" ||
+              stripeMessage.includes("descriptor code") ||
+              stripeMessage.includes("microdeposit")
+            ) {
+              errorMessage =
+                "The verification code entered is incorrect. Please enter the 6-character code that starts with SM from your bank statement.";
+            }
+
+            $(".verify-bank-error-text").text(errorMessage);
+            $(".form__error-block").show();
+
             $("#verify-bank-form")
-            .find('input[type="submit"]')
-            .css("pointer-events", "auto");
-        }
-
-
+              .find('input[type="submit"]')
+              .val("Continue")
+              .css("pointer-events", "auto");
+          }
         },
-        error: function (error) {
-          $(".form__error-block").show(); // show error
-          // Disable pointer events for the submit button
-          $("#verify-bank-form").find('input[type="submit"]').val("Continue");
+
+        error: function () {
+          $(".verify-bank-error-text").text(
+            "Something went wrong while verifying your bank account. Please try again."
+          );
+          $(".form__error-block").show();
+
           $("#verify-bank-form")
             .find('input[type="submit"]')
+            .val("Continue")
             .css("pointer-events", "auto");
         },
       });
