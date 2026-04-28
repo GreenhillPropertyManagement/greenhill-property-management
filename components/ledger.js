@@ -371,12 +371,37 @@ function updateTable(data) {
     if (url) window.open(url, "_blank");
   });
 
-  // ── v2 balance output ──
-  $("[data-tenant='current-balance-v2']").text(
-    (currentMonthBalance < 0)
-      ? `-${formatCurrency(Math.abs(currentMonthBalance))}`
-      : formatCurrency(currentMonthBalance)
-  );
+  // ── v2 balance output (from rendered table) ──
+  (function () {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonthName = today.toLocaleString("en-US", { month: "long" });
+
+    const $yearTbody = $(`tbody.year-tbody[data-year="${currentYear}"]`);
+    if (!$yearTbody.length) return;
+
+    let balanceText = null;
+
+    $yearTbody.find("tr").each(function () {
+      const $row = $(this);
+
+      if ($row.attr("style")?.includes("#92EFDD")) {
+        const firstCell = $row.find("td").first().text().trim();
+        const labelCell = $row.find("td").eq(3).text().trim();
+
+        if (
+          firstCell.startsWith(currentMonthName) &&
+          labelCell.includes("Balance")
+        ) {
+          balanceText = $row.find("td").last().text().trim();
+        }
+      }
+    });
+
+    if (balanceText) {
+      $("[data-tenant='current-balance-v2']").text(balanceText);
+    }
+  })();
 
   $(".charge-row").css("cursor", "pointer");
   $("[data-file-url]").css("cursor", "pointer");
