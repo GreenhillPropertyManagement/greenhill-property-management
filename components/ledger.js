@@ -1,5 +1,5 @@
 /* ===========================
-   Ledger (FINAL - WITH FALLBACK FIX)
+   Ledger (FINAL WORKING)
    =========================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -88,10 +88,12 @@ function updateTable(data) {
 
   const $table = $(".styled-table");
 
+  // ✅ Sort chronologically FIRST (this fixes cross-year balance)
   data.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
   let runningBalance = 0;
 
+  // ✅ Build ledger WITH carried balance
   const ledger = data.map(item => {
 
     const amt = Math.abs(item.amount || 0);
@@ -220,24 +222,24 @@ function updateTable(data) {
     }
   });
 
+} // ✅ CLOSE updateTable CORRECTLY
+
 /* ---------------------------
-   CURRENT BALANCE (FIXED)
+   CURRENT BALANCE (FINAL FIX)
 --------------------------- */
 (function () {
   const today = new Date();
   const currentYear = today.getFullYear();
 
-  const $yearTbody = $(`tbody.year-tbody[data-year="${currentYear}"]`);
+  const $yearTbody = $(".styled-table tbody.year-tbody[data-year='" + currentYear + "']");
   if (!$yearTbody.length) return;
 
-  // Get all green balance rows for THIS YEAR ONLY
   const $greenRows = $yearTbody.find("tr").filter(function () {
     return $(this).attr("style")?.includes("#92EFDD");
   });
 
   if (!$greenRows.length) return;
 
-  // ✅ Always take the LAST one (most recent month)
   const $lastRow = $greenRows.last();
   const balanceText = $lastRow.find("td").last().text().trim();
 
