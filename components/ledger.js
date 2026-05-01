@@ -1,5 +1,5 @@
 /* ===========================
-   Ledger (FINAL FIXED)
+   Ledger (FINAL - FULLY WORKING)
    =========================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -24,6 +24,12 @@ document.addEventListener("DOMContentLoaded", function () {
     loadBalancesPaymentPage(localStorage.userRecId);
   });
 
+  $(".styled-table").off("click", ".file-icon").on("click", ".file-icon", function (e) {
+    e.stopPropagation();
+    const url = $(this).data("url");
+    if (url) window.open(url, "_blank");
+  });
+
 });
 
 /* ---------------------------
@@ -40,6 +46,26 @@ function formatCurrency(amount) {
     style: "currency",
     currency: "USD"
   });
+}
+
+/* ---------------------------
+   Date helpers
+--------------------------- */
+function parseDate(input) {
+  if (!input) return null;
+  return new Date(input);
+}
+
+function formatDate(input) {
+  const d = parseDate(input);
+  if (!d) return "";
+  return `${("0" + (d.getMonth()+1)).slice(-2)}/${("0" + d.getDate()).slice(-2)}/${d.getFullYear().toString().slice(-2)}`;
+}
+
+function formatBillingPeriod(input) {
+  const d = parseDate(input);
+  if (!d) return "";
+  return d.toLocaleString("en-US",{month:"long", year:"numeric"});
 }
 
 /* ---------------------------
@@ -73,13 +99,52 @@ function updateTable(data) {
 
   const $table = $(".styled-table");
 
-  // ✅ SORT ALL TRANSACTIONS (CRITICAL)
+  /* ---------------------------
+     MATCH PAYMENT INIT RECORDS
+  --------------------------- */
+  const paymentInits = data.filter(d =>
+    d.description?.toLowerCase().includes("initiated")
+  );
+
+  function findMatchingInit(record) {
+    if (!record || record.type !== "payment") return null;
+
+    if (record.payment_init_id) {
+      return paymentInits.find(init =>
+        init.payment_init_id === record.payment_init_id
+      );
+    }
+
+    const completionDate = new Date(record.transaction_date);
+
+    return paymentInits.find(init =>
+      init.transaction_id === record.transaction_id &&
+      init.amount === 0 &&
+      new Date(init.transaction_date) <= completionDate
+    );
+  }
+
+  /* ---------------------------
+     SORT (CRITICAL)
+  --------------------------- */
   data.sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
-  // ✅ GLOBAL RUNNING BALANCE (ONE PASS)
+  /* ---------------------------
+     BUILD LEDGER (GLOBAL PASS)
+  --------------------------- */
   let runningBalance = 0;
 
   const ledger = data.map(item => {
+
+    const matchedInit = item.type === "payment"
+      ? findMatchingInit(item)
+      : null;
+
+    const initiatedDate = (item.type === "payment" && matchedInit)
+      ? matchedInit.transaction_date
+      : item.transaction_date;
+
+    const completionDate = item.transaction_date;
 
     const amt = Math.abs(item.amount || 0);
     const delta = item.type === "charge" ? amt : -amt;
@@ -88,12 +153,16 @@ function updateTable(data) {
 
     return {
       ...item,
+      initiatedDate,
+      completionDate,
       runningBalance
     };
 
   });
 
-  // GROUP BY MONTH/YEAR
+  /* ---------------------------
+     GROUP BY MONTH/YEAR
+  --------------------------- */
   const groups = {};
 
   ledger.forEach(item => {
@@ -117,14 +186,16 @@ function updateTable(data) {
     return ay === by ? am - bm : ay - by;
   });
 
-  // YEARS (NEWEST FIRST FOR UI)
+  /* ---------------------------
+     YEARS (NEWEST FIRST)
+  --------------------------- */
   const years = [...new Set(sortedKeys.map(k => groups[k].year))].reverse();
 
   years.forEach(year => {
 
     const isCurrentYear = year === new Date().getFullYear();
 
-    // ACCORDION HEADER
+    /* ---------- ACCORDION HEADER ---------- */
     $table.append(`
       <tbody>
         <tr class="year-accordion-row ${isCurrentYear ? "" : "is-collapsed"}" data-year="${year}">
@@ -153,9 +224,9 @@ function updateTable(data) {
 
         $tbody.append(`
           <tr>
-            <td>${new Date(item.transaction_date).toLocaleString("en-US",{month:"long",year:"numeric"})}</td>
-            <td></td>
-            <td></td>
+            <td>${formatBillingPeriod(item.billing_period)}</td>
+            <td>${formatDate(item.initiatedDate)}</td>
+            <td>${formatDate(item.completionDate)}</td>
             <td>${item.type}</td>
             <td>${item.description || ""}</td>
             <td>${item.type==="charge" ? formatCurrency(amt) : ""}</td>
@@ -166,7 +237,7 @@ function updateTable(data) {
 
       });
 
-      // ✅ GREEN ROW FIX (USE LAST ITEM IN MONTH)
+      /* ---------- GREEN MONTH ROW ---------- */
       const last = group.items[group.items.length - 1];
 
       const monthName = new Date(group.year, group.month)
@@ -193,7 +264,7 @@ function updateTable(data) {
   });
 
   /* ---------------------------
-     ACCORDION
+     ACCORDION LOGIC
   --------------------------- */
   $table.off("click", ".year-accordion-row").on("click", ".year-accordion-row", function () {
 
@@ -218,14 +289,12 @@ function updateTable(data) {
     const month = today.toLocaleString("en-US", { month: "long" });
 
     const $tbody = $(`tbody.year-tbody[data-year="${year}"]`);
-
     let balanceText = null;
 
     $tbody.find("tr").each(function () {
       const $row = $(this);
 
       if ($row.attr("style")?.includes("#92EFDD")) {
-
         const first = $row.find("td").first().text();
 
         if (first.startsWith(month)) {
@@ -241,9 +310,9 @@ function updateTable(data) {
 }
 
 /* ---------------------------
-   Payment Page
+   Payment Page Balances
 --------------------------- */
-function loadBalancesPaymentPage(user) {
+function loadBalancesPaymentPage(user){
   $.ajax({
     url: localStorage.baseUrl + "api:sElUkr6t/get_balances_payment_page",
     method: "GET",
