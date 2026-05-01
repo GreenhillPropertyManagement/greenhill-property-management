@@ -40,10 +40,12 @@ document.addEventListener("DOMContentLoaded", function () {
 function roundToCents(n) {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 }
+
 function normalizeMoney(n) {
   const r = roundToCents(n);
   return Object.is(r, -0) ? 0 : r;
 }
+
 function formatCurrency(amount) {
   const v = normalizeMoney(amount);
   return v.toLocaleString("en-US", {
@@ -90,6 +92,7 @@ function fetchTransactions(type, target) {
    --------------------------- */
 function parseDateInEasternTime(input) {
   if (!input) return null;
+
   let date = new Date(input + "T00:00:00");
 
   let estOffset = -5 * 60;
@@ -109,13 +112,23 @@ function parseDateInEasternTime(input) {
 function formatDate(input) {
   const date = parseDateInEasternTime(input);
   if (!date) return "";
-  return `${("0" + (date.getMonth() + 1)).slice(-2)}/${("0" + date.getDate()).slice(-2)}/${date.getFullYear().toString().substr(2,2)}`;
+
+  const day = ("0" + date.getDate()).slice(-2);
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const year = date.getFullYear().toString().substr(2, 2);
+
+  return `${month}/${day}/${year}`;
 }
 
 function formatBillingPeriod(input) {
   const date = parseDateInEasternTime(input);
   if (!date) return "";
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
   return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
@@ -130,6 +143,11 @@ function updateTable(data) {
   const $table = $(".styled-table");
   $table.find("tbody").remove();
 
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
   const paymentInits = data.filter(d => d.description?.toLowerCase().includes("initiated"));
 
   function findMatchingInit(record) {
@@ -140,9 +158,7 @@ function updateTable(data) {
     return null;
   }
 
-  // -------------------------
-  // ENRICH
-  // -------------------------
+  // Enrich
   const enriched = data.map(item => {
     const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
     const effectiveISO = matchedInit ? matchedInit.transaction_date : item.transaction_date;
@@ -150,12 +166,10 @@ function updateTable(data) {
     return { item, matchedInit, effectiveISO, effectiveET };
   });
 
-  // -------------------------
-  // 🔥 FIX: CALCULATE TRUE BALANCE FIRST
-  // -------------------------
-  const chronological = [...enriched].sort((a, b) => {
-    return (a.effectiveET?.getTime() || 0) - (b.effectiveET?.getTime() || 0);
-  });
+  // 🔥 FIX: calculate running balance chronologically
+  const chronological = [...enriched].sort((a, b) =>
+    (a.effectiveET?.getTime() || 0) - (b.effectiveET?.getTime() || 0)
+  );
 
   let trueRunningBalance = 0;
 
@@ -164,13 +178,10 @@ function updateTable(data) {
     const delta = meta.item.type === "charge" ? amount : -amount;
 
     trueRunningBalance = normalizeMoney(trueRunningBalance + delta);
-
-    meta.runningBalance = trueRunningBalance; // 🔥 store it
+    meta.runningBalance = trueRunningBalance;
   });
 
-  // -------------------------
-  // GROUPING
-  // -------------------------
+  // Group
   const groups = {};
   chronological.forEach(meta => {
     const et = meta.effectiveET;
@@ -189,13 +200,15 @@ function updateTable(data) {
 
   yearOrder.reverse();
 
-  // -------------------------
-  // RENDER
-  // -------------------------
+  // Render
   yearOrder.forEach(year => {
 
-    const $toggleTbody = $(`<tbody></tbody>`);
-    $toggleTbody.append(`<tr class="year-accordion-row" data-year="${year}"><td colspan="8">${year}</td></tr>`);
+    const $toggleTbody = $(`<tbody class="year-toggle-tbody"></tbody>`);
+    $toggleTbody.append(`
+      <tr class="year-accordion-row" data-year="${year}">
+        <td colspan="8">${year}</td>
+      </tr>
+    `);
     $table.append($toggleTbody);
 
     const $yearTbody = $(`<tbody class="year-tbody" data-year="${year}"></tbody>`);
@@ -229,16 +242,23 @@ function updateTable(data) {
         `);
       });
 
-      // 🔥 FIX month balance row
+      // ✅ FIXED GREEN ROW FORMAT
       const lastItem = group.items[group.items.length - 1];
 
       $yearTbody.append(`
         <tr style="background-color:#92EFDD;">
-          <td>${group.month + 1}/${group.year}</td>
-          <td></td><td></td>
-          <td>${group.month + 1}/${group.year} Balance</td>
-          <td></td><td></td><td></td>
-          <td>${formatCurrency(lastItem.runningBalance)}</td>
+          <td>${monthNames[group.month]} ${group.year}</td>
+          <td></td>
+          <td></td>
+          <td>${monthNames[group.month]} ${group.year} Balance</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>${
+            lastItem.runningBalance < 0
+              ? `-${formatCurrency(Math.abs(lastItem.runningBalance))}`
+              : formatCurrency(lastItem.runningBalance)
+          }</td>
         </tr>
       `);
     });
@@ -246,9 +266,7 @@ function updateTable(data) {
     $table.append($yearTbody);
   });
 
-  // -------------------------
-  // KEEP YOUR DOM BALANCE (unchanged)
-  // -------------------------
+  // ✅ Your DOM-based balance (unchanged)
   (function () {
     const today = new Date();
     const currentYear = today.getFullYear();
