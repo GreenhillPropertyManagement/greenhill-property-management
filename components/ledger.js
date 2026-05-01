@@ -5,26 +5,26 @@
 document.addEventListener("DOMContentLoaded", function () {
 
   $(document).on("click", "#unit-overview-bttn", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    let unitId = urlParams.get("id");
-    fetchTransactions("active-tenant", unitId);
+      const urlParams = new URLSearchParams(window.location.search);
+      let unitId = urlParams.get("id");
+      fetchTransactions("active-tenant", unitId);
   });
 
   $("[api-button='unit-ledger']").off("click").click(function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    let unitId = urlParams.get("id");
-    fetchTransactions("active-tenant", unitId);
+      const urlParams = new URLSearchParams(window.location.search);
+      let unitId = urlParams.get("id");
+      fetchTransactions("active-tenant", unitId);
   });
 
   $("[api-button='user-ledger']").off("click").click(function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get("id");
-    fetchTransactions("tenant-user-ledger", userId);
+      const urlParams = new URLSearchParams(window.location.search);
+      let userId = urlParams.get("id");
+      fetchTransactions("tenant-user-ledger", userId);
   });
 
   $("#pay-rent").off("click").click(function () {
-    fetchTransactions("tenant-user-ledger", localStorage.userId);
-    loadBalancesPaymentPage(localStorage.userRecId);
+      fetchTransactions("tenant-user-ledger", localStorage.userId);
+      loadBalancesPaymentPage(localStorage.userRecId);
   });
 
   $(".styled-table").off("click", ".file-icon").on("click", ".file-icon", function (e) {
@@ -36,16 +36,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* ---------------------------
    Money helpers
-   --------------------------- */
+--------------------------- */
 function roundToCents(n) {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 }
-
 function normalizeMoney(n) {
   const r = roundToCents(n);
   return Object.is(r, -0) ? 0 : r;
 }
-
 function formatCurrency(amount) {
   const v = normalizeMoney(amount);
   return v.toLocaleString("en-US", {
@@ -58,8 +56,9 @@ function formatCurrency(amount) {
 
 /* ---------------------------
    Fetch
-   --------------------------- */
+--------------------------- */
 function fetchTransactions(type, target) {
+
   $(".loader").css("display", "flex");
 
   const table = document.querySelector(".styled-table");
@@ -88,210 +87,215 @@ function fetchTransactions(type, target) {
 }
 
 /* ---------------------------
-   Time helpers
-   --------------------------- */
+   Date helpers
+--------------------------- */
 function parseDateInEasternTime(input) {
   if (!input) return null;
-
   let date = new Date(input + "T00:00:00");
-
-  let estOffset = -5 * 60;
-  let edtOffset = -4 * 60;
 
   let jan = new Date(date.getFullYear(), 0, 1);
   let jul = new Date(date.getFullYear(), 6, 1);
-  let dstOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-  let isDST = date.getTimezoneOffset() < dstOffset;
+  let isDST = date.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
 
-  let offset = isDST ? edtOffset : estOffset;
+  let offset = isDST ? -4 * 60 : -5 * 60;
   date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + offset);
 
   return date;
 }
 
 function formatDate(input) {
-  const date = parseDateInEasternTime(input);
-  if (!date) return "";
-
-  const day = ("0" + date.getDate()).slice(-2);
-  const month = ("0" + (date.getMonth() + 1)).slice(-2);
-  const year = date.getFullYear().toString().substr(2, 2);
-
-  return `${month}/${day}/${year}`;
+  const d = parseDateInEasternTime(input);
+  if (!d) return "";
+  return `${("0"+(d.getMonth()+1)).slice(-2)}/${("0"+d.getDate()).slice(-2)}/${d.getFullYear().toString().slice(-2)}`;
 }
 
 function formatBillingPeriod(input) {
-  const date = parseDateInEasternTime(input);
-  if (!date) return "";
-
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+  const d = parseDateInEasternTime(input);
+  if (!d) return "";
+  return `${d.toLocaleString("en-US",{month:"long"})} ${d.getFullYear()}`;
 }
 
-/* ---------------------------
-   Table rendering
-   --------------------------- */
+/* ===========================
+   TABLE RENDER
+=========================== */
 function updateTable(data) {
 
   let runningBalance = 0;
-  const addedMonthKeys = new Set();
-
   const $table = $(".styled-table");
   $table.find("tbody").remove();
 
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
+  // SORT EVERYTHING FIRST (CRITICAL FIX)
+  data.sort((a,b)=> new Date(a.transaction_date) - new Date(b.transaction_date));
 
-  const paymentInits = data.filter(d => d.description?.toLowerCase().includes("initiated"));
-
-  function findMatchingInit(record) {
-    if (!record || record.type !== "payment") return null;
-    if (record.payment_init_id) {
-      return paymentInits.find(init => init.payment_init_id === record.payment_init_id);
-    }
-    return null;
-  }
-
-  // Enrich
-  const enriched = data.map(item => {
-    const matchedInit = item.type === "payment" ? findMatchingInit(item) : null;
-    const effectiveISO = matchedInit ? matchedInit.transaction_date : item.transaction_date;
-    const effectiveET = parseDateInEasternTime(effectiveISO);
-    return { item, matchedInit, effectiveISO, effectiveET };
-  });
-
-  // 🔥 FIX: calculate running balance chronologically
-  const chronological = [...enriched].sort((a, b) =>
-    (a.effectiveET?.getTime() || 0) - (b.effectiveET?.getTime() || 0)
-  );
-
-  let trueRunningBalance = 0;
-
-  chronological.forEach(meta => {
-    const amount = Math.abs(Number(meta.item.amount) || 0);
-    const delta = meta.item.type === "charge" ? amount : -amount;
-
-    trueRunningBalance = normalizeMoney(trueRunningBalance + delta);
-    meta.runningBalance = trueRunningBalance;
-  });
-
-  // Group
   const groups = {};
-  chronological.forEach(meta => {
-    const et = meta.effectiveET;
-    const key = `${et.getFullYear()}-${et.getMonth()}`;
-    if (!groups[key]) groups[key] = { year: et.getFullYear(), month: et.getMonth(), items: [] };
-    groups[key].items.push(meta);
+
+  data.forEach(item=>{
+    const d = parseDateInEasternTime(item.transaction_date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if(!groups[key]) groups[key] = {year:d.getFullYear(), month:d.getMonth(), items:[]};
+    groups[key].items.push(item);
   });
 
-  const sortedKeys = Object.keys(groups).sort();
-
-  const yearOrder = [];
-  sortedKeys.forEach(k => {
-    const yr = groups[k].year;
-    if (!yearOrder.includes(yr)) yearOrder.push(yr);
+  const sortedKeys = Object.keys(groups).sort((a,b)=>{
+    const [ay,am] = a.split('-').map(Number);
+    const [by,bm] = b.split('-').map(Number);
+    return ay===by ? am-bm : ay-by;
   });
 
-  yearOrder.reverse();
+  const yearOrder = [...new Set(sortedKeys.map(k=>groups[k].year))].reverse();
 
-  // Render
-  yearOrder.forEach(year => {
+  yearOrder.forEach(year=>{
 
-    const $toggleTbody = $(`<tbody class="year-toggle-tbody"></tbody>`);
-    $toggleTbody.append(`
-      <tr class="year-accordion-row" data-year="${year}">
-        <td colspan="8">${year}</td>
+    const isCurrentYear = (year === new Date().getFullYear());
+
+    const $toggleTbody = $(`<tbody></tbody>`);
+    const $toggleRow = $(`
+      <tr class="year-accordion-row${isCurrentYear ? '' : ' is-collapsed'}" data-year="${year}">
+        <td colspan="8">
+          ${year}
+          <span class="year-accordion-chevron">&#9660;</span>
+        </td>
       </tr>
     `);
+    $toggleTbody.append($toggleRow);
     $table.append($toggleTbody);
 
-    const $yearTbody = $(`<tbody class="year-tbody" data-year="${year}"></tbody>`);
+    const $yearTbody = $(`<tbody class="year-tbody${isCurrentYear ? '' : ' is-collapsed'}" data-year="${year}"></tbody>`);
 
-    sortedKeys.forEach(gKey => {
-      const group = groups[gKey];
-      if (group.year !== year) return;
+    sortedKeys.forEach(key=>{
+      const group = groups[key];
+      if(group.year !== year) return;
 
-      group.items.forEach(meta => {
+      group.items.forEach(item=>{
 
-        const item = meta.item;
+        const amt = Math.abs(item.amount||0);
+        const delta = item.type === "charge" ? amt : -amt;
+        runningBalance = normalizeMoney(runningBalance + delta);
 
-        const chargeAmt = item.type === "charge" ? formatCurrency(item.amount) : "";
-        const creditAmt = item.type !== "charge" ? formatCurrency(item.amount) : "";
-
-        const balanceAmt = meta.runningBalance < 0
-          ? `-${formatCurrency(Math.abs(meta.runningBalance))}`
-          : formatCurrency(meta.runningBalance);
+        const balanceAmt = runningBalance < 0
+          ? `-${formatCurrency(Math.abs(runningBalance))}`
+          : formatCurrency(runningBalance);
 
         $yearTbody.append(`
           <tr>
             <td>${formatBillingPeriod(item.billing_period)}</td>
-            <td>${formatDate(meta.effectiveISO)}</td>
+            <td>${formatDate(item.transaction_date)}</td>
             <td>${formatDate(item.transaction_date)}</td>
             <td>${item.type}</td>
-            <td>${item.description || ""}</td>
-            <td>${chargeAmt}</td>
-            <td>${creditAmt}</td>
+            <td>${item.description||""}</td>
+            <td>${item.type==="charge"?formatCurrency(amt):""}</td>
+            <td>${item.type!=="charge"?formatCurrency(amt):""}</td>
             <td>${balanceAmt}</td>
           </tr>
         `);
+
       });
 
-      // ✅ FIXED GREEN ROW FORMAT
-      const lastItem = group.items[group.items.length - 1];
+      // GREEN ROW (FIXED FORMAT)
+      const lastBalance = runningBalance < 0
+        ? `-${formatCurrency(Math.abs(runningBalance))}`
+        : formatCurrency(runningBalance);
+
+      const monthName = new Date(group.year, group.month).toLocaleString("en-US",{month:"long"});
 
       $yearTbody.append(`
         <tr style="background-color:#92EFDD;">
-          <td>${monthNames[group.month]} ${group.year}</td>
+          <td>${monthName} ${group.year}</td>
           <td></td>
           <td></td>
-          <td>${monthNames[group.month]} ${group.year} Balance</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>${
-            lastItem.runningBalance < 0
-              ? `-${formatCurrency(Math.abs(lastItem.runningBalance))}`
-              : formatCurrency(lastItem.runningBalance)
-          }</td>
+          <td>${monthName} ${group.year} Balance</td>
+          <td></td><td></td><td></td>
+          <td>${lastBalance}</td>
         </tr>
       `);
+
     });
 
     $table.append($yearTbody);
   });
 
-  // ✅ Your DOM-based balance (unchanged)
-  (function () {
+  /* ---------------------------
+     ACCORDION FIX
+  --------------------------- */
+  $table.off("click",".year-accordion-row").on("click",".year-accordion-row",function(){
+
+    const year = $(this).data("year");
+    const isCollapsed = $(this).hasClass("is-collapsed");
+
+    $table.find(".year-accordion-row").addClass("is-collapsed");
+    $table.find(".year-tbody").addClass("is-collapsed");
+
+    if(isCollapsed){
+      $(this).removeClass("is-collapsed");
+      $table.find(`.year-tbody[data-year="${year}"]`).removeClass("is-collapsed");
+    }
+
+  });
+
+  /* ---------------------------
+     BALANCE FROM TABLE
+  --------------------------- */
+  (function(){
     const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonthName = today.toLocaleString("en-US", { month: "long" });
+    const year = today.getFullYear();
+    const month = today.toLocaleString("en-US",{month:"long"});
 
-    const $yearTbody = $(`tbody.year-tbody[data-year="${currentYear}"]`);
-    if (!$yearTbody.length) return;
-
+    const $tbody = $(`tbody.year-tbody[data-year="${year}"]`);
     let balanceText = null;
 
-    $yearTbody.find("tr").each(function () {
-      const $row = $(this);
-      const firstCell = $row.find("td").first().text().trim();
-      const labelCell = $row.find("td").eq(3).text().trim();
-
-      if (
-        firstCell.startsWith(currentMonthName) &&
-        labelCell.includes("Balance")
-      ) {
-        balanceText = $row.find("td").last().text().trim();
+    $tbody.find("tr").each(function(){
+      const $r = $(this);
+      if($r.attr("style")?.includes("#92EFDD")){
+        if($r.find("td").first().text().startsWith(month)){
+          balanceText = $r.find("td").last().text();
+        }
       }
     });
 
-    if (balanceText) {
+    if(balanceText){
       $("[data-tenant='current-balance-v2']").text(balanceText);
     }
   })();
+}
+
+/* ---------------------------
+   CSV
+--------------------------- */
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function exportTableToCSV(table, filename) {
+  let csv = [];
+  table.querySelectorAll("tr").forEach(row=>{
+    let cols = row.querySelectorAll("td, th");
+    let rowData = [];
+    cols.forEach(c=>rowData.push(`"${c.innerText}"`));
+    csv.push(rowData.join(","));
+  });
+  downloadCSV(csv.join("\n"), filename);
+}
+
+/* ---------------------------
+   Payment Page Balances
+--------------------------- */
+function loadBalancesPaymentPage(user){
+  $.ajax({
+    url: localStorage.baseUrl + "api:sElUkr6t/get_balances_payment_page",
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + localStorage.authToken,
+    },
+    data: { user_id:user },
+    success: function (res) {
+      $("[data-tenant='current-balance']").text(formatCurrency(res.balance));
+      $("[data-tenant='next-month-balance']").text(formatCurrency(res.next_month_payment));
+    }
+  });
 }
