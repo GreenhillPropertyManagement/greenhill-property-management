@@ -220,46 +220,31 @@ function updateTable(data) {
     }
   });
 
-  /* ---------------------------
-     CURRENT BALANCE (FIXED)
-  --------------------------- */
-  (function () {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.toLocaleString("en-US", { month: "long" });
+/* ---------------------------
+   CURRENT BALANCE (FIXED)
+--------------------------- */
+(function () {
+  const today = new Date();
+  const currentYear = today.getFullYear();
 
-    const $tbody = $(`tbody.year-tbody[data-year="${year}"]`);
+  const $yearTbody = $(`tbody.year-tbody[data-year="${currentYear}"]`);
+  if (!$yearTbody.length) return;
 
-    let balanceText = null;
+  // Get all green balance rows for THIS YEAR ONLY
+  const $greenRows = $yearTbody.find("tr").filter(function () {
+    return $(this).attr("style")?.includes("#92EFDD");
+  });
 
-    // TRY current month
-    $tbody.find("tr").each(function () {
-      const $row = $(this);
+  if (!$greenRows.length) return;
 
-      if ($row.attr("style")?.includes("#92EFDD")) {
-        const first = $row.find("td").first().text();
+  // ✅ Always take the LAST one (most recent month)
+  const $lastRow = $greenRows.last();
+  const balanceText = $lastRow.find("td").last().text().trim();
 
-        if (first.startsWith(month)) {
-          balanceText = $row.find("td").last().text();
-        }
-      }
-    });
-
-    // 🔥 FALLBACK → LAST GREEN ROW IN TABLE
-    if (!balanceText) {
-      const $allGreen = $(".styled-table tr[style*='#92EFDD']");
-      const $last = $allGreen.last();
-
-      if ($last.length) {
-        balanceText = $last.find("td").last().text();
-      }
-    }
-
-    if (balanceText) {
-      $("[data-tenant='current-balance-v2']").text(balanceText);
-    }
-  })();
-}
+  if (balanceText) {
+    $("[data-tenant='current-balance-v2']").text(balanceText);
+  }
+})();
 
 /* ---------------------------
    Payment Page Balances
