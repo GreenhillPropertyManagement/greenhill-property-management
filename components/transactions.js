@@ -33,7 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* Initiate pay transactions on button click */
-  $(document).on("click", '[data-api-button="pay-transactions"]', function (e) {
+  $(document)
+    .off("click", '[data-api-button="pay-transactions"]')
+    .on("click", '[data-api-button="pay-transactions"]', function (e) {
     e.preventDefault();
     paySelectedTransactions();
   });
@@ -45,7 +47,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /* Make general balance payment */
-  $(document).on("click", '[api-button="general-balance-payment"]', function (e) {
+  $(document)
+    .off("click", '[api-button="general-balance-payment"]')
+    .on("click", '[api-button="general-balance-payment"]', function (e) {
     e.preventDefault();
     makeGeneralBalancePayment();
   });
