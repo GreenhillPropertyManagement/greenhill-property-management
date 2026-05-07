@@ -1,5 +1,6 @@
 let transactionToDelete;
 let amount;
+let isProcessingPayment = false; // 🔒 Prevents duplicate payment submissions
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -1060,6 +1061,9 @@ function deleteRecurringTransaction(transId, type, frequency) {
 }
 
 function tenantMakesPayment(amount) {
+  // 🔒 Block duplicate submissions while a payment is in flight
+  if (isProcessingPayment) return;
+  isProcessingPayment = true;
 
   $(".loader").css("display", "flex");
   $.ajax({
@@ -1079,11 +1083,17 @@ function tenantMakesPayment(amount) {
 
     },
     complete: function () {
+      // 🔓 Always release the lock, even if the request errored
+      isProcessingPayment = false;
       $(".loader").hide();
       $("#pay-rent-form")[0].reset();
       fetchTransactions("tenant-user-ledger", localStorage.userId);
     },
-    error: function (error) {},
+    // ⚠️ Tell the user when payment fails so they don't retry blindly
+    error: function (error) {
+      console.error("Payment error:", error);
+      alert("There was an error processing your payment. Please try again.");
+    },
   });
 }
 
@@ -1219,6 +1229,8 @@ function loadOutstandingTransactions() {
 }
 
 function paySelectedTransactions() {
+  // 🔒 Block duplicate submissions while a payment is in flight
+  if (isProcessingPayment) return;
 
   const $selectedItems = $(".payment__transaction-item.selected");
 
@@ -1248,6 +1260,8 @@ function paySelectedTransactions() {
     return; // Exit if user cancels
   }
 
+  // 🔒 Lock immediately after confirm — before any await/render delay
+  isProcessingPayment = true;
   $('.loader').css('display', 'flex');
 
   $.ajax({
@@ -1273,6 +1287,8 @@ function paySelectedTransactions() {
       alert("There was an error processing your payment.");
     },
     complete: function () {
+      // 🔓 Always release the lock, even if the request errored
+      isProcessingPayment = false;
       showToast("Your Payment Was Submitted.");
       
     }
@@ -1306,7 +1322,9 @@ function loadBalance() {
 }
 
 function makeGeneralBalancePayment() {
-  $('.loader').css('display','flex');
+  // 🔒 Block duplicate submissions while a payment is in flight
+  if (isProcessingPayment) return;
+
   const amount = parseFloat($('[data-api-input="general-balance-amount"]').val()) || 0;
 
   if (amount <= 0) {
@@ -1322,7 +1340,12 @@ function makeGeneralBalancePayment() {
   const confirmed = confirm(`Are you sure you want to make a general balance payment of ${formattedAmount}?`);
   if (!confirmed) return;
 
-  $('.container-loader').show(); // Show loader
+  // 🔒 Lock + show loaders only AFTER validation/confirm pass.
+  // (Previously the loader showed before validation, which left it stuck on
+  // the screen forever if the user entered $0 or canceled the confirm dialog.)
+  isProcessingPayment = true;
+  $('.loader').css('display', 'flex');
+  $('.container-loader').show();
 
   $.ajax({
     url: localStorage.baseUrl + "api:S5JmTHue/general_balance_payment",
@@ -1343,6 +1366,8 @@ function makeGeneralBalancePayment() {
       alert("There was an error processing your payment.");
     },
     complete: function () {
+      // 🔓 Always release the lock, even if the request errored
+      isProcessingPayment = false;
       $('.container-loader').hide();
       $('.loader').hide();
       showToast("Payment submitted successfully.");
@@ -1449,7 +1474,3 @@ function showEmptyState($container) {
     </div>
   `);
 }
-
-
-
-
