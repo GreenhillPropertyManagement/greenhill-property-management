@@ -400,79 +400,165 @@ function dashActivityLog(type, user, property, unit) {
 }
 
 function loadConvosInDashboard(target) {
-  var dashCommContainer = $(".dyn-container__unit-grid__convos");
-  let activeUserId;
+  const dashCommContainer = $(".dyn-container__unit-grid__convos");
+  const activeUserId = String(target);
 
-  // Make API Call
   $.ajax({
     url:
-      localStorage.baseUrl + "api:LEAuXkTc/fetch_user_conversations_dashboard",
+      localStorage.baseUrl +
+      "api:LEAuXkTc/fetch_user_conversations_dashboard",
+
     type: "GET",
+
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
     },
+
     data: {
       user_uuid: target,
     },
-    success: function (response) {
-      activeUserId = target;
 
-      var sampleItem = $(".grid-user-sample-wrapper").find(
-        ".dyn-item__unit-grid__convo",
-      );
+    success: function (response) {
+      const sampleItem = $(".grid-user-sample-wrapper")
+        .find(".dyn-item__unit-grid__convo")
+        .first();
+
       dashCommContainer.empty();
 
+      const seenConvos = new Set();
+
       response.forEach((convo) => {
-        let dashConvoItem = $(sampleItem).clone().appendTo(dashCommContainer);
+        let attributes = {};
 
-        dashConvoItem.attr("id", convo.conversation_sid);
+        try {
+          attributes =
+            typeof convo.attributes === "string"
+              ? JSON.parse(convo.attributes)
+              : convo.attributes || {};
+        } catch (error) {
+          console.error(
+            "Unable to parse dashboard conversation attributes:",
+            convo.attributes,
+            error
+          );
 
-        // bind data
-        dashConvoItem
-          .find("[data-comm-grid='timestamp']")
-          .text(formatDateToCustomFormat(convo.attributes.last_updated));
-        dashConvoItem
-          .find("[data-comm-grid='convo_title']")
-          .text(convo.friendly_name);
-        dashConvoItem
-          .find("[data-comm-grid='convo_title']")
-          .text(convo.friendly_name);
-
-        if (convo.attributes.convo_type !== "blast") {
-          const participants = convo.attributes.convo_participants;
-          let otherParticipantInfo = null;
-
-          participants.forEach(function (participant) {
-            if (participant.id !== activeUserId) {
-              otherParticipantInfo = participant.info;
-              dashConvoItem
-                .find("[data-comm-grid='last_message_sender']")
-                .text(otherParticipantInfo);
-            }
-          });
-        } else {
-          dashConvoItem
-            .find("[data-comm-grid='last_message_sender']")
-            .text("Broadcast:" + " " + convo.attributes.property);
+          return;
         }
 
-        $(dashConvoItem).click(function () {
+        const conversationSid = convo.conversation_sid;
+
+        if (
+          !conversationSid ||
+          seenConvos.has(conversationSid)
+        ) {
+          return;
+        }
+
+        seenConvos.add(conversationSid);
+
+        const dashConvoItem = sampleItem
+          .clone(false)
+          .appendTo(dashCommContainer);
+
+        dashConvoItem.attr("id", conversationSid);
+
+        const conversationTimestamp =
+          attributes.last_updated ||
+          convo.date_updated ||
+          convo.date_created;
+
+        dashConvoItem
+          .find("[data-comm-grid='timestamp']")
+          .text(
+            formatDateToCustomFormat(
+              conversationTimestamp
+            )
+          );
+
+        dashConvoItem
+          .find("[data-comm-grid='convo_title']")
+          .text(
+            convo.friendly_name || "Conversation"
+          );
+
+        if (attributes.convo_type !== "blast") {
+          const participants = Array.isArray(
+            attributes.convo_participants
+          )
+            ? attributes.convo_participants
+            : [];
+
+          const otherParticipant = participants.find(
+            (participant) =>
+              participant.id != null &&
+              String(participant.id) !== activeUserId
+          );
+
+          const otherParticipantInfo =
+            otherParticipant?.info || "Unknown User";
+
+          dashConvoItem
+            .find(
+              "[data-comm-grid='last_message_sender']"
+            )
+            .text(otherParticipantInfo);
+        } else {
+          dashConvoItem
+            .find(
+              "[data-comm-grid='last_message_sender']"
+            )
+            .text(
+              "Broadcast: " +
+                (attributes.property || "Property")
+            );
+        }
+
+        dashConvoItem.on("click", function () {
+          const convoId = $(this).attr("id");
+
+          localStorage.setItem(
+            "activeConvo",
+            convoId
+          );
+
           $("#communications").click();
-          localStorage.setItem("activeConvo", dashConvoItem.attr("id"));
-          loadConvoMessages(dashConvoItem.attr("id"));
-          $(".chat__input-wrapper").css("display", "flex"); // show chat input
+
+          loadConvoMessages(convoId);
+
+          $(".chat__input-wrapper").css(
+            "display",
+            "flex"
+          );
         });
       });
+
+      // Remove only the final email address,
+      // preserving names such as "Anthony (Test Tenant)"
+      dashCommContainer
+        .find(
+          "[data-comm-grid='last_message_sender']"
+        )
+        .each(function () {
+          const $el = $(this);
+
+          const displayName = $el
+            .text()
+            .replace(
+              /\s*\([^()]*@[^()]*\)\s*$/,
+              ""
+            )
+            .trim();
+
+          $el.text(displayName);
+        });
     },
-    complete: function () {
-      // strip anything in parentheses from last_message_sender cells
-      $("[data-comm-grid='last_message_sender']").each(function () {
-        const $el = $(this);
-        const text = $el.text();
-        $el.text(text.replace(/\([^)]*\)/g, "").trim());
-      });
+
+    error: function (xhr, status, error) {
+      console.error(
+        "Error loading dashboard conversations:",
+        error
+      );
     },
-    error: function (error) {},
   });
 }
 
