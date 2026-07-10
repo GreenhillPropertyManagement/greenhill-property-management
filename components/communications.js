@@ -424,133 +424,194 @@ function convoInFocus() {
   }
 }
 
-function loadConvoMessages(convoId) {
-  var chatContainer = $("[dyn-container='chat-container']");
 
-  $.ajax({
-    url: localStorage.baseUrl + "api:LEAuXkTc/fetch_conversation",
+let activeMessagesRequest = null;
+
+function loadConvoMessages(convoId) {
+  const chatContainer = $("[dyn-container='chat-container']");
+  const activeUser = String(localStorage.userId);
+
+  // Cancel any previous message-loading request
+  if (activeMessagesRequest) {
+    activeMessagesRequest.abort();
+  }
+
+  chatContainer.empty();
+
+  const currentRequest = $.ajax({
+    url:
+      localStorage.baseUrl +
+      "api:LEAuXkTc/fetch_conversation",
+
     method: "GET",
+
     headers: {
-      Authorization: "Bearer " + localStorage.authToken,
+      Authorization:
+        "Bearer " + localStorage.authToken,
     },
+
     dataType: "json",
+
     data: {
       conversation_id: convoId,
     },
+
     success: function (response) {
-      var activeUser = localStorage.userId; // set active user
-      var sampleUserMessage = $(".convo-item-sample-wrapper").find(
-        "[comm-sample-item='user-chat']",
-      );
-      var sampleParticipantMessage = $(".convo-item-sample-wrapper").find(
-        "[comm-sample-item='participant-chat']",
-      );
+      // Only select one copy of each hidden template
+      const sampleUserMessage = $(".convo-item-sample-wrapper")
+        .find("[comm-sample-item='user-chat']")
+        .first();
 
-      chatContainer.empty(); // empty the chat container
+      const sampleParticipantMessage = $(".convo-item-sample-wrapper")
+        .find("[comm-sample-item='participant-chat']")
+        .first();
 
-      // loop through each message
+      chatContainer.empty();
+
       response.forEach((message) => {
-        // get and convert the message sender data
+        let attributes = {};
+
+        try {
+          attributes =
+            typeof message.attributes === "string"
+              ? JSON.parse(message.attributes)
+              : message.attributes || {};
+        } catch (error) {
+          console.error(
+            "Unable to parse message attributes:",
+            message.attributes,
+            error
+          );
+
+          return;
+        }
+
         const messageSender =
-          message.attributes.sender_id != null
-            ? message.attributes.sender_id.toString()
+          attributes.sender_id != null
+            ? String(attributes.sender_id)
             : "";
 
-        // run if the message sender is the active user...
-        if (messageSender === activeUser) {
-          let userMessageItem = $(sampleUserMessage)
-            .clone()
-            .appendTo(chatContainer); // clone the sample message blob and append to chat container
-          const messageBodyContainer = userMessageItem.find(
-            "[data-chat='message']",
+        const senderName =
+          attributes.sender_name || "Unknown User";
+
+        const timestamp =
+          attributes.timestamp ||
+          message.date_created ||
+          message.date_updated;
+
+        const messageBody =
+          message.body || "";
+
+        const isCurrentUser =
+          messageSender === activeUser;
+
+        const messageItem = (
+          isCurrentUser
+            ? sampleUserMessage
+            : sampleParticipantMessage
+        )
+          .clone(false)
+          .appendTo(chatContainer);
+
+        messageItem
+          .find("[data-chat='message']")
+          .html(
+            messageBody.replace(/\n/g, "<br>")
           );
-          messageBodyContainer.html(message.body.replace(/\n/g, "<br>"));
-          userMessageItem
-            .find("[data-chat='sender']")
-            .text(message.attributes.sender_name); // bind the sender's name
-          userMessageItem
-            .find("[data-chat='timestamp']")
-            .text(formatDateToCustomFormat(message.attributes.timestamp)); // bind the timestamp
 
-          // Check if there are images in the message
-          if (message.attributes.media_url) {
-            const mediaUrl = message.attributes.media_url;
-            const [uuid, numImages] = mediaUrl.split("~");
-            const numImagesInt = parseInt(numImages);
+        messageItem
+          .find("[data-chat='sender']")
+          .text(senderName);
 
-            for (let i = 0; i < numImagesInt; i++) {
-              const imageUrl = `${mediaUrl}/nth/${i}/`;
-              const imageElement = $("<img>");
-              imageElement.attr("src", imageUrl);
-              imageElement.attr("alt", "Image");
-              imageElement.css("width", "auto");
-              imageElement.css("max-height", "200px");
-              imageElement.css("margin-bottom", "10px");
-              imageElement.css("border-radius", "7px"); // Add padding to the bottom of each image
-
-              // Add a click handler to the image element
-              imageElement.click(function () {
-                window.open(imageUrl, "_blank"); // Open the image URL in a new tab when the image is clicked
-              });
-
-              const imageDiv = $("<div>");
-              imageDiv.append(imageElement);
-
-              // Append the image div to the user message container
-              userMessageItem.find(".message-img-container").append(imageDiv);
-            }
-          }
-        } else {
-          let participantMessageItem = $(sampleParticipantMessage)
-            .clone()
-            .appendTo(chatContainer); // clone the sample message blob and append to chat container
-          const messageBodyContainer = participantMessageItem.find(
-            "[data-chat='message']",
+        messageItem
+          .find("[data-chat='timestamp']")
+          .text(
+            formatDateToCustomFormat(timestamp)
           );
-          messageBodyContainer.html(message.body.replace(/\n/g, "<br>"));
-          participantMessageItem
-            .find("[data-chat='sender']")
-            .text(message.attributes.sender_name); // bind the sender's name
-          participantMessageItem
-            .find("[data-chat='timestamp']")
-            .text(formatDateToCustomFormat(message.attributes.timestamp)); // bind the timestamp
 
-          if (message.attributes.media_url) {
-            const mediaUrl = message.attributes.media_url;
-            const [uuid, numImages] = mediaUrl.split("~");
-            const numImagesInt = parseInt(numImages);
+        if (attributes.media_url) {
+          const mediaUrl =
+            attributes.media_url;
 
-            for (let i = 0; i < numImagesInt; i++) {
-              const imageUrl = `${mediaUrl}/nth/${i}/`;
-              const imageElement = $("<img>");
-              imageElement.attr("src", imageUrl);
-              imageElement.attr("alt", "Image");
-              imageElement.css("width", "100%");
-              imageElement.css("max-height", "200px");
-              imageElement.css("margin-bottom", "10px");
-              imageElement.css("border-radius", "7px"); // Add padding to the bottom of each image
+          const mediaParts =
+            mediaUrl.split("~");
 
-              // Add a click handler to the image element
-              imageElement.click(function () {
-                window.open(imageUrl, "_blank"); // Open the image URL in a new tab when the image is clicked
-              });
+          const numImages =
+            parseInt(mediaParts[1], 10) || 0;
 
-              const imageDiv = $("<div>");
-              imageDiv.append(imageElement);
+          for (
+            let i = 0;
+            i < numImages;
+            i++
+          ) {
+            const imageUrl =
+              `${mediaUrl}/nth/${i}/`;
 
-              participantMessageItem
-                .find(".message-img-container")
-                .append(imageDiv);
-            }
+            const imageElement = $("<img>", {
+              src: imageUrl,
+              alt: "Attachment",
+            }).css({
+              width: isCurrentUser
+                ? "auto"
+                : "100%",
+              "max-height": "200px",
+              "margin-bottom": "10px",
+              "border-radius": "7px",
+              cursor: "pointer",
+            });
+
+            imageElement.on(
+              "click",
+              function () {
+                window.open(
+                  imageUrl,
+                  "_blank"
+                );
+              }
+            );
+
+            messageItem
+              .find(".message-img-container")
+              .append(
+                $("<div>").append(
+                  imageElement
+                )
+              );
           }
         }
       });
     },
+
     complete: function () {
+      // Ignore an older aborted request
+      if (
+        activeMessagesRequest !==
+        currentRequest
+      ) {
+        return;
+      }
+
+      activeMessagesRequest = null;
+
       convoInFocus();
       $(".loader").hide();
     },
+
+    error: function (
+      xhr,
+      status,
+      error
+    ) {
+      if (status !== "abort") {
+        console.error(
+          "Error loading messages:",
+          error
+        );
+      }
+    },
   });
+
+  activeMessagesRequest = currentRequest;
 }
 
 function updateConvoStatus(convoId) {
