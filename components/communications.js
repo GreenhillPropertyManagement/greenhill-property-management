@@ -80,7 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 let activeConvosRequest = null;
 
+
+
 function loadConvos(targetUser, type) {
+
+  if (activeMessagesRequest) {
+    activeMessagesRequest.abort();
+    activeMessagesRequest = null;
+  }
+  localStorage.removeItem("activeConvo");
+  $("[dyn-container='chat-container']").empty();
+  $(".chat__messages-wrapper").hide();
+  $(".chat__input-wrapper").hide();
+  $("[data-convo='delete-convo']").hide();
+  $(".dyn-item__chat-convo-item").css("color", "#201562");
+
   const loadType = type;
   const activeUserId = String(targetUser);
   const convosContainer = $("[dyn-container='convos-container']");
