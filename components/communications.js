@@ -337,7 +337,6 @@ function loadConvos(targetUser, type) {
         "Conversations Loaded. Running Counter..."
       );
     },
-
     complete: function () {
       console.log(
         "AJAX completed, conversations should be loaded."
@@ -353,16 +352,18 @@ function loadConvos(targetUser, type) {
 
       updateConvoCounter();
 
+      // Remove only the email address, preserving parentheses in the display name
       $("[data-convo='recipient-info']").each(function () {
         const $el = $(this);
         const text = $el.text();
 
-        $el.text(
-          text.replace(/\([^)]*\)/g, "").trim()
-        );
+        const displayName = text
+          .replace(/\s*\([^()]*@[^()]*\)\s*$/, "")
+          .trim();
+
+        $el.text(displayName);
       });
     },
-
     error: function (error) {
       console.error(
         "Error fetching conversations:",
