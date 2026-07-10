@@ -92,7 +92,7 @@ function loadConvos(targetUser, type) {
   $("[dyn-container='chat-container']").empty();
   //$(".chat__messages-wrapper").hide();
   //$(".chat__input-wrapper").hide();
-  //$("[data-convo='delete-convo']").hide();
+  $("[data-convo='delete-convo']").hide();
   //$(".dyn-item__chat-convo-item").css("color", "#201562");
 
   const loadType = type;
