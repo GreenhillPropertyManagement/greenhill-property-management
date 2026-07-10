@@ -105,9 +105,9 @@ function loadConvos(targetUser, type) {
 
       const seenConvos = new Set();
 
-      const sampleConvo = $(".convo-item-sample-wrapper").find(
-        "[comm-sample-item='convo-item']"
-      );
+      const sampleConvo = $(".convo-item-sample-wrapper")
+        .find("[comm-sample-item='convo-item']")
+        .first();
 
       response.forEach((convo) => {
         let attributes = {};
@@ -132,7 +132,7 @@ function loadConvos(targetUser, type) {
         seenConvos.add(convo.conversation_sid);
 
         const convoItem = sampleConvo
-          .clone()
+          .clone(false)
           .appendTo(convosContainer);
 
         convoItem.attr("id", convo.conversation_sid);
