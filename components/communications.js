@@ -78,24 +78,33 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+let activeConvosRequest = null;
+
 function loadConvos(targetUser, type) {
   const loadType = type;
-  const activeUserId = targetUser.toString();
+  const activeUserId = String(targetUser);
   const convosContainer = $("[dyn-container='convos-container']");
+
+  if (activeConvosRequest) {
+    activeConvosRequest.abort();
+  }
 
   convosContainer.empty();
   $(".chat__input-wrapper").hide();
   $(".loader").css("display", "flex");
 
-  $.ajax({
+  const currentRequest = $.ajax({
     url:
       localStorage.baseUrl +
       "api:LEAuXkTc/fetch_user_conversations",
+
     method: "GET",
     dataType: "json",
+
     headers: {
       Authorization: "Bearer " + localStorage.authToken,
     },
+
     data: {
       user_uuid: targetUser,
     },
@@ -123,19 +132,27 @@ function loadConvos(targetUser, type) {
             convo.attributes,
             error
           );
-        }
 
-        if (seenConvos.has(convo.conversation_sid)) {
           return;
         }
 
-        seenConvos.add(convo.conversation_sid);
+        const conversationSid = convo.conversation_sid;
+
+        if (
+          !conversationSid ||
+          seenConvos.has(conversationSid) ||
+          document.getElementById(conversationSid)
+        ) {
+          return;
+        }
+
+        seenConvos.add(conversationSid);
 
         const convoItem = sampleConvo
           .clone(false)
           .appendTo(convosContainer);
 
-        convoItem.attr("id", convo.conversation_sid);
+        convoItem.attr("id", conversationSid);
 
         convoItem
           .find("[data-convo='convo-title']")
@@ -152,12 +169,11 @@ function loadConvos(targetUser, type) {
 
         const lastMessageSender =
           attributes.last_message_sender != null
-            ? attributes.last_message_sender.toString()
+            ? String(attributes.last_message_sender)
             : "";
 
         convoItem.removeClass("new-message");
 
-        /* ---------- Peer-to-Peer Conversation ---------- */
         if (attributes.convo_type === "peer_to_peer") {
           const participants = Array.isArray(
             attributes.convo_participants
@@ -165,17 +181,14 @@ function loadConvos(targetUser, type) {
             ? attributes.convo_participants
             : [];
 
-          let recipientInfo = "Unknown User";
-
           const recipient = participants.find(
             (participant) =>
               participant.id != null &&
-              participant.id.toString() !== activeUserId
+              String(participant.id) !== activeUserId
           );
 
-          if (recipient) {
-            recipientInfo = recipient.info || "Unknown User";
-          }
+          const recipientInfo =
+            recipient?.info || "Unknown User";
 
           convoItem
             .find("[data-convo='recipient-info']")
@@ -202,13 +215,9 @@ function loadConvos(targetUser, type) {
 
             const convoSid = $(this).attr("id");
 
-            localStorage.setItem(
-              "activeConvo",
-              convoSid
-            );
+            localStorage.setItem("activeConvo", convoSid);
 
             $("[dyn-container='chat-container']").empty();
-
             $(".loader").css("display", "flex");
 
             loadConvoMessages(convoSid);
@@ -235,7 +244,6 @@ function loadConvos(targetUser, type) {
           });
         }
 
-        /* ---------- Property Blast Conversation ---------- */
         if (attributes.convo_type === "blast") {
           convoItem
             .find("[data-convo='recipient-info']")
@@ -261,8 +269,7 @@ function loadConvos(targetUser, type) {
             const hasUnreadMessage = participants.some(
               (participant) =>
                 participant.user != null &&
-                participant.user.toString() ===
-                  activeUserId &&
+                String(participant.user) === activeUserId &&
                 !participant.message_seen
             );
 
@@ -288,10 +295,7 @@ function loadConvos(targetUser, type) {
 
             const convoSid = $(this).attr("id");
 
-            localStorage.setItem(
-              "activeConvo",
-              convoSid
-            );
+            localStorage.setItem("activeConvo", convoSid);
 
             if (localStorage.userRole !== "Admin") {
               $(".chat__input-wrapper").hide();
@@ -303,7 +307,6 @@ function loadConvos(targetUser, type) {
             }
 
             $("[dyn-container='chat-container']").empty();
-
             $(".loader").css("display", "flex");
 
             loadConvoMessages(convoSid);
@@ -337,12 +340,13 @@ function loadConvos(targetUser, type) {
         "Conversations Loaded. Running Counter..."
       );
     },
-    complete: function () {
-      console.log(
-        "AJAX completed, conversations should be loaded."
-      );
 
-      $(".loader").hide();
+    complete: function () {
+      // Only clear the variable if this is still the newest request
+      if (activeConvosRequest === currentRequest) {
+        activeConvosRequest = null;
+        $(".loader").hide();
+      }
 
       $(".back-convo-button")
         .off("click")
@@ -352,25 +356,29 @@ function loadConvos(targetUser, type) {
 
       updateConvoCounter();
 
-      // Remove only the email address, preserving parentheses in the display name
       $("[data-convo='recipient-info']").each(function () {
         const $el = $(this);
-        const text = $el.text();
 
-        const displayName = text
+        const displayName = $el
+          .text()
           .replace(/\s*\([^()]*@[^()]*\)\s*$/, "")
           .trim();
 
         $el.text(displayName);
       });
     },
-    error: function (error) {
-      console.error(
-        "Error fetching conversations:",
-        error
-      );
+
+    error: function (xhr, status, error) {
+      if (status !== "abort") {
+        console.error(
+          "Error fetching conversations:",
+          error
+        );
+      }
     },
   });
+
+  activeConvosRequest = currentRequest;
 }
 
 
